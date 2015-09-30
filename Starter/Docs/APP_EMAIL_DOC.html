@@ -1,0 +1,374 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+ <HEAD>
+ <LINK REL="STYLESHEET" TYPE="text/css" HREF="plsqldoc.css">
+ <TITLE>Table APP_EMAIL_DOC</TITLE>
+ <META name="object" content="TABLE">
+ <META name="name" content="APP_EMAIL_DOC">
+ <META name="description" content="Email Documents/Attachments (AEMD): Large textual or binary attachments sent out with emails recorded in APP_EMAIL.">
+ <META name="columns" content="EMAIL_DOC_ID EMAIL_ID FILE_NM DOC_CONTENT DOC_SIZE MIME_TYPE OTX_DOC_TYPE OTX_LANG_CD OTX_CHARSET_CD">
+</HEAD>
+<BODY>
+<TABLE WIDTH="100%"><TR>
+<TD><P ALIGN="LEFT"><STRONG><SMALL></SMALL></STRONG></TD>
+<TD><P ALIGN="RIGHT"><STRONG><SMALL><A HREF="index.html">index</A></SMALL></STRONG></TD>
+</TR></TABLE>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="DESC_TEXT">
+<P CLASS="MAIN_TITLE">Table APP_EMAIL_DOC</P>
+Email Documents/Attachments (AEMD): Large textual or binary attachments sent out with emails recorded in <A HREF="APP_EMAIL.html">APP_EMAIL</A>.
+</TD></TR></TABLE>
+<HR>
+<A NAME="Columns"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Columns
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Type
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Optional
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Default
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Comments
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+EMAIL_DOC_ID
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+NUMBER
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Email Document ID: Surrogate key for this table.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+<A HREF="APP_EMAIL.html">EMAIL_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+NUMBER
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Email ID: Identifying key that ties an attachment to an email. Foreign key to the <A HREF="APP_EMAIL.html">APP_EMAIL</A> table.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+FILE_NM
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(4000)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Document Name: The full file name of the doc, including file extension. Certain document records can just be pointers to external sources; in which case, use this column to store the full URI to the external document. FILE_NAME was used (instead of DOC_NM), because uploading with OWS/OAS/9iAS required this name.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+DOC_CONTENT
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+BLOB
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Document Content: The text or binary contents of the stored document.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+DOC_SIZE
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+NUMBER
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Document Size: The size in bytes of the doc. This can be converted to a virtual column when we upgrade to 11g.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+MIME_TYPE
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(128)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+MIME Type: The standard MIME type of the doc, e.g. application/msexcel, application/msword, application/octet-stream, text/html, text/plain, image/jpg, etc.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+OTX_DOC_TYPE
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(10)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Oracle Text Document Type: Used only by Oracle Text. Valid values are IGNORE, TEXT or BINARY. IGNORE is used for records that you wish Oracle Text to skip when indexing, like images.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+OTX_LANG_CD
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(2)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Oracle Text Language Code: Used only by Oracle Text. Valid values are one of the language codes recognized by Oracle. See http://download.oracle.com/docs/cd/B19306_01/server.102/b14225/applocaledata.htm#i634428.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+OTX_CHARSET_CD
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(30)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Oracle Text Characterset Code: Used only by Oracle Text. Valid values are one of the characterset codes recognized by Oracle. See http://download.oracle.com/docs/cd/B19306_01/server.102/b14225/applocaledata.htm#i635016.
+</TD>
+</TR>
+</TABLE>
+<HR>
+<A NAME="Primary Key"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Primary Key
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+APP_EMAIL_DOC_PK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+EMAIL_DOC_ID
+</TD>
+</TR>
+</TABLE>
+<HR>
+<A NAME="Unique Keys"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Unique Keys
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+APP_EMAIL_DOC_UK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="APP_EMAIL.html">EMAIL_ID</A>,FILE_NM
+</TD>
+</TR>
+</TABLE>
+<HR>
+<A NAME="Foreign Keys"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Foreign Keys
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Referencing Table
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+AEMD_EMAIL_ID_FK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="APP_EMAIL.html">EMAIL_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="APP_EMAIL.html">APP_EMAIL</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="APP_EMAIL.html">EMAIL_ID</A>
+</TD>
+</TR>
+</TABLE>
+<HR>
+<A NAME="Check Constraints"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Check Constraints
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Condition
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+AEMD_OTX_DOC_TYPE_CHK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+otx_doc_type IN ('IGNORE','TEXT','BINARY')
+</TD>
+</TR>
+</TABLE>
+<HR>
+<A NAME="Indexes"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Indexes
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Type
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+AEMD_EMAIL_ID_IDX
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="APP_EMAIL.html">EMAIL_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Normal
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+APP_EMAIL_DOC_PK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+EMAIL_DOC_ID
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Unique
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+APP_EMAIL_DOC_UK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="APP_EMAIL.html">EMAIL_ID</A>,FILE_NM
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Unique
+</TD>
+</TR>
+</TABLE>
+<HR>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+</BODY>
+</HTML>

@@ -1,0 +1,783 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+ <HEAD>
+ <LINK REL="STYLESHEET" TYPE="text/css" HREF="plsqldoc.css">
+ <TITLE>Package dt</TITLE>
+ <META name="object" content="PACKAGE">
+ <META name="name" content="dt">
+ <META name="description" content="%author Bill Coulam (bcoulam@dbartisans.com)">
+</HEAD>
+<BODY>
+<TABLE WIDTH="100%"><TR>
+<TD><P ALIGN="LEFT"><STRONG><SMALL></SMALL></STRONG></TD>
+<TD><P ALIGN="RIGHT"><STRONG><SMALL><A HREF="index.html">index</A></SMALL></STRONG></TD>
+</TR></TABLE>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="DESC_TEXT">
+<P CLASS="MAIN_TITLE">Package dt</P>
+Contains constants and routines for working with date values.<br>
+&nbsp;<br>
+<pre>
+Artisan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Comments
+============ ========= ========================================================
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1997Dec30 Creation
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2008Sep23 Added Unix-style &quot;epoch&quot; functions.
+
+<i>
+&nbsp;&nbsp;&nbsp; __________________________&nbsp; LGPL License&nbsp; ____________________________
+&nbsp;&nbsp;&nbsp; Copyright (C) 1997-2008 Bill Coulam
+
+&nbsp;&nbsp;&nbsp; This library is free software; you can redistribute it and/or
+&nbsp;&nbsp;&nbsp; modify it under the terms of the GNU Lesser General Public
+&nbsp;&nbsp;&nbsp; License as published by the Free Software Foundation; either
+&nbsp;&nbsp;&nbsp; version 2.1 of the License, or (at your option) any later version.
+
+&nbsp;&nbsp;&nbsp; This library is distributed in the hope that it will be useful,
+&nbsp;&nbsp;&nbsp; but WITHOUT ANY WARRANTY; without even the implied warranty of
+&nbsp;&nbsp;&nbsp; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+&nbsp;&nbsp;&nbsp; Lesser General Public License for more details.
+
+&nbsp;&nbsp;&nbsp; You should have received a copy of the GNU Lesser General Public
+&nbsp;&nbsp;&nbsp; License along with this library; if not, write to the Free Software
+&nbsp;&nbsp;&nbsp; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+
+
+<BR>
+<A NAME="Author"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Author
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Bill Coulam (<A HREF="MAILTO:bcoulam@dbartisans.com">bcoulam@dbartisans.com</A>)
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR></TABLE>
+<HR>
+<A NAME="Program units"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Program units
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_highdt">get_highdt</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_highdt:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_sysdt">get_sysdt</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_sysdt:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_sysdtm">get_sysdtm</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_sysdtm:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_systs">get_systs</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_systs:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_day_name">get_day_name</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_day_name:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#minutes_to_dhm">minutes_to_dhm</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+minutes_to_dhm &amp; minutes_to_hm:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#minutes_to_hm">minutes_to_hm</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_time_diff">get_time_diff</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_time_diff:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_time_diff_str">get_time_diff_str</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_time_diff_str:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#trunc_dt">trunc_dt</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+trunc_dt:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#dt_to_epoch">dt_to_epoch</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+dt_to_epoch:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#epoch_to_dt">epoch_to_dt</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+epoch_to_dt:
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Constants"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Constants
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#SECONDS_PER_DAY">SECONDS_PER_DAY</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+PUBLIC CONSTANTS, VARIABLES, EXCEPTIONS, ETC.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#SECONDS_PER_HOUR">SECONDS_PER_HOUR</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#SECONDS_PER_MIN">SECONDS_PER_MIN</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#MINUTES_PER_DAY">MINUTES_PER_DAY</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#HOURS_PER_DAY">HOURS_PER_DAY</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#DAYS_PER_WEEK">DAYS_PER_WEEK</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#MONTHS_PER_YEAR">MONTHS_PER_YEAR</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#DAYS_PER_YEAR">DAYS_PER_YEAR</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#ONE_SECOND">ONE_SECOND</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+time portions for complex date arithmetic
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#ONE_MINUTE">ONE_MINUTE</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#ONE_HOUR">ONE_HOUR</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#FIVE_MINUTES">FIVE_MINUTES</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#TEN_MINUTES">TEN_MINUTES</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#FIFTEEN_MINUTES">FIFTEEN_MINUTES</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#THIRTY_MINUTES">THIRTY_MINUTES</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#BATCH_DT_MASK">BATCH_DT_MASK</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+date/time mask constants
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#Y2K_BATCH_DT_MASK">Y2K_BATCH_DT_MASK</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#Y2K_DT_MASK">Y2K_DT_MASK</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#DT_MASK">DT_MASK</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#DTM_MASK">DTM_MASK</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#SORTABLE_DTM_MASK">SORTABLE_DTM_MASK</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#TM_MASK">TM_MASK</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#UNIX_EPOCH">UNIX_EPOCH</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Unix epoch
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="SECONDS_PER_DAY"></A>
+<P CLASS="TYPE_TITLE">
+SECONDS_PER_DAY
+</P>
+<PRE CLASS="DECL_TEXT">
+SECONDS_PER_DAY  CONSTANT PLS_INTEGER := 86400;
+</PRE>
+<P CLASS="DESC_TEXT">
+PUBLIC CONSTANTS, VARIABLES, EXCEPTIONS, ETC.<br>
+&nbsp;<br>
+more readable and less prone to typos, these will never change<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="SECONDS_PER_HOUR"></A>
+<P CLASS="TYPE_TITLE">
+SECONDS_PER_HOUR
+</P>
+<PRE CLASS="DECL_TEXT">
+SECONDS_PER_HOUR CONSTANT PLS_INTEGER := 3600;
+</PRE>
+<HR>
+<A NAME="SECONDS_PER_MIN"></A>
+<P CLASS="TYPE_TITLE">
+SECONDS_PER_MIN
+</P>
+<PRE CLASS="DECL_TEXT">
+SECONDS_PER_MIN  CONSTANT PLS_INTEGER := 60;
+</PRE>
+<HR>
+<A NAME="MINUTES_PER_DAY"></A>
+<P CLASS="TYPE_TITLE">
+MINUTES_PER_DAY
+</P>
+<PRE CLASS="DECL_TEXT">
+MINUTES_PER_DAY  CONSTANT PLS_INTEGER := 1440;
+</PRE>
+<HR>
+<A NAME="HOURS_PER_DAY"></A>
+<P CLASS="TYPE_TITLE">
+HOURS_PER_DAY
+</P>
+<PRE CLASS="DECL_TEXT">
+HOURS_PER_DAY    CONSTANT PLS_INTEGER := 24;
+</PRE>
+<HR>
+<A NAME="DAYS_PER_WEEK"></A>
+<P CLASS="TYPE_TITLE">
+DAYS_PER_WEEK
+</P>
+<PRE CLASS="DECL_TEXT">
+DAYS_PER_WEEK    CONSTANT PLS_INTEGER := 7;
+</PRE>
+<HR>
+<A NAME="MONTHS_PER_YEAR"></A>
+<P CLASS="TYPE_TITLE">
+MONTHS_PER_YEAR
+</P>
+<PRE CLASS="DECL_TEXT">
+MONTHS_PER_YEAR  CONSTANT PLS_INTEGER := 12;
+</PRE>
+<HR>
+<A NAME="DAYS_PER_YEAR"></A>
+<P CLASS="TYPE_TITLE">
+DAYS_PER_YEAR
+</P>
+<PRE CLASS="DECL_TEXT">
+DAYS_PER_YEAR    CONSTANT PLS_INTEGER := 365;
+</PRE>
+<HR>
+<A NAME="ONE_SECOND"></A>
+<P CLASS="TYPE_TITLE">
+ONE_SECOND
+</P>
+<PRE CLASS="DECL_TEXT">
+ONE_SECOND CONSTANT NUMBER(9,9) := (1/SECONDS_PER_DAY);
+</PRE>
+<P CLASS="DESC_TEXT">
+time portions for complex date arithmetic<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="ONE_MINUTE"></A>
+<P CLASS="TYPE_TITLE">
+ONE_MINUTE
+</P>
+<PRE CLASS="DECL_TEXT">
+ONE_MINUTE CONSTANT NUMBER(9,9) := (1/MINUTES_PER_DAY);
+</PRE>
+<HR>
+<A NAME="ONE_HOUR"></A>
+<P CLASS="TYPE_TITLE">
+ONE_HOUR
+</P>
+<PRE CLASS="DECL_TEXT">
+ONE_HOUR   CONSTANT NUMBER(9,9) := (1/24);
+</PRE>
+<HR>
+<A NAME="FIVE_MINUTES"></A>
+<P CLASS="TYPE_TITLE">
+FIVE_MINUTES
+</P>
+<PRE CLASS="DECL_TEXT">
+FIVE_MINUTES    CONSTANT NUMBER(9,9) := (5/MINUTES_PER_DAY);
+</PRE>
+<HR>
+<A NAME="TEN_MINUTES"></A>
+<P CLASS="TYPE_TITLE">
+TEN_MINUTES
+</P>
+<PRE CLASS="DECL_TEXT">
+TEN_MINUTES     CONSTANT NUMBER(9,9) := (10/MINUTES_PER_DAY);
+</PRE>
+<HR>
+<A NAME="FIFTEEN_MINUTES"></A>
+<P CLASS="TYPE_TITLE">
+FIFTEEN_MINUTES
+</P>
+<PRE CLASS="DECL_TEXT">
+FIFTEEN_MINUTES CONSTANT NUMBER(9,9) := (15/MINUTES_PER_DAY);
+</PRE>
+<HR>
+<A NAME="THIRTY_MINUTES"></A>
+<P CLASS="TYPE_TITLE">
+THIRTY_MINUTES
+</P>
+<PRE CLASS="DECL_TEXT">
+THIRTY_MINUTES  CONSTANT NUMBER(9,9) := (30/MINUTES_PER_DAY);
+</PRE>
+<HR>
+<A NAME="BATCH_DT_MASK"></A>
+<P CLASS="TYPE_TITLE">
+BATCH_DT_MASK
+</P>
+<PRE CLASS="DECL_TEXT">
+BATCH_DT_MASK    CONSTANT VARCHAR2(30)  := 'YYYYMMDD';
+</PRE>
+<P CLASS="DESC_TEXT">
+date/time mask constants<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="Y2K_BATCH_DT_MASK"></A>
+<P CLASS="TYPE_TITLE">
+Y2K_BATCH_DT_MASK
+</P>
+<PRE CLASS="DECL_TEXT">
+Y2K_BATCH_DT_MASK  CONSTANT VARCHAR2(30) := 'RRMMDD';
+</PRE>
+<HR>
+<A NAME="Y2K_DT_MASK"></A>
+<P CLASS="TYPE_TITLE">
+Y2K_DT_MASK
+</P>
+<PRE CLASS="DECL_TEXT">
+Y2K_DT_MASK        CONSTANT VARCHAR2(30) := 'MM/DD/RR';
+</PRE>
+<HR>
+<A NAME="DT_MASK"></A>
+<P CLASS="TYPE_TITLE">
+DT_MASK
+</P>
+<PRE CLASS="DECL_TEXT">
+DT_MASK          CONSTANT VARCHAR2(20) := 'MM/DD/RRRR';
+</PRE>
+<HR>
+<A NAME="DTM_MASK"></A>
+<P CLASS="TYPE_TITLE">
+DTM_MASK
+</P>
+<PRE CLASS="DECL_TEXT">
+DTM_MASK          CONSTANT VARCHAR2(22) := 'MM/DD/RRRR HH24:MI:SS';
+</PRE>
+<HR>
+<A NAME="SORTABLE_DTM_MASK"></A>
+<P CLASS="TYPE_TITLE">
+SORTABLE_DTM_MASK
+</P>
+<PRE CLASS="DECL_TEXT">
+SORTABLE_DTM_MASK CONSTANT VARCHAR2(20) := 'YYYYMonDD HH24:MI:SS';
+</PRE>
+<HR>
+<A NAME="TM_MASK"></A>
+<P CLASS="TYPE_TITLE">
+TM_MASK
+</P>
+<PRE CLASS="DECL_TEXT">
+TM_MASK           CONSTANT VARCHAR2(10) := 'HH24:MI:SS';
+</PRE>
+<HR>
+<A NAME="UNIX_EPOCH"></A>
+<P CLASS="TYPE_TITLE">
+UNIX_EPOCH
+</P>
+<PRE CLASS="DECL_TEXT">
+UNIX_EPOCH        CONSTANT DATE := TO_DATE('1970Jan01','YYYYMonDD');
+</PRE>
+<P CLASS="DESC_TEXT">
+Unix epoch<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="get_highdt"></A>
+<P CLASS="TYPE_TITLE">
+get_highdt
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_highdt RETURN DATE
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_highdt:<br>
+&nbsp;Returns the high date to be used by the application. There is not<br>
+&nbsp;a corresponding get_highdtm since the maximum date currently allowed<br>
+&nbsp;by Oracle (12/31/9999) returns with no time portion, just the date.<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="get_sysdt"></A>
+<P CLASS="TYPE_TITLE">
+get_sysdt
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_sysdt RETURN DATE
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_sysdt:<br>
+&nbsp;Returns the current date (TRUNC'ed of the time portion)<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="get_sysdtm"></A>
+<P CLASS="TYPE_TITLE">
+get_sysdtm
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_sysdtm RETURN DATE
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_sysdtm:<br>
+&nbsp;Returns the current date and time<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="get_systs"></A>
+<P CLASS="TYPE_TITLE">
+get_systs
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_systs RETURN TIMESTAMP
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_systs:<br>
+&nbsp;Returns the current date and time<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="get_day_name"></A>
+<P CLASS="TYPE_TITLE">
+get_day_name
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_day_name(i_num IN NUMBER) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_day_name:<br>
+&nbsp;Given the day of the week (as an integer), returns the name of the day of the<br>
+&nbsp;week.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_num&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+- the number of the day of the week.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="minutes_to_dhm"></A>
+<P CLASS="TYPE_TITLE">
+minutes_to_dhm
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION minutes_to_dhm(i_mnts IN NUMBER) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+minutes_to_dhm &amp; minutes_to_hm:<br>
+&nbsp;These functions take a measure in minutes and return a string<br>
+&nbsp;formatted in<br>
+&nbsp;dhm -&gt; dd:hh:mm format, e.g. 6:2:03 means 6 days, 2 hours and 3 minutes<br>
+&nbsp;hm -&gt; hh:mm format, e.g. 0:34 means 0 hours and 34 minutes<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_mnts&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+- Number of minutes to format, in integer form<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="minutes_to_hm"></A>
+<P CLASS="TYPE_TITLE">
+minutes_to_hm
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION minutes_to_hm(i_mnts IN NUMBER) RETURN VARCHAR2
+
+</PRE>
+<HR>
+<A NAME="get_time_diff"></A>
+<P CLASS="TYPE_TITLE">
+get_time_diff
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_time_diff
+(
+   i_old_dtm  IN DATE,
+   i_curr_dtm IN DATE DEFAULT SYSDATE,
+   i_tm_uom   IN VARCHAR2 DEFAULT 'hour'
+) RETURN NUMBER
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_time_diff:<br>
+&nbsp;Returns the number of time units between two dates. The time units are based<br>
+&nbsp;upon the unit of measure specified by the caller. The result could be fractional,<br>
+&nbsp;in which case the result has full precision. If you don't need so many digits<br>
+&nbsp;of precision, use ROUND or TRUNC or TO_CHAR with a numeric format model to<br>
+&nbsp;reduce the number of digits to the right of the decimal.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_old_dtm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+- The begin date of the period to measure<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_curr_dtm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+- The end date of the period to measure<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_tm_uom&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+- Time-based Unit of Measure. Acceptable values are: 'day','hour','minute','second','week','year'<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Returns an integer, based upon the desired time period, e.g. 3 [weeks] 10 [days] 45 [minutes] ...and so forth<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="get_time_diff_str"></A>
+<P CLASS="TYPE_TITLE">
+get_time_diff_str
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_time_diff_str
+(
+   i_old_dtm  IN DATE,
+   i_curr_dtm IN DATE DEFAULT SYSDATE,
+   i_tm_uom   IN VARCHAR2 DEFAULT 'hour'
+) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_time_diff_str:<br>
+&nbsp;Returns the period of time between two dates suffixed with a given unit of<br>
+&nbsp;measure. Calls upon <A HREF=#get_time_diff>get_time_diff</A> with the same interface. If the uom value is<br>
+&nbsp;&quot;hm&quot; or &quot;dhm&quot; it means to calculate the difference in terms of minutes, but<br>
+&nbsp;return the age formatted, as in days:hours;minutes, e.g. a 192 minute<br>
+&nbsp;difference, or age, would return&nbsp; 3:12 or 0:3:12, depending on the format chosen.<br>
+&nbsp;<br>
+Returns a string, based upon the given time period, e.g. &quot;3 hr&quot; or &quot;.15 dy&quot; &quot;650 sec&quot;<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_old_dtm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The begin date of the period to measure<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_curr_dtm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The end date of the period to measure. Defaults to now.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_tm_uom&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Time-based Unit of Measure. Acceptable values are: 'second','minute','hour','day','week','year','dhm','hm'<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="trunc_dt"></A>
+<P CLASS="TYPE_TITLE">
+trunc_dt
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION trunc_dt
+(
+   i_dtm         IN DATE,
+   i_trunc_floor IN PLS_INTEGER
+) RETURN DATE
+
+</PRE>
+<P CLASS="DESC_TEXT">
+trunc_dt:<br>
+&nbsp;The following rounds a date down to the nearest time increment matching<br>
+&nbsp;the given truncation floor. For example, if the requested trunc floor is<br>
+&nbsp;a 5 minute increment, then a 1999Sep29 16:47:26 date will be returned<br>
+&nbsp;as 1999Sep29 16:45:00, so too will 16:49:59 be returned as 16:45:00 since<br>
+&nbsp;it is being rounded down to the latest 5 minute increment.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_dtm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Date to truncate<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_trunc_floor&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+A time period in minutes to which we want to round the date down to. This enables events, queries and reports to be grouped based on the time period passed into this parameter, i.e. these records were produced in this 5 or 10 or 20 or 30 or 60 minute period.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="dt_to_epoch"></A>
+<P CLASS="TYPE_TITLE">
+dt_to_epoch
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION dt_to_epoch(i_dt IN DATE) RETURN NUMBER
+
+</PRE>
+<P CLASS="DESC_TEXT">
+dt_to_epoch:<br>
+&nbsp;Converts an Oracle DATE value to the Unix &quot;seconds from epoch&quot; value, with the<br>
+&nbsp;epoch defined as Jan 01, 1970.<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="epoch_to_dt"></A>
+<P CLASS="TYPE_TITLE">
+epoch_to_dt
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION epoch_to_dt(i_epoch_num IN NUMBER) RETURN DATE
+
+</PRE>
+<P CLASS="DESC_TEXT">
+epoch_to_dt:<br>
+&nbsp;Converts a Unix &quot;seconds from epoch&quot; numeric value to an Oracle DATE.<br>
+
+<BR>
+</P>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+</BODY>
+</HTML>

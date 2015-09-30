@@ -1,0 +1,24 @@
+CREATE OR REPLACE FORCE VIEW app_role_vw
+(
+ role_id
+,role_nm
+,role_descr
+)
+AS
+SELECT role_id,
+       role_nm,
+       role_descr
+  FROM sec_role ar,
+       app_vw av
+ WHERE av.app_id = ar.app_id
+--------------------------------------------------------------------------------
+--A view that self-adjusts, showing only the roles for the current database
+--and invoking schema. The Core schema should grant this view to any consuming
+--schemas. The consuming schema would create a synonym to this view and then
+--query it simply with SELECT * FROM app_role_vw.
+--
+--Artisan      Date      Comments
+--============ ========= ======================================================
+--bcoulam      2007Nov09 Initial creation.
+--------------------------------------------------------------------------------
+/

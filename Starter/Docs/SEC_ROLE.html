@@ -1,0 +1,305 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+ <HEAD>
+ <LINK REL="STYLESHEET" TYPE="text/css" HREF="plsqldoc.css">
+ <TITLE>Table SEC_ROLE</TITLE>
+ <META name="object" content="TABLE">
+ <META name="name" content="SEC_ROLE">
+ <META name="description" content="Role (SR): Stores the list of valid roles for each application.">
+ <META name="columns" content="ROLE_ID APP_ID ROLE_NM ROLE_DESCR ROLE_PARENT_ID">
+</HEAD>
+<BODY>
+<TABLE WIDTH="100%"><TR>
+<TD><P ALIGN="LEFT"><STRONG><SMALL></SMALL></STRONG></TD>
+<TD><P ALIGN="RIGHT"><STRONG><SMALL><A HREF="index.html">index</A></SMALL></STRONG></TD>
+</TR></TABLE>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="DESC_TEXT">
+<P CLASS="MAIN_TITLE">Table SEC_ROLE</P>
+Role (SR): Stores the list of valid roles for each application.
+</TD></TR></TABLE>
+<HR>
+<A NAME="Columns"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Columns
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Type
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Optional
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Default
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Comments
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+<A HREF="SEC_ROLE_PMSN.html">ROLE_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+NUMBER(38)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Role ID: The surrogate key for this table, filled by SEC_ROLE_SEQ.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+<A HREF="SEC_USER_APP.html">APP_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+NUMBER(38)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Application ID: Foreign key to <A HREF="APP.html">APP</A>. The application to which the role applies.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+<A HREF="SEC_ROLE_PMSN_VW.html">ROLE_NM</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(400)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Role Name: The name for a given role, unique within an application.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+<A HREF="SEC_ROLE_VW.html">ROLE_DESCR</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(4000)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Role Description: Optional notes about the intended purpose and use of the role.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+ROLE_PARENT_ID
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+NUMBER(38)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Role Parent ID: Self-referencing foreign key to SEC_ROLE. Indicates whether the role is 
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+owned"
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+under
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+or
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+supervised by
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+a
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+higher
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+role."
+</TD>
+</TR>
+</TABLE>
+<HR>
+<A NAME="Primary Key"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Primary Key
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+SEC_ROLE_PK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="SEC_ROLE_PMSN.html">ROLE_ID</A>
+</TD>
+</TR>
+</TABLE>
+<HR>
+<A NAME="Unique Keys"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Unique Keys
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+SEC_ROLE_UK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="SEC_ROLE_PMSN_VW.html">ROLE_NM</A>,<A HREF="SEC_USER_APP.html">APP_ID</A>
+</TD>
+</TR>
+</TABLE>
+<HR>
+<A NAME="Foreign Keys"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Foreign Keys
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Referencing Table
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+SR_APP_ID_FK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="SEC_USER_APP.html">APP_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="APP.html">APP</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="SEC_USER_APP.html">APP_ID</A>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+SR_ROLE_PARENT_ID_FK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+ROLE_PARENT_ID
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+SEC_ROLE
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="SEC_ROLE_PMSN.html">ROLE_ID</A>
+</TD>
+</TR>
+</TABLE>
+<HR>
+<A NAME="Indexes"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Indexes
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Type
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+SEC_ROLE_PK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="SEC_ROLE_PMSN.html">ROLE_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Unique
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+SEC_ROLE_UK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="SEC_ROLE_PMSN_VW.html">ROLE_NM</A>,<A HREF="SEC_USER_APP.html">APP_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Unique
+</TD>
+</TR>
+</TABLE>
+<HR>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+</BODY>
+</HTML>

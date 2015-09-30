@@ -1,0 +1,197 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+ <HEAD>
+ <LINK REL="STYLESHEET" TYPE="text/css" HREF="plsqldoc.css">
+ <TITLE>Table SEC_USER_ROLE</TITLE>
+ <META name="object" content="TABLE">
+ <META name="name" content="SEC_USER_ROLE">
+ <META name="description" content="User Role (SUR): Map of roles granted to users.">
+ <META name="columns" content="USER_ID ROLE_ID">
+</HEAD>
+<BODY>
+<TABLE WIDTH="100%"><TR>
+<TD><P ALIGN="LEFT"><STRONG><SMALL></SMALL></STRONG></TD>
+<TD><P ALIGN="RIGHT"><STRONG><SMALL><A HREF="index.html">index</A></SMALL></STRONG></TD>
+</TR></TABLE>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="DESC_TEXT">
+<P CLASS="MAIN_TITLE">Table SEC_USER_ROLE</P>
+User Role (SUR): Map of roles granted to users. Users may be granted one or more roles.
+</TD></TR></TABLE>
+<HR>
+<A NAME="Columns"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Columns
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Type
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Optional
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Default
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Comments
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+<A HREF="SEC_USER_APP_VW.html">USER_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+NUMBER(38)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+User ID: Foreign key to <A HREF="SEC_USER.html">SEC_USER</A>. The user being granted a role.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+<A HREF="SEC_ROLE_VW.html">ROLE_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+NUMBER(38)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Role ID: Foreign key to <A HREF="SEC_ROLE.html">SEC_ROLE</A>. The role being assigned to a user.
+</TD>
+</TR>
+</TABLE>
+<HR>
+<A NAME="Unique Keys"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Unique Keys
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+SEC_USER_ROLE_UK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="SEC_USER_APP_VW.html">USER_ID</A>,<A HREF="SEC_ROLE_VW.html">ROLE_ID</A>
+</TD>
+</TR>
+</TABLE>
+<HR>
+<A NAME="Foreign Keys"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Foreign Keys
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Referencing Table
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+SUR_ROLE_ID_FK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="SEC_ROLE_VW.html">ROLE_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="SEC_ROLE.html">SEC_ROLE</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="SEC_ROLE_VW.html">ROLE_ID</A>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+SUR_USER_ID_FK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="SEC_USER_APP_VW.html">USER_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="SEC_USER.html">SEC_USER</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="SEC_USER_APP_VW.html">USER_ID</A>
+</TD>
+</TR>
+</TABLE>
+<HR>
+<A NAME="Indexes"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Indexes
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Type
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+SEC_USER_ROLE_UK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="SEC_USER_APP_VW.html">USER_ID</A>,<A HREF="SEC_ROLE_VW.html">ROLE_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Unique
+</TD>
+</TR>
+</TABLE>
+<HR>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+</BODY>
+</HTML>

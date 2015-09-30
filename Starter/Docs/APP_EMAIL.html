@@ -1,0 +1,589 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+ <HEAD>
+ <LINK REL="STYLESHEET" TYPE="text/css" HREF="plsqldoc.css">
+ <TITLE>Table APP_EMAIL</TITLE>
+ <META name="object" content="TABLE">
+ <META name="name" content="APP_EMAIL">
+ <META name="description" content="Email (AEM): Generic table for use in applications that have email requirements.">
+ <META name="columns" content="EMAIL_ID APP_ID EMAIL_TO EMAIL_SUBJECT EMAIL_BODY LONG_BODY EMAIL_FROM EMAIL_REPLYTO EMAIL_CC EMAIL_BCC EMAIL_EXTRA SENT_STATUS SENT_DT SMTP_ERROR OTX_SYNC_COL">
+</HEAD>
+<BODY>
+<TABLE WIDTH="100%"><TR>
+<TD><P ALIGN="LEFT"><STRONG><SMALL></SMALL></STRONG></TD>
+<TD><P ALIGN="RIGHT"><STRONG><SMALL><A HREF="index.html">index</A></SMALL></STRONG></TD>
+</TR></TABLE>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="DESC_TEXT">
+<P CLASS="MAIN_TITLE">Table APP_EMAIL</P>
+Email (AEM): Generic table for use in applications that have email requirements.
+</TD></TR></TABLE>
+<HR>
+<A NAME="Columns"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Columns
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Type
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Optional
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Default
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Comments
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+<A HREF="APP_EMAIL_DOC.html">EMAIL_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+NUMBER
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Email ID: Surrogate key for this table.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+<A HREF="APP_ENV.html">APP_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+NUMBER
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Application ID: Foreign key to <A HREF="APP.html">APP</A>. The application which 
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+owns"
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+the
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+emailed
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+info."
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+EMAIL_TO
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(4000)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+To: Standard email To field.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+EMAIL_SUBJECT
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(2000)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Subject: Standard email Subject field.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+EMAIL_BODY
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(4000)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Body: Standard email Body field.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+LONG_BODY
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+CLOB
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Long Body: If the email body is greater than the maximum possible length of the email_body column (currently 4000 characters), the entire body will be stored here, and the truncated body will be kept in the email_body column.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+EMAIL_FROM
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(2000)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+From: Standard email From field.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+EMAIL_REPLYTO
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(2000)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Reply-To: Standard email Reply-To field.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+EMAIL_CC
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(4000)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+CC: Standard email CC field.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+EMAIL_BCC
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(4000)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+BCC: Standard email BCC field.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+EMAIL_EXTRA
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(4000)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Extra Info: Flexible field for unforseen email header or MIME protocol stuff.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+SENT_STATUS
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(20)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+'Not Sent'
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Status: Indicates whether the email was sent or not. Valid values are Not Sent, Sent, Send Pending and Error.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+SENT_DT
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+DATE
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Sent Time: Timestamp issued when the email is sent successfully.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+SMTP_ERROR
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(4000)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+SMTP Error: Context surrounding any errors received from the SMTP server. This should probably be the error code, followed by the error message or JavaMail error stack, depending on the implementation you choose to use.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+OTX_SYNC_COL
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(1)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+'N'
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Oracle Text Syncronization Column: Used by Oracle Text as both the 
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+dummy"
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+column
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+for
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+the
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+MULTI_COLUMN_DATASTORE
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+and
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+the
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+search
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+column
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+when
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+using
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+the
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+CONTAINS
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+operator
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+in
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+queries.
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+If
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+any
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+of
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+the
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+columns
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+in
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+the
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+multi-column
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+context
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+index
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+are
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+updated
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+set
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+this
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+column
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+to
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+indicating
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+it
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+is
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+in
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+need
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+of
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+a
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+CTX_DDL
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+sync
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+operation."
+</TD>
+</TR>
+</TABLE>
+<HR>
+<A NAME="Primary Key"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Primary Key
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+APP_EMAIL_PK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="APP_EMAIL_DOC.html">EMAIL_ID</A>
+</TD>
+</TR>
+</TABLE>
+<HR>
+<A NAME="Foreign Keys"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Foreign Keys
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Referencing Table
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+AEM_APP_ID_FK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="APP_ENV.html">APP_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="APP.html">APP</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="APP_ENV.html">APP_ID</A>
+</TD>
+</TR>
+</TABLE>
+<HR>
+<A NAME="Check Constraints"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Check Constraints
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Condition
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+AEM_OTX_SYNC_COL_CHK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+otx_sync_col IN ('Y','N')
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+AEM_SENT_STATUS_CHK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+sent_status IN ('Not Sent','Error','Send Pending','Sent')
+</TD>
+</TR>
+</TABLE>
+<HR>
+<A NAME="Indexes"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Indexes
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Type
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+AEM_APP_ID_IDX
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="APP_ENV.html">APP_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Normal
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+APP_EMAIL_PK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="APP_EMAIL_DOC.html">EMAIL_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Unique
+</TD>
+</TR>
+</TABLE>
+<HR>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+</BODY>
+</HTML>

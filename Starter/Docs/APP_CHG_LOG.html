@@ -1,0 +1,411 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+ <HEAD>
+ <LINK REL="STYLESHEET" TYPE="text/css" HREF="plsqldoc.css">
+ <TITLE>Table APP_CHG_LOG</TITLE>
+ <META name="object" content="TABLE">
+ <META name="name" content="APP_CHG_LOG">
+ <META name="description" content="Change Log (ACLG): Tracks change transactions.">
+ <META name="columns" content="CHG_LOG_ID APP_ID CHG_LOG_DT CHG_TYPE_CD TABLE_NM PK_ID ROW_ID CLIENT_ID CLIENT_IP CLIENT_HOST CLIENT_OS_USER CHG_CONTEXT">
+</HEAD>
+<BODY>
+<TABLE WIDTH="100%"><TR>
+<TD><P ALIGN="LEFT"><STRONG><SMALL></SMALL></STRONG></TD>
+<TD><P ALIGN="RIGHT"><STRONG><SMALL><A HREF="index.html">index</A></SMALL></STRONG></TD>
+</TR></TABLE>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="DESC_TEXT">
+<P CLASS="MAIN_TITLE">Table APP_CHG_LOG</P>
+Change Log (ACLG): Tracks change transactions. The changes to individual columns are tracked in the associated detail table. This table is filled by triggers tracking changes to each table, but could be written to directly by upper layer code if needed.
+</TD></TR></TABLE>
+<HR>
+<A NAME="Columns"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Columns
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Type
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Optional
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Default
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Comments
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+<A HREF="APP_CHG_LOG_DTL.html">CHG_LOG_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+NUMBER
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Change Log ID: Surrogate key for this table.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+<A HREF="APP_EMAIL.html">APP_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+NUMBER
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Application ID: Foreign key to <A HREF="APP.html">APP</A>. The application in which the recorded changes occurred.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+CHG_LOG_DT
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+DATE
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Change Log Date: The date and time recording when the change was detected, as per the database host on which the application runs.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+CHG_TYPE_CD
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(1)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Change Type Code: The type of change detected and tracked. Valid values are I for Insert, U for Update or D for Delete.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+TABLE_NM
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(120)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Table Name: Name of the table containing the record and column being tracked.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+PK_ID
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+NUMBER(38)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Row Primary Key ID: The numeric, surrogate PK ID to the row being altered. This should be used for most audited tables. It can be useful for IOT tables where a physical ROWID is not available.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+ROW_ID
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+ROWID
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Row ID: Row ID of the row where the change was detected. This can be used for most records in the database, but is intended for rows whose PK or UK identifier is multi-column (does not have a single value to store in SRC_PK_ID).
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+<A HREF="APP_LOG.html">CLIENT_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(320)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Client Identifier: Optional unique identifier for the end user or automated process responsible for the generation of the log message. This can be set by the frontend using ENV.INIT_CLIENT_CTX, but will default to something useful if it has not been set.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+<A HREF="APP_LOG.html">CLIENT_IP</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(160)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Client IP: Optional IPv4 or IPv6 address of the client machine.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+<A HREF="APP_LOG.html">CLIENT_HOST</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(160)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Client Host: Optional name of the machine the client is connecting from. For direct connections (application servers, end users with SQL*Plus, OEM, Forms, DBA tools, etc.), this is available from the USERENV context using the 'host' parameter. For 3 and n-tier applications, if you desire to store the name of the machine the end user is operating from, the application server would have to obtain it from the user's environment and set it using env.init_client_ctx() upon connection.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+<A HREF="APP_LOG.html">CLIENT_OS_USER</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(400)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Client OS User: The name of the logged in account on the operating system from which the client or user is connecting. This can be set by the application using env.init_client_ctx() upon connection.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+CHG_CONTEXT
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(4000)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Change Context: Can be used for additional identifiers surrounding the person, web service or transaction that triggered the audit, like IP Address, Program Name, Terminal, etc.
+</TD>
+</TR>
+</TABLE>
+<HR>
+<A NAME="Primary Key"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Primary Key
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+APP_CHG_LOG_PK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="APP_CHG_LOG_DTL.html">CHG_LOG_ID</A>
+</TD>
+</TR>
+</TABLE>
+<HR>
+<A NAME="Foreign Keys"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Foreign Keys
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Referencing Table
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+ACLG_APP_ID_FK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="APP_EMAIL.html">APP_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="APP.html">APP</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="APP_EMAIL.html">APP_ID</A>
+</TD>
+</TR>
+</TABLE>
+<HR>
+<A NAME="Check Constraints"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Check Constraints
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Condition
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+ACLG_CHG_TYPE_CD_CHK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+chg_type_cd IN ('I','U','D')
+</TD>
+</TR>
+</TABLE>
+<HR>
+<A NAME="Indexes"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Indexes
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Type
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+ACLG_APP_ID_IDX
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="APP_EMAIL.html">APP_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Normal
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+ACLG_MOD_DTM_IDX
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+CHG_LOG_DT,TABLE_NM
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Normal
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+ACLG_PK_ID_IDX
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+PK_ID
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Normal
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+APP_CHG_LOG_PK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="APP_CHG_LOG_DTL.html">CHG_LOG_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Unique
+</TD>
+</TR>
+</TABLE>
+<HR>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+</BODY>
+</HTML>

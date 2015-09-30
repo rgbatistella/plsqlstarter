@@ -1,0 +1,435 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+ <HEAD>
+ <LINK REL="STYLESHEET" TYPE="text/css" HREF="plsqldoc.css">
+ <TITLE>Package msgs</TITLE>
+ <META name="object" content="PACKAGE">
+ <META name="name" content="msgs">
+ <META name="description" content="%author Bill Coulam (bcoulam@dbartisans.com)">
+</HEAD>
+<BODY>
+<TABLE WIDTH="100%"><TR>
+<TD><P ALIGN="LEFT"><STRONG><SMALL></SMALL></STRONG></TD>
+<TD><P ALIGN="RIGHT"><STRONG><SMALL><A HREF="index.html">index</A></SMALL></STRONG></TD>
+</TR></TABLE>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="DESC_TEXT">
+<P CLASS="MAIN_TITLE">Package msgs</P>
+A collection of routines for utilizing the standard messages contained in<br>
+&nbsp;APP_MSG.<br>
+&nbsp;<br>
+&nbsp;<br>
+&nbsp;<br>
+<pre>
+Artisan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Comments
+============ ========= ========================================================
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1997Dec30 Creation
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2008Feb02 Moved all routines that didn't pertain to reading APP_MSG
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; to the LOGS and IO packages.
+
+<i>
+&nbsp;&nbsp;&nbsp; __________________________&nbsp; LGPL License&nbsp; ____________________________
+&nbsp;&nbsp;&nbsp; Copyright (C) 1997-2008 Bill Coulam
+
+&nbsp;&nbsp;&nbsp; This library is free software; you can redistribute it and/or
+&nbsp;&nbsp;&nbsp; modify it under the terms of the GNU Lesser General Public
+&nbsp;&nbsp;&nbsp; License as published by the Free Software Foundation; either
+&nbsp;&nbsp;&nbsp; version 2.1 of the License, or (at your option) any later version.
+
+&nbsp;&nbsp;&nbsp; This library is distributed in the hope that it will be useful,
+&nbsp;&nbsp;&nbsp; but WITHOUT ANY WARRANTY; without even the implied warranty of
+&nbsp;&nbsp;&nbsp; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+&nbsp;&nbsp;&nbsp; Lesser General Public License for more details.
+
+&nbsp;&nbsp;&nbsp; You should have received a copy of the GNU Lesser General Public
+&nbsp;&nbsp;&nbsp; License along with this library; if not, write to the Free Software
+&nbsp;&nbsp;&nbsp; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+
+
+<BR>
+<A NAME="Author"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Author
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Bill Coulam (<A HREF="MAILTO:bcoulam@dbartisans.com">bcoulam@dbartisans.com</A>)
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Note"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Note
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+I prefer to only use the singular in table and package names, but unfortunately the package name MSG conflicts with the msg() procedures inside the LOGS package, when LOGS tries to refer to constants and routines in the MSG package it can't resolve everything.
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Story"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Story
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Build a GUI to administer the data in APP_MSG, so the development team can collaborate, easily search for existing and add new standard messages.
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR></TABLE>
+<HR>
+<A NAME="Program units"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Program units
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_msg">get_msg</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_msg:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_msg2">get_msg</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_msg_id">get_msg_id</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_msg_id:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_msg_cd">get_msg_cd</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_msg_cd:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#fill_msg">fill_msg</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+fill_msg:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#fill_msg2">fill_msg</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#fill_msg3">fill_msg</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+fill_msg:
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Constants"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Constants
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#DEFAULT_MSG_CD">DEFAULT_MSG_CD</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+PUBLIC CONSTANTS, VARIABLES, EXCEPTIONS, ETC.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#MISSING_MSG_CD">MISSING_MSG_CD</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#ERROR_MSG_CD">ERROR_MSG_CD</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#WARN_MSG_CD">WARN_MSG_CD</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#INFO_MSG_CD">INFO_MSG_CD</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#DEBUG_MSG_CD">DEBUG_MSG_CD</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="DEFAULT_MSG_CD"></A>
+<P CLASS="TYPE_TITLE">
+DEFAULT_MSG_CD
+</P>
+<PRE CLASS="DECL_TEXT">
+DEFAULT_MSG_CD CONSTANT app_msg.msg_cd%TYPE := 'Ad-Hoc Msg';
+</PRE>
+<P CLASS="DESC_TEXT">
+PUBLIC CONSTANTS, VARIABLES, EXCEPTIONS, ETC.<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="MISSING_MSG_CD"></A>
+<P CLASS="TYPE_TITLE">
+MISSING_MSG_CD
+</P>
+<PRE CLASS="DECL_TEXT">
+MISSING_MSG_CD CONSTANT app_msg.msg_cd%TYPE := 'Missing Msg';
+</PRE>
+<HR>
+<A NAME="ERROR_MSG_CD"></A>
+<P CLASS="TYPE_TITLE">
+ERROR_MSG_CD
+</P>
+<PRE CLASS="DECL_TEXT">
+ERROR_MSG_CD    CONSTANT app_msg.msg_cd%TYPE := 'Error Msg';
+</PRE>
+<HR>
+<A NAME="WARN_MSG_CD"></A>
+<P CLASS="TYPE_TITLE">
+WARN_MSG_CD
+</P>
+<PRE CLASS="DECL_TEXT">
+WARN_MSG_CD    CONSTANT app_msg.msg_cd%TYPE := 'Warning Msg';
+</PRE>
+<HR>
+<A NAME="INFO_MSG_CD"></A>
+<P CLASS="TYPE_TITLE">
+INFO_MSG_CD
+</P>
+<PRE CLASS="DECL_TEXT">
+INFO_MSG_CD    CONSTANT app_msg.msg_cd%TYPE := 'Info Msg';
+</PRE>
+<HR>
+<A NAME="DEBUG_MSG_CD"></A>
+<P CLASS="TYPE_TITLE">
+DEBUG_MSG_CD
+</P>
+<PRE CLASS="DECL_TEXT">
+DEBUG_MSG_CD   CONSTANT app_msg.msg_cd%TYPE := 'Debug Msg';
+</PRE>
+<HR>
+<A NAME="get_msg"></A>
+<P CLASS="TYPE_TITLE">
+get_msg
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_msg(i_msg_cd IN app_msg.msg_cd%TYPE) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_msg:<br>
+&nbsp;This overloaded function retrieves the message text based on the message name<br>
+&nbsp;or the message number. This is the main routine I expect application PL/SQL to<br>
+&nbsp;use as they send messages to the screen (io.p) or the various log targets<br>
+&nbsp;(logs.msg, logs.dbg, logs.err, etc.)<br>
+
+<BR>
+</P>
+<A NAME="Usage"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<code><br>&nbsp;&nbsp;&nbsp; logs.err('Daily Load status: '|| <A HREF=#get_msg2>msgs.get_msg</A>(l_return_code));<br>&nbsp;&nbsp;&nbsp; logs.warn(<A HREF=#get_msg2>msgs.get_msg</A>('Date Missing'));<br> <br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_msg_cd&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This is the name of the desired message, found in APP_MSG.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_msg_id&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This is the ID of the desired message, found in app_msg.<br> <br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="get_msg2"></A>
+<P CLASS="TYPE_TITLE">
+get_msg
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_msg(i_msg_id IN app_msg.msg_id%TYPE) RETURN VARCHAR2
+
+</PRE>
+<HR>
+<A NAME="get_msg_id"></A>
+<P CLASS="TYPE_TITLE">
+get_msg_id
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_msg_id(i_msg_cd IN app_msg.msg_cd%TYPE) RETURN NUMBER
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_msg_id:<br>
+&nbsp;Returns the message number based on the message name. It is mainly meant for<br>
+&nbsp;use by framework internals, not application code.<br>
+
+<BR>
+</P>
+<A NAME="Usage"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+(for Java client expecting a return code indicating status)&nbsp; <code><br>&nbsp;&nbsp;&nbsp; WHEN lx_useless_record THEN<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; RETURN msgs.get_msg_id('Useless Record');<br> <br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="get_msg_cd"></A>
+<P CLASS="TYPE_TITLE">
+get_msg_cd
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_msg_cd(i_msg_id IN app_msg.msg_id%TYPE) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_msg_cd:<br>
+&nbsp;Returns the message code based on the message ID. It is mainly meant for use<br>
+&nbsp;by framework internals, not application code.<br>
+
+<BR>
+</P>
+<A NAME="Usage"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<code><br>&nbsp;&nbsp;&nbsp; logs.msg(<A HREF=#get_msg>msgs.get_msg</A>(msgs.get_msg_cd(l_return_cd)));<br> <br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="fill_msg"></A>
+<P CLASS="TYPE_TITLE">
+fill_msg
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION fill_msg
+(
+   i_msg_cd    IN app_msg.msg_cd%TYPE,
+   ias_fill    IN typ.tas_medium,
+   i_wrap_char IN VARCHAR2 DEFAULT cnst.subchar
+) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+fill_msg:<br>
+&nbsp;The three versions of this routine resemble printf used in cnst.<br>
+&nbsp;<br>
+&nbsp;Certain messages in APP_MSG will contain placeholders. The placeholders must<br>
+&nbsp;follow a numerical sequence and be surrounded by some special character which<br>
+&nbsp;indicates that the number is a placeholder, e.g. a fictitious message named<br>
+&nbsp;&quot;Column Update Failure&quot;, whose full error text might be defined in APP_MSG as<br>
+&nbsp;<br>
+&nbsp;&quot;Update of column @1@ on table @2@ failed given the PK value @3@&quot;<br>
+&nbsp;<br>
+&nbsp;Assuming you trapped the error and wanted to note it in the logs using the<br>
+&nbsp;standard table-defined message text, you'd replace the placeholders with the<br>
+&nbsp;error's contextual information like this:<br>
+&nbsp;<code><br>
+&nbsp;&nbsp;&nbsp; las_context(1) := 'assigned_to'; -- column name placeholder<br>
+&nbsp;&nbsp;&nbsp; las_context(2) := 'ORDERS'; -- table name placeholder<br>
+&nbsp;&nbsp;&nbsp; las_context(3) := 'ord_id' -- PK placeholder;<br>
+&nbsp;&nbsp;&nbsp; <A HREF=#fill_msg2>msgs.fill_msg</A>('Column Update Failure',las_context);<br>
+&nbsp;</code>
+&nbsp;<br>
+&nbsp;or you could use the non-array version like this:<br>
+&nbsp;<code><br>
+&nbsp;&nbsp;&nbsp; <A HREF=#fill_msg2>msgs.fill_msg</A>('Column Update Failure', 'assigned_to', 'ORDERS', 'ord_id');<br>
+&nbsp;</code>
+&nbsp;<br>
+&nbsp;The values placed in the array will then replace the placeholders in the message<br>
+&nbsp;in the order in which they are placed in the array, i.e. value 1 in the array<br>
+&nbsp;will look through the message for placeholder &quot;@1@&quot; and replace it, and so on.<br>
+&nbsp;This enables the content and placeholders in the message to be flexible. If you<br>
+&nbsp;needed to add a fourth value that happened to fall before the &quot;@1@&quot; placeholder,<br>
+&nbsp;no problem. You do not need to renumber the placeholders or change any previous<br>
+&nbsp;code using the same message. For example, if we wanted to make the message more<br>
+&nbsp;dynamic instead of hardcoding it around the given PK value, you could alter it<br>
+&nbsp;in APP_MSG to look like this:<br>
+&nbsp;<br>
+&nbsp;&quot;Update of column @1@ on table @2@ failed given the @4@ value @3@&quot;<br>
+&nbsp;<br>
+&nbsp;Then it's only a matter of adding a fourth element to the context array before<br>
+&nbsp;calling fill_msg.<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="fill_msg2"></A>
+<P CLASS="TYPE_TITLE">
+fill_msg
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION fill_msg
+(
+   i_msg_id    IN app_msg.msg_id%TYPE,
+   ias_fill    IN typ.tas_medium,
+   i_wrap_char IN VARCHAR2 DEFAULT cnst.subchar
+) RETURN VARCHAR2
+
+</PRE>
+<HR>
+<A NAME="fill_msg3"></A>
+<P CLASS="TYPE_TITLE">
+fill_msg
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION fill_msg
+(
+   i_msg_cd    IN app_msg.msg_cd%TYPE,
+   i_field1    IN VARCHAR2 DEFAULT NULL,
+   i_field2    IN VARCHAR2 DEFAULT NULL,
+   i_field3    IN VARCHAR2 DEFAULT NULL,
+   i_field4    IN VARCHAR2 DEFAULT NULL,
+   i_field5    IN VARCHAR2 DEFAULT NULL,
+   i_wrap_char IN VARCHAR2 DEFAULT cnst.subchar
+) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+fill_msg:<br>
+&nbsp;Some of my developers were annoyed by having to use an array every time they<br>
+&nbsp;wanted to log some context to the error message. So I created this one that<br>
+&nbsp;takes up to five plain old strings as parameters. If you are passing in a date<br>
+&nbsp;or formatted number, you should wrap the parameter with TO_CHAR() and its<br>
+&nbsp;format mask before passing it in.<br>
+
+<BR>
+</P>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+</BODY>
+</HTML>

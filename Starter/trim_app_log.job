@@ -1,0 +1,50 @@
+-------------------------------------------------------------------------------
+SET SERVEROUTPUT ON
+DECLARE
+   l_job_id INTEGER := 0;
+   l_job_what VARCHAR2(2000) := 
+'DECLARE
+   l_rows_deleted NUMBER := 0;
+BEGIN
+   app_log_api.trim_table(o_rows_deleted => l_rows_deleted,
+                         i_keep_amt => 2,
+                         i_keep_amt_uom => ''week'',
+                         i_archive_to_file_flg => ''N'');
+END;';
+   l_interval VARCHAR2(100) := 'TRUNC(SYSDATE + 1)+(1/24)';
+BEGIN
+   BEGIN
+      SELECT JOB
+        INTO l_job_id
+        FROM user_jobs
+       WHERE INSTR(LOWER(what),'app_log_api.trim_table') > 0;
+
+      BEGIN
+         dbms_job.remove(l_job_id);
+         dbms_output.put_line('Removed job '||l_job_id); 
+      END;
+
+   EXCEPTION
+      WHEN NO_DATA_FOUND THEN
+         l_job_id := NULL;
+   END;
+
+   IF l_job_id is NULL THEN
+      dbms_job.submit(job => l_job_id, -- will be generated and passed back
+                      what => l_job_what,
+                      next_date => SYSDATE+1,
+                      INTERVAL => l_interval);
+      dbms_output.put_line('Submitting new job '||l_job_id||' to keep the app_log table trimmed.');
+   ELSE
+      -- Job to periodically clean out old rows from APP_LOG
+      dbms_job.isubmit(   JOB       => l_job_id,
+                          what      => l_job_what,
+                          next_date => SYSDATE+1,
+                          INTERVAL  => l_interval);
+      dbms_output.put_line('Re-submitted job '||l_job_id||' to keep the app_log table trimmed.');
+   END IF;
+
+   COMMIT;
+    
+END;
+/

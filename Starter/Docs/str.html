@@ -1,0 +1,933 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+ <HEAD>
+ <LINK REL="STYLESHEET" TYPE="text/css" HREF="plsqldoc.css">
+ <TITLE>Package str</TITLE>
+ <META name="object" content="PACKAGE">
+ <META name="name" content="str">
+ <META name="description" content="%author Bill Coulam (bcoulam@dbartisans.com)">
+</HEAD>
+<BODY>
+<TABLE WIDTH="100%"><TR>
+<TD><P ALIGN="LEFT"><STRONG><SMALL></SMALL></STRONG></TD>
+<TD><P ALIGN="RIGHT"><STRONG><SMALL><A HREF="index.html">index</A></SMALL></STRONG></TD>
+</TR></TABLE>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="DESC_TEXT">
+<P CLASS="MAIN_TITLE">Package str</P>
+Package bundling generic routines for string manipulation/handling.<br>
+&nbsp;<br>
+<pre>
+Artisan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Comments
+============ ========= ========================================================
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1997Dec30 Creation
+
+<i>
+&nbsp;&nbsp;&nbsp; __________________________&nbsp; LGPL License&nbsp; ____________________________
+&nbsp;&nbsp;&nbsp; Copyright (C) 1997-2008 Bill Coulam
+
+&nbsp;&nbsp;&nbsp; This library is free software; you can redistribute it and/or
+&nbsp;&nbsp;&nbsp; modify it under the terms of the GNU Lesser General Public
+&nbsp;&nbsp;&nbsp; License as published by the Free Software Foundation; either
+&nbsp;&nbsp;&nbsp; version 2.1 of the License, or (at your option) any later version.
+
+&nbsp;&nbsp;&nbsp; This library is distributed in the hope that it will be useful,
+&nbsp;&nbsp;&nbsp; but WITHOUT ANY WARRANTY; without even the implied warranty of
+&nbsp;&nbsp;&nbsp; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+&nbsp;&nbsp;&nbsp; Lesser General Public License for more details.
+
+&nbsp;&nbsp;&nbsp; You should have received a copy of the GNU Lesser General Public
+&nbsp;&nbsp;&nbsp; License along with this library; if not, write to the Free Software
+&nbsp;&nbsp;&nbsp; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+
+
+<BR>
+<A NAME="Author"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Author
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Bill Coulam (<A HREF="MAILTO:bcoulam@dbartisans.com">bcoulam@dbartisans.com</A>)
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR></TABLE>
+<HR>
+<A NAME="Program units"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Program units
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_diacritic_list">get_diacritic_list</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_diacritic_list:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_diacritic_map">get_diacritic_map</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_diacritic_map:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#foreign_to_ascii">foreign_to_ascii</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+foreign_to_ascii:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#nonascii_to_ascii">nonascii_to_ascii</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+nonascii_to_ascii:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#format_to_width">format_to_width</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+format_to_width:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#ewc">ewc</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+ewc:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#parse_list">parse_list</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+parse_list: Takes a delimited list of values and returns a collection of strings, that can subsequently be used to join in SQL queries or used in other processing.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#make_list">make_list</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+make_list:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#trim_str">trim_str</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+trim_str:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#purge_str">purge_str</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+purge_str:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_token">get_token</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_token:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#contains_num">contains_num</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+contains_num:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#ctr">ctr</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+ctr:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#split_str">split_str</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+split_str:
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Variables"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Variables
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#empty_str_tab">empty_str_tab</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Constants"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Constants
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#NUL">NUL</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+PUBLIC CONSTANTS, VARIABLES, EXCEPTIONS, ETC.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#TAB">TAB</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+A single tab character
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#CR">CR</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+A single carriage return character (^M)
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#LF">LF</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+A single linefeed character
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#LFCR">LFCR</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Odd duck
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#CRLF">CRLF</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Common Microsoft line break
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#FF">FF</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+A form feed
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#SP">SP</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+A space
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#DEL">DEL</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+old delete, non-printing, end of ASCII set
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="NUL"></A>
+<P CLASS="TYPE_TITLE">
+NUL
+</P>
+<PRE CLASS="DECL_TEXT">
+NUL   CONSTANT VARCHAR2(1) := CHR(0);
+</PRE>
+<P CLASS="DESC_TEXT">
+PUBLIC CONSTANTS, VARIABLES, EXCEPTIONS, ETC.<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="TAB"></A>
+<P CLASS="TYPE_TITLE">
+TAB
+</P>
+<PRE CLASS="DECL_TEXT">
+TAB   CONSTANT VARCHAR2(1) := CHR(9);
+</PRE>
+<P CLASS="DESC_TEXT">
+A single tab character<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="CR"></A>
+<P CLASS="TYPE_TITLE">
+CR
+</P>
+<PRE CLASS="DECL_TEXT">
+CR    CONSTANT VARCHAR2(1) := CHR(13);
+</PRE>
+<P CLASS="DESC_TEXT">
+A single carriage return character (^M)<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="LF"></A>
+<P CLASS="TYPE_TITLE">
+LF
+</P>
+<PRE CLASS="DECL_TEXT">
+LF    CONSTANT VARCHAR2(1) := CHR(10);
+</PRE>
+<P CLASS="DESC_TEXT">
+A single linefeed character<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="LFCR"></A>
+<P CLASS="TYPE_TITLE">
+LFCR
+</P>
+<PRE CLASS="DECL_TEXT">
+LFCR  CONSTANT VARCHAR2(2) := CHR(10)||CHR(13);
+</PRE>
+<P CLASS="DESC_TEXT">
+Odd duck<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="CRLF"></A>
+<P CLASS="TYPE_TITLE">
+CRLF
+</P>
+<PRE CLASS="DECL_TEXT">
+CRLF  CONSTANT VARCHAR2(2) := CHR(13)||CHR(10);
+</PRE>
+<P CLASS="DESC_TEXT">
+Common Microsoft line break<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="FF"></A>
+<P CLASS="TYPE_TITLE">
+FF
+</P>
+<PRE CLASS="DECL_TEXT">
+FF    CONSTANT VARCHAR2(1) := CHR(12);
+</PRE>
+<P CLASS="DESC_TEXT">
+A form feed<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="SP"></A>
+<P CLASS="TYPE_TITLE">
+SP
+</P>
+<PRE CLASS="DECL_TEXT">
+SP    CONSTANT VARCHAR2(1) := CHR(32);
+</PRE>
+<P CLASS="DESC_TEXT">
+A space<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="DEL"></A>
+<P CLASS="TYPE_TITLE">
+DEL
+</P>
+<PRE CLASS="DECL_TEXT">
+DEL   CONSTANT VARCHAR2(1) := CHR(127);
+</PRE>
+<P CLASS="DESC_TEXT">
+old delete, non-printing, end of ASCII set<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="empty_str_tab"></A>
+<P CLASS="TYPE_TITLE">
+empty_str_tab
+</P>
+<PRE CLASS="DECL_TEXT">
+empty_str_tab type_stab := type_stab();
+</PRE>
+<HR>
+<A NAME="get_diacritic_list"></A>
+<P CLASS="TYPE_TITLE">
+get_diacritic_list
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_diacritic_list RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_diacritic_list:<br>
+&nbsp;Returns a string of foreign characters which maps 1:1, character for character,<br>
+&nbsp;the map returned by <A HREF=#get_diacritic_map>get_diacritic_map</A>.<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="get_diacritic_map"></A>
+<P CLASS="TYPE_TITLE">
+get_diacritic_map
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_diacritic_map RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_diacritic_map:<br>
+&nbsp;Returns a string of lower range ASCII characters that map character for<br>
+&nbsp;character, position for position, the list of characters returned by<br>
+&nbsp;get_diacritic_list;<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="foreign_to_ascii"></A>
+<P CLASS="TYPE_TITLE">
+foreign_to_ascii
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION foreign_to_ascii(i_str IN VARCHAR2) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+foreign_to_ascii:<br>
+&nbsp;Reads a string and converts all &quot;foreign&quot; characters to plain ASCII characters.<br>
+&nbsp;Foreign characters are defined as those that fall in the upper range of the<br>
+&nbsp;ISO-8859-1, or extended ASCII, character set.<br>
+&nbsp;<br>
+&nbsp;If there are any extended ASCII characters not mapped by the underlying<br>
+&nbsp;TRANSLATE function, or any Unicode characters, they will be preserved as-is.<br>
+&nbsp;If you desire these characters to also be rendered as ASCII, either wrap<br>
+&nbsp;this function with a call to ASCIISTR(), or use %see <A HREF=#nonascii_to_ascii>nonascii_to_ascii</A> instead.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_str&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+String with foreign characters which need translation to plain ASCII characters.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="nonascii_to_ascii"></A>
+<P CLASS="TYPE_TITLE">
+nonascii_to_ascii
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION nonascii_to_ascii(i_str IN VARCHAR2) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+nonascii_to_ascii:<br>
+&nbsp;Anything outside the range of the lower ASCII set (128-255) as well as Unicode<br>
+&nbsp;characters, will be converted to Unicode escape codes, e.g. the Euro symbol<br>
+&nbsp;CHR(128) will be returned as \20AC.<br>
+&nbsp;<br>
+&nbsp;If you desire to preserve the Latin-looking foreign characters with diacritics<br>
+&nbsp;as their lower ASCII equivalents,, call %<A HREF=#foreign_to_ascii>foreign_to_ascii</A> instead and wrap it<br>
+&nbsp;with ASCIISTR().<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_str&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+String with foreign characters which need conversion to plain ASCII characters as Unicode escape codes (UTF-16 code unit).<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="format_to_width"></A>
+<P CLASS="TYPE_TITLE">
+format_to_width
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION format_to_width
+(
+   i_str        IN VARCHAR2,
+   i_width      IN INTEGER DEFAULT cnst.pagewidth,
+   i_allow_wrap IN VARCHAR2 DEFAULT 'Y'
+) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+format_to_width:<br>
+&nbsp;This function takes in a string and a width to &quot;break&quot; the string into<br>
+&nbsp;lines of manageable width by means of inserted linefeeds. Paragraphs will be<br>
+&nbsp;preserved. Other linefeeds and carriage returns will be removed.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_str&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Hunk of disorderly or very long text to break into manageable-width lines.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_width&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Width to use in breaking up long strings. Uses default value if not given.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_allow_wrap&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If Y[es] (the default) will break strings unceremoniously when it reaches the requested width. If wrap is not allowed, then words will not be broken unnaturally. Instead whole words will be preserved; lines will only be broken at the last whitespace or dash character before the requested width.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="ewc"></A>
+<P CLASS="TYPE_TITLE">
+ewc
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION ewc
+(
+   i_str     IN VARCHAR2 DEFAULT NULL,
+   i_colsize IN PLS_INTEGER DEFAULT 1
+) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+ewc:<br>
+&nbsp;ewc stands for equal-width columns. When HTML tables are overkill and you've<br>
+&nbsp;got a result set you want to&nbsp; display in columns, use this function to pad or<br>
+&nbsp;trim a string down to the desired column width. CAUTION: This will NOT work if<br>
+&nbsp;the output isn't viewed in a fixed-width font, like Courier.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_str&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+string to fill or trim<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_colsize&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+column size desired<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="parse_list"></A>
+<P CLASS="TYPE_TITLE">
+parse_list
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION parse_list
+(
+   i_string       IN VARCHAR2,
+   i_delimiter    IN VARCHAR2 DEFAULT cnst.delimiter,
+   i_ignore_nulls IN VARCHAR2 DEFAULT 'Y'
+) RETURN type_stab
+
+</PRE>
+<P CLASS="DESC_TEXT">
+parse_list: Takes a delimited list of values and returns a collection of strings, that can subsequently be used to join in SQL queries or used in other processing.<br>
+&nbsp;<br>
+If your delimiter is something other than a comma, change the value of the second parameter, i_delimiter, to the delimiter you want. It can handle multiple-character delimiters if you need that, e.g. :: or =&gt; and other such dividers and seperators.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_string&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The delimited list that will be broken out into individual strings in a nested table collection.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_delimiter&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Default is &quot;,&quot;. The delimiter used to split up the tokens.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_ignore_nulls&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If you specify or allow the default of Y, then any consecutive delimiters in the list will be eliminated. For example, 1,2,,4,5 will only return 4 integer values. If you specify N, then consecutive delimiters will be treated as a NULL value that is desired. For example, 1,2,,4,5 will return 5 elements in the nested_table. The third value will be a NULL.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Nested table of strings.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="make_list"></A>
+<P CLASS="TYPE_TITLE">
+make_list
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION make_list
+(
+   i_coll      IN type_stab,
+   i_delimiter IN VARCHAR2 DEFAULT cnst.delimiter
+) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+make_list:<br>
+&nbsp;Takes an array of strings and returns a delimited list of the same in a single<br>
+&nbsp;string. The returned string can be up to 32767 bytes long, so the receiving<br>
+&nbsp;variable or column should be the same size, or the result should be truncated<br>
+&nbsp;using SUBSTR.<br>
+&nbsp;<br>
+&nbsp;Obviously, if one of the strings includes a character which is the requested<br>
+&nbsp;delimiter, that string will be broken up where it ought not.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_coll&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Collection<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_delimiter&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Delimiter<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="trim_str"></A>
+<P CLASS="TYPE_TITLE">
+trim_str
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION trim_str(i_str IN VARCHAR2) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+trim_str:<br>
+&nbsp;This function takes in a string and cleans off ALL non-printing characters from<br>
+&nbsp;the left and right side. Any non-printing characters in the middle of the<br>
+&nbsp;string are left alone. If you need to get rid of ALL non-printing characters,<br>
+&nbsp;except SPACE, call %see <A HREF=#purge_str>purge_str</A>.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_str&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+String with garbage characters on one end, or ends, which need removal.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="purge_str"></A>
+<P CLASS="TYPE_TITLE">
+purge_str
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION purge_str
+(
+   i_str                       IN VARCHAR2,
+   i_preserve_tabs             IN VARCHAR2 DEFAULT 'N',
+   i_preserve_linebreaks       IN VARCHAR2 DEFAULT 'N',
+   i_convert_diacritics        IN VARCHAR2 DEFAULT 'N',
+   i_convert_nonascii_to_ascii IN VARCHAR2 DEFAULT 'N'
+) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+purge_str:<br>
+&nbsp;This function takes in a string and cleans out ALL non-printing characters<br>
+&nbsp;except the SPACE character. If tabs and linebreaks (ordinarily invisible) are<br>
+&nbsp;still needed, alter one or both of the last two parameters to Y. Since multi-<br>
+&nbsp;byte characters are also technically non-printing in many ASCII-oriented<br>
+&nbsp;systems and software, the last parameter allows you to convert those to Unicode<br>
+&nbsp;escape codes as well if set to Y.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_str&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Candidate string bearing garbage characters which need removing.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_preserve_tabs&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If Y, will leave ASCII character 9 intact.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_preserve_linebreaks&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If Y, will leave ASCII characters 10 and 13 intact.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_convert_diacritics&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If Y, will translate extended ASCII letter chars (128-255) to lower ASCII equivalents before applying non-ascii conversion (if requested). This allows Latin-looking characters to still be read or displayed, without the Unicode substitution. If left as N, characters with diacritics will be removed.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_convert_nonascii_to_ascii&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If Y, will convert non-ascii characters to the escaped Unicode equivalent. These codes can be wrapped by UNISTR to return them to the original characters. If left as N, Unicode and extended ASCII characters will be removed.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="get_token"></A>
+<P CLASS="TYPE_TITLE">
+get_token
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_token
+(
+   i_str           IN VARCHAR2,
+   i_delimiter     IN VARCHAR2 DEFAULT cnst.delimiter,
+   i_token_idx     IN PLS_INTEGER DEFAULT 1,
+   i_ignore_blanks IN VARCHAR2 DEFAULT 'Y'
+) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_token:<br>
+&nbsp;Takes a delimited string, uses <A HREF=#parse_list>parse_list</A> to turn it into an array of<br>
+&nbsp;tokens, then returns the desired token to the caller.<br>
+&nbsp;If the caller wants the function to ignore empty tokens (tokens with nothing<br>
+&nbsp;or just non-printing and space characters), the third, optional parameter is<br>
+&nbsp;set to TRUE.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_str&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Delimited string, otherwise known as a list.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_delimiter&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Character to look for as the delimiter.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_token_idx&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The position of the token you desire in the delimited list.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_ignore_blanks&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Whether to ignore empty tokens when determining position.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="contains_num"></A>
+<P CLASS="TYPE_TITLE">
+contains_num
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION contains_num(i_str IN VARCHAR2) RETURN INTEGER
+
+</PRE>
+<P CLASS="DESC_TEXT">
+contains_num:<br>
+&nbsp;Will return a 1 if the given string contains a number, 0 if no number is found.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_str&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The string to check for the existence of any numbers.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Story"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Story
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Decided to use 1/0 instead of BOOLEAN return, so that this function could be used within SQL.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="ctr"></A>
+<P CLASS="TYPE_TITLE">
+ctr
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION ctr
+(
+   i_str        IN VARCHAR2,
+   i_char       IN VARCHAR2 DEFAULT <A HREF=#SP>sp</A>,
+   i_page_width IN INTEGER DEFAULT cnst.pagewidth
+) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+ctr:<br>
+&nbsp;Will return the given str centered within the page width. If no page width is<br>
+&nbsp;provided, the default set in CNST will be assumed.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_str&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The string to check for the existence of any numbers.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_char&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The character to use in padding the centered text, defaults to space.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_page_width&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The width of the space within which the text must be centered.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="split_str"></A>
+<P CLASS="TYPE_TITLE">
+split_str
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE split_str
+(
+   i_string    IN VARCHAR2,
+   i_splitchar IN VARCHAR2,
+   oas_results OUT typ.tas_large
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+split_str:<br>
+&nbsp;This routine shares the same purpose as parse_list. However, it is implemented<br>
+&nbsp;differently. It is less robust, but does operate at twice the speed as parse_list.<br>
+&nbsp;If you have a need for a speedier parser, and your lists are not sparse, but well-<br>
+&nbsp;packed and delimited, you might want to use split_str instead.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_string&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Delimited string, otherwise known as a list.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_splitchar&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Character to use as the delimiter. The delimiter can be multiple characters, like ::, =&gt;, etc.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+oas_results&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The filled PL/SQL table of strings parsed out of the delimited list.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+</BODY>
+</HTML>
