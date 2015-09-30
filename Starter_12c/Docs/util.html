@@ -1,0 +1,1148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+ <HEAD>
+ <LINK REL="STYLESHEET" TYPE="text/css" HREF="plsqldoc.css">
+ <TITLE>Package util</TITLE>
+ <META name="object" content="PACKAGE">
+ <META name="name" content="util">
+ <META name="description" content="%author Bill Coulam (bcoulam@dbartisans.com)">
+</HEAD>
+<BODY>
+<TABLE WIDTH="100%"><TR>
+<TD><P ALIGN="LEFT"><STRONG><SMALL></SMALL></STRONG></TD>
+<TD><P ALIGN="RIGHT"><STRONG><SMALL><A HREF="index.html">index</A></SMALL></STRONG></TD>
+</TR></TABLE>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="DESC_TEXT">
+<P CLASS="MAIN_TITLE">Package util</P>
+Container for generic utility routines that don't fit anywhere else. These<br>
+&nbsp;should be very low level routines. Any utility with higher level business<br>
+&nbsp;logic or purpose should go in its own package. This package should be pinned<br>
+&nbsp;into the SGA.<br>
+&nbsp;<br>
+<pre>
+Artisan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Comments
+============ ========= ========================================================
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1997Dec30 Creation
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2008May02 Added <A HREF=#get_mime_type>get_mime_type</A>.
+
+<i>
+&nbsp;&nbsp;&nbsp; __________________________&nbsp; LGPL License&nbsp; ____________________________
+&nbsp;&nbsp;&nbsp; Copyright (C) 1997-2008 Bill Coulam
+
+&nbsp;&nbsp;&nbsp; This library is free software; you can redistribute it and/or
+&nbsp;&nbsp;&nbsp; modify it under the terms of the GNU Lesser General Public
+&nbsp;&nbsp;&nbsp; License as published by the Free Software Foundation; either
+&nbsp;&nbsp;&nbsp; version 2.1 of the License, or (at your option) any later version.
+
+&nbsp;&nbsp;&nbsp; This library is distributed in the hope that it will be useful,
+&nbsp;&nbsp;&nbsp; but WITHOUT ANY WARRANTY; without even the implied warranty of
+&nbsp;&nbsp;&nbsp; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+&nbsp;&nbsp;&nbsp; Lesser General Public License for more details.
+
+&nbsp;&nbsp;&nbsp; You should have received a copy of the GNU Lesser General Public
+&nbsp;&nbsp;&nbsp; License along with this library; if not, write to the Free Software
+&nbsp;&nbsp;&nbsp; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+
+
+<BR>
+<A NAME="Author"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Author
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Bill Coulam (<A HREF="MAILTO:bcoulam@dbartisans.com">bcoulam@dbartisans.com</A>)
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR></TABLE>
+<HR>
+<A NAME="Program units"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Program units
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#bool_to_str">bool_to_str</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+bool_to_str:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#bool_to_num">bool_to_num</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+bool_to_num:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#str_to_bool">str_to_bool</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+str_to_bool:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#num_to_bool">num_to_bool</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+num_to_bool:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#ifnn">ifnn</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+ifnn:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#ifnn2">ifnn</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+PRAGMA RESTRICT_REFERENCES(ifnn, WNDS, WNPS, RNDS, RNPS);
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#ifnn3">ifnn</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+PRAGMA RESTRICT_REFERENCES(ifnn, WNDS, WNPS, RNDS, RNPS);
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#ifnull">ifnull</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+ifnull:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#ifnull2">ifnull</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+PRAGMA RESTRICT_REFERENCES(ifnull, WNDS, WNPS, RNDS, RNPS);
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#ifnull3">ifnull</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+PRAGMA RESTRICT_REFERENCES(ifnull, WNDS, WNPS, RNDS, RNPS);
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#ite">ite</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+ite:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#ite2">ite</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+PRAGMA RESTRICT_REFERENCES(ite, WNDS, WNPS, RNDS, RNPS);
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#ite3">ite</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+PRAGMA RESTRICT_REFERENCES(ite, WNDS, WNPS, RNDS, RNPS);
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_mime_type">get_mime_type</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_mime_type:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_otx_doc_type">get_otx_doc_type</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_otx_doc_type:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#convert_clob_to_blob">convert_clob_to_blob</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+convert_clob_to_blob:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#obj_exists">obj_exists</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+obj_exists:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#attr_exists">attr_exists</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+attr_exists:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_max_pk_val">get_max_pk_val</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_max_pk_val:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#reset_seq">reset_seq</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+reset_seq:
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Constants"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Constants
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_table">gc_table</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+PUBLIC TYPES
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_index">gc_index</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_package">gc_package</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_sequence">gc_sequence</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_synonym">gc_synonym</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_trigger">gc_trigger</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_view">gc_view</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_type">gc_type</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_constraint">gc_constraint</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_column">gc_column</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_attribute">gc_attribute</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_method">gc_method</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_routine">gc_routine</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_part">gc_part</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_subpart">gc_subpart</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="gc_table"></A>
+<P CLASS="TYPE_TITLE">
+gc_table
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_table      CONSTANT user_objects.object_type%TYPE := 'TABLE';
+</PRE>
+<P CLASS="DESC_TEXT">
+PUBLIC TYPES<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="gc_index"></A>
+<P CLASS="TYPE_TITLE">
+gc_index
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_index      CONSTANT user_objects.object_type%TYPE := 'INDEX';
+</PRE>
+<HR>
+<A NAME="gc_package"></A>
+<P CLASS="TYPE_TITLE">
+gc_package
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_package    CONSTANT user_objects.object_type%TYPE := 'PACKAGE';
+</PRE>
+<HR>
+<A NAME="gc_sequence"></A>
+<P CLASS="TYPE_TITLE">
+gc_sequence
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_sequence   CONSTANT user_objects.object_type%TYPE := 'SEQUENCE';
+</PRE>
+<HR>
+<A NAME="gc_synonym"></A>
+<P CLASS="TYPE_TITLE">
+gc_synonym
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_synonym    CONSTANT user_objects.object_type%TYPE := 'SYNONYM';
+</PRE>
+<HR>
+<A NAME="gc_trigger"></A>
+<P CLASS="TYPE_TITLE">
+gc_trigger
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_trigger    CONSTANT user_objects.object_type%TYPE := 'TRIGGER';
+</PRE>
+<HR>
+<A NAME="gc_view"></A>
+<P CLASS="TYPE_TITLE">
+gc_view
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_view       CONSTANT user_objects.object_type%TYPE := 'VIEW';
+</PRE>
+<HR>
+<A NAME="gc_type"></A>
+<P CLASS="TYPE_TITLE">
+gc_type
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_type       CONSTANT user_objects.object_type%TYPE := 'TYPE';
+</PRE>
+<HR>
+<A NAME="gc_constraint"></A>
+<P CLASS="TYPE_TITLE">
+gc_constraint
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_constraint CONSTANT user_objects.object_type%TYPE := 'CONSTRAINT';
+</PRE>
+<HR>
+<A NAME="gc_column"></A>
+<P CLASS="TYPE_TITLE">
+gc_column
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_column     CONSTANT VARCHAR2(20) := 'COLUMN';
+</PRE>
+<HR>
+<A NAME="gc_attribute"></A>
+<P CLASS="TYPE_TITLE">
+gc_attribute
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_attribute  CONSTANT VARCHAR2(20) := 'ATTRIBUTE';
+</PRE>
+<HR>
+<A NAME="gc_method"></A>
+<P CLASS="TYPE_TITLE">
+gc_method
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_method     CONSTANT VARCHAR2(20) := 'METHOD';
+</PRE>
+<HR>
+<A NAME="gc_routine"></A>
+<P CLASS="TYPE_TITLE">
+gc_routine
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_routine    CONSTANT VARCHAR2(20) := 'ROUTINE';
+</PRE>
+<HR>
+<A NAME="gc_part"></A>
+<P CLASS="TYPE_TITLE">
+gc_part
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_part       CONSTANT VARCHAR2(20) := 'PARTITION';
+</PRE>
+<HR>
+<A NAME="gc_subpart"></A>
+<P CLASS="TYPE_TITLE">
+gc_subpart
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_subpart    CONSTANT VARCHAR2(20) := 'SUBPARTITION';
+</PRE>
+<HR>
+<A NAME="bool_to_str"></A>
+<P CLASS="TYPE_TITLE">
+bool_to_str
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION bool_to_str(i_bool_val IN BOOLEAN) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+bool_to_str:<br>
+&nbsp;Converts a PL/SQL Boolean value to &quot;TRUE&quot;, &quot;FALSE&quot; or &quot;NULL&quot;.<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="bool_to_num"></A>
+<P CLASS="TYPE_TITLE">
+bool_to_num
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION bool_to_num(i_bool_val IN BOOLEAN) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+bool_to_num:<br>
+&nbsp;Converts a PL/SQL Boolean value to 1, 0 or NULL.<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="str_to_bool"></A>
+<P CLASS="TYPE_TITLE">
+str_to_bool
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION str_to_bool(i_str IN VARCHAR2) RETURN BOOLEAN
+
+</PRE>
+<P CLASS="DESC_TEXT">
+str_to_bool:<br>
+&nbsp;Converts a string value to PL/SQL Boolean TRUE or FALSE.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_str&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+A character or string that represents true or false. Valid values are:<br>
+
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+TRUE:&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+true, TRUE, t, T, y, Y, yes, YES, 1<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+FALSE:&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+false, FALSE, f, F, n, N, no, NO, 0<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+NULL:&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+empty string or NULL<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="num_to_bool"></A>
+<P CLASS="TYPE_TITLE">
+num_to_bool
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION num_to_bool(i_num IN NUMBER) RETURN BOOLEAN
+
+</PRE>
+<P CLASS="DESC_TEXT">
+num_to_bool:<br>
+&nbsp;Converts a numeric value to PL/SQL boolean TRUE or FALSE.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_str&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+A number that represents true or false. Valid values are:<br>
+
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+1&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+and non-zero (will return TRUE)<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+0&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+or NULL (will return FALSE)<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="ifnn"></A>
+<P CLASS="TYPE_TITLE">
+ifnn
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION ifnn
+(
+   i_if   IN VARCHAR2,
+   i_then IN VARCHAR2,
+   i_else IN VARCHAR2 DEFAULT NULL
+) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+ifnn:<br>
+&nbsp;Function to perform inline if not null/then/else, giving more flexibility and enabling<br>
+&nbsp;more elegant code. Overloaded to accommodate strings, dates and numbers.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_if&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Data to check if it is not null<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_then&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Data to return if first parameter is not null<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_else&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Data to return if first parameter is null. If left NULL, NULL will be returned if the i_if parameter is NULL.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="ifnn2"></A>
+<P CLASS="TYPE_TITLE">
+ifnn
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION ifnn
+(
+   i_if   IN DATE,
+   i_then IN DATE,
+   i_else IN DATE DEFAULT NULL
+) RETURN DATE
+
+</PRE>
+<P CLASS="DESC_TEXT">
+PRAGMA RESTRICT_REFERENCES(ifnn, WNDS, WNPS, RNDS, RNPS);<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="ifnn3"></A>
+<P CLASS="TYPE_TITLE">
+ifnn
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION ifnn
+(
+   i_if   IN NUMBER,
+   i_then IN NUMBER,
+   i_else IN NUMBER DEFAULT NULL
+) RETURN NUMBER
+
+</PRE>
+<P CLASS="DESC_TEXT">
+PRAGMA RESTRICT_REFERENCES(ifnn, WNDS, WNPS, RNDS, RNPS);<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="ifnull"></A>
+<P CLASS="TYPE_TITLE">
+ifnull
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION ifnull
+(
+   i_if   IN VARCHAR2,
+   i_then IN VARCHAR2,
+   i_else IN VARCHAR2 DEFAULT NULL
+) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+ifnull:<br>
+&nbsp;Function to perform inline if null/then/else, giving more flexibility than NVL<br>
+&nbsp;and enabling more elegant code. Overloaded to accommodate strings, dates and numbers.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_if&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Data to check if it is null<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_then&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Data to return if first parameter is null<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_else&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Data to return if first parameter is not null. If left NULL, NULL will be returned if i_if is NULL. But that behavior makes this function equivalent to NVL. So be sure to provide the i_else parameter. If you don't need to, use NVL instead. It's probably optimized and faster.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="ifnull2"></A>
+<P CLASS="TYPE_TITLE">
+ifnull
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION ifnull
+(
+   i_if   IN DATE,
+   i_then IN DATE,
+   i_else IN DATE DEFAULT NULL
+) RETURN DATE
+
+</PRE>
+<P CLASS="DESC_TEXT">
+PRAGMA RESTRICT_REFERENCES(ifnull, WNDS, WNPS, RNDS, RNPS);<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="ifnull3"></A>
+<P CLASS="TYPE_TITLE">
+ifnull
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION ifnull
+(
+   i_if   IN NUMBER,
+   i_then IN NUMBER,
+   i_else IN NUMBER DEFAULT NULL
+) RETURN NUMBER
+
+</PRE>
+<P CLASS="DESC_TEXT">
+PRAGMA RESTRICT_REFERENCES(ifnull, WNDS, WNPS, RNDS, RNPS);<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="ite"></A>
+<P CLASS="TYPE_TITLE">
+ite
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION ite
+(
+   i_if   IN BOOLEAN,
+   i_then IN VARCHAR2,
+   i_else IN VARCHAR2 DEFAULT NULL
+) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+ite:<br>
+&nbsp;Function to perform inline if/then/else, giving more flexibilty and enabling<br>
+&nbsp;more elegant code. Overloaded to accommodate strings, dates and numbers.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_if&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Boolean to test<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_then&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Data to return if i_if is true<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_else&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Data to return if i_if is false<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="ite2"></A>
+<P CLASS="TYPE_TITLE">
+ite
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION ite
+(
+   i_if   IN BOOLEAN,
+   i_then IN DATE,
+   i_else IN DATE DEFAULT NULL
+) RETURN DATE
+
+</PRE>
+<P CLASS="DESC_TEXT">
+PRAGMA RESTRICT_REFERENCES(ite, WNDS, WNPS, RNDS, RNPS);<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="ite3"></A>
+<P CLASS="TYPE_TITLE">
+ite
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION ite
+(
+   i_if   IN BOOLEAN,
+   i_then IN NUMBER,
+   i_else IN NUMBER DEFAULT NULL
+) RETURN NUMBER
+
+</PRE>
+<P CLASS="DESC_TEXT">
+PRAGMA RESTRICT_REFERENCES(ite, WNDS, WNPS, RNDS, RNPS);<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="get_mime_type"></A>
+<P CLASS="TYPE_TITLE">
+get_mime_type
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_mime_type(i_file_nm IN VARCHAR2) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_mime_type:<br>
+&nbsp;A simple algorithm to determine the MIME type of a file based on the file<br>
+&nbsp;extension. If it cannot be determined, &quot;application/octet-stream&quot; will be returned.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+A full filename, including extension.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="get_otx_doc_type"></A>
+<P CLASS="TYPE_TITLE">
+get_otx_doc_type
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_otx_doc_type(i_mime_type IN typ.t_mime_type) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_otx_doc_type:<br>
+&nbsp;A simple algorithm to determine the Oracle Text document type. Valid values are<br>
+&nbsp;{*} TEXT plain, html, txt, log files, etc.<br>
+&nbsp;{*} BINARY binary documents with text, like Word, PDF, Excel, etc.<br>
+&nbsp;{*} IGNORE binary files with no text, like images<br>
+&nbsp;This determination is based on the MIME type passed in by the caller (which is<br>
+&nbsp;usually determined by called %see <A HREF=#get_mime_type>util.get_mime_type</A>.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_mime_type&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+a valid media MIME type. Pass your file name to <A HREF=#get_mime_type>util.get_mime_type</A> to have the MIME type determined for you. If the MIME type is not recognized, IGNORE will be returned.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="convert_clob_to_blob"></A>
+<P CLASS="TYPE_TITLE">
+convert_clob_to_blob
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION convert_clob_to_blob(i_clob IN CLOB) RETURN BLOB
+
+</PRE>
+<P CLASS="DESC_TEXT">
+convert_clob_to_blob:<br>
+&nbsp;Converts data within a CLOB to a BLOB.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_clob&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+A valid CLOB locator.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="obj_exists"></A>
+<P CLASS="TYPE_TITLE">
+obj_exists
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION obj_exists
+(
+   i_obj_nm   IN VARCHAR2,
+   i_obj_type IN VARCHAR2 DEFAULT NULL
+) RETURN BOOLEAN
+
+</PRE>
+<P CLASS="DESC_TEXT">
+obj_exists:<br>
+&nbsp;Tells you whether a given object exists or not.&nbsp; The object can be any top-level<br>
+&nbsp;object found in user_objects or user_constraints, and tablespaces.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_obj_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the table, index, etc.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_obj_type&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Optional parameter to narrow the search and force it to look only for matches of that type. Valid values are: <A HREF=#gc_table>gc_table</A>, <A HREF=#gc_index>gc_index</A>, <A HREF=#gc_package>gc_package</A>, <A HREF=#gc_sequence>gc_sequence</A>, <A HREF=#gc_synonym>gc_synonym</A>, <A HREF=#gc_trigger>gc_trigger</A> <A HREF=#gc_view>gc_view</A>, <A HREF=#gc_type>gc_type</A>, <A HREF=#gc_constraint>gc_constraint</A>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+TRUE&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Object exists in current schema.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+FALSE&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Object was not found.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Note"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Note
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Since this function looks at user_objects, it will not find &quot;contained&quot; things like functions/procedures inside packages, columns in tables, attributes in type specs, etc. To do that, use <A HREF=#attr_exists>attr_exists</A>() found further below.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="attr_exists"></A>
+<P CLASS="TYPE_TITLE">
+attr_exists
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION attr_exists
+(
+   i_obj_nm    IN VARCHAR2,
+   i_attr_nm   IN VARCHAR2,
+   i_attr_type IN VARCHAR2 DEFAULT <A HREF=#gc_column>gc_column</A>
+) RETURN BOOLEAN
+
+</PRE>
+<P CLASS="DESC_TEXT">
+attr_exists:<br>
+&nbsp;Determines whether a contained item, like a column, type attribute or type method,<br>
+&nbsp;is found in the containing object. Defaults to columns since most callers will<br>
+&nbsp;simply want to know if a given column already exists on a table.<br>
+
+<BR>
+</P>
+<A NAME="Usage"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<code><br>&nbsp; DECLARE<br>&nbsp; BEGIN<br>&nbsp;&nbsp;&nbsp; IF (NOT util.attr_exists('contracts','active_yn')) THEN<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; EXECUTE IMMEDIATE '<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ALTER TABLE contracts<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ADD active_yn VARCHAR2(1)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ';<br>&nbsp;&nbsp;&nbsp; ELSE<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; dbms_output.put_line('ACTIVE_YN already exists on CONTRACTS.');<br>&nbsp;&nbsp;&nbsp; END IF;<br>&nbsp; END;<br> <br> </code>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_obj_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the containing table, package or user-defined type<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_attr_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the attribute whose existence is questioned.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_attr_type&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The type of the attribute. Defaults to COLUMN if not given. Valid values are:<br>
+
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+<A HREF=#gc_column>gc_column</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+For table column<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+<A HREF=#gc_attribute>gc_attribute</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+For type attribute<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+<A HREF=#gc_method>gc_method</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+For type method<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+<A HREF=#gc_routine>gc_routine</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+For packaged functions or procedures<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+<A HREF=#gc_part>gc_part</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+For table partitions<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+<A HREF=#gc_subpart>gc_subpart</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+For table subpartitions<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+TRUE&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Attribute exists within the given object.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+FALSE&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Attribute was not found.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="get_max_pk_val"></A>
+<P CLASS="TYPE_TITLE">
+get_max_pk_val
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_max_pk_val(i_table_nm IN VARCHAR2) RETURN INTEGER
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_max_pk_val:<br>
+&nbsp;Given a table name, retrieves the name of the PK column, and with that queries<br>
+&nbsp;the table for the MAX(pk column) value in the table. This is used by the numerous<br>
+&nbsp;Core triggers to ensure that the next inserted row won't clash with existing<br>
+&nbsp;PK values in the table in case humans have manually inserted values without aid<br>
+&nbsp;of the sequence.<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="reset_seq"></A>
+<P CLASS="TYPE_TITLE">
+reset_seq
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE reset_seq
+(
+   i_seq_nm IN VARCHAR2,
+   i_tbl_nm IN VARCHAR2 DEFAULT NULL
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+reset_seq:<br>
+&nbsp;Attempts to bring a sequence up to where it should be after a data import/<br>
+&nbsp;refresh/migration/conversion.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_seq_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the sequence to check<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_tbl_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the table for which the sequence provides surrogate key values. Required if the table name cannot be derived from the sequence name.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Story"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Story
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This is only designed to work for sequences that support the surrogate PK for a single table. Also if the table name isn't provided, the routine attempts to derive the table name from the sequence name. It assumes you have used one of four conventions to name your sequence: SEQ_TABLE_NAME, TABLE_NAME_SEQ, TABLE_NAME_ID_SEQ, SEQ_TABLE_NAME_ID.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+</BODY>
+</HTML>

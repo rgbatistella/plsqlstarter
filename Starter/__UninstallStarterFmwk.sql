@@ -7,6 +7,7 @@ DROP ROLE core_full;
 DROP ROLE core_select;
 DROP DIRECTORY core_dir;
 DROP DIRECTORY core_logs;
+DROP DIRECTORY core_mail;
 DROP CONTEXT app_core_ctx;
 
 PURGE DBA_RECYCLEBIN;

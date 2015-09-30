@@ -1,0 +1,42 @@
+ORA-29855
+error occurred in the execution of ODCIINDEXCREATE routine
+
+I was attempting to create this multi-table, multi-column, user-specified Oracle Text index when I got the following cryptic error message.
+
+Here was the index creation DDL:
+CREATE INDEX ps_multitab_cidx ON ps_prob(otx_sync_col)
+  INDEXTYPE IS CTXSYS.CONTEXT
+  PARAMETERS ('DATASTORE sol_user_ds
+               SECTION GROUP sol_sectioner
+               LEXER sol_lexer
+               WORDLIST sol_wordlist
+               SYNC (EVERY "SYSDATE+6/24")
+               TRANSACTIONAL');
+
+And here was the less-than-useful error stack:
+ORA-29855: error occurred in the execution of ODCIINDEXCREATE routine
+ORA-20000: Oracle Text error:
+DRG-50857: oracle error in drvddl.IndexCreate
+ORA-27486: insufficient privileges
+ORA-06512: at "CTXSYS.DRUE", line 160
+ORA-06512: at "CTXSYS.TEXTINDEXMETHODS", line 364
+
+
+In 10g, if you use the new TRANSACTIONAL parameter for your Oracle Text index, it will create an Oracle job for you that will wake up per the SYNC specification, to re-sync the Oracle Text index with the data changes. This requires a new system privilege named CREATE JOB. So GRANT CREATE JOB to the user that is attempting to create the Oracle Text index.
+
+
+
+
+XDB Credentials Required
+
+I was trying to get the embedded PL/SQL gateway (web server) to work. On my initial attempts, using Basic authentication-mode, every time I'd request the homepage, I'd be prompted for the XDB user name and password, which I did not know. On the web, numerous people were having the same trouble, and no answers were to be found.
+Finally found one page that pointed out a tip in the 11g documentation that states the embedded gateway uses the ANONYMOUS account for the XDB web server. ANONYMOUS is locked by default. You have to unlock it:
+
+ALTER USER anonymous ACCOUNT UNLOCK;
+
+Once it is unlocked, you will no longer be prompted for the XDB user and pass, assuming you have done everything else right (creating the DAD right and setting the database-username attribute to the user the DAD is using to serve up web pages).
+
+
+
+
+

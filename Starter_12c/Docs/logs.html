@@ -1,0 +1,1349 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+ <HEAD>
+ <LINK REL="STYLESHEET" TYPE="text/css" HREF="plsqldoc.css">
+ <TITLE>Package logs</TITLE>
+ <META name="object" content="PACKAGE">
+ <META name="name" content="logs">
+ <META name="description" content="%author Bill Coulam (bcoulam@dbartisans.com)">
+</HEAD>
+<BODY>
+<TABLE WIDTH="100%"><TR>
+<TD><P ALIGN="LEFT"><STRONG><SMALL></SMALL></STRONG></TD>
+<TD><P ALIGN="RIGHT"><STRONG><SMALL><A HREF="index.html">index</A></SMALL></STRONG></TD>
+</TR></TABLE>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="DESC_TEXT">
+<P CLASS="MAIN_TITLE">Package logs</P>
+A collection of routines responsible for logging messages to some output<br>
+&nbsp;device, be it the screen, a file and/or a logging table. Where messages are<br>
+&nbsp;directed depends upon the targets specified in the &quot;Default Log Targets&quot;<br>
+&nbsp;parameter (see usage and notes for further <A HREF=#info>info</A>).<br>
+&nbsp;<br>
+&nbsp;<br>
+&nbsp;<code><br>
+&nbsp;<A HREF=#dbg>logs.dbg</A>('Attempting to open file '||l_file_nm);<br>
+&nbsp;...<br>
+&nbsp;<A HREF=#msg>logs.msg</A>('Daily refresh started at '||dt.get_systs);<br>
+&nbsp;...<br>
+&nbsp;<A HREF=#err>logs.err</A>('Request on pipe '||l_pipe_nm||'timed out.');<br>
+<br>
+&nbsp;However, this API is rather flexible and provides the parameters and overloaded<br>
+&nbsp;routines needed to handle most any typical logging requirement.<br>
+<br>
+&nbsp;If you wish logging to be directed at the filesystem, you must set up a few<br>
+&nbsp;parameters in the framework's parameter structures (APP_PARM, APP_ENV_PARM).<br>
+&nbsp;The parameters required for a file destination are &quot;Default Log File Directory&quot;<br>
+&nbsp;and &quot;Default IO File Name&quot;.<br>
+<br>
+%note<br>
+&nbsp;Logging to the screen and logging table can only be turned on or off, not<br>
+&nbsp;redirected somewhere else. Of the three logging targets, only file logging can<br>
+&nbsp;be redirected to a specific directory and/or file. To explicitly change the<br>
+&nbsp;logging directory, change the value of the &quot;Default Log File Directory&quot;<br>
+&nbsp;parameter. To change the logging file name, change the value of the<br>
+&nbsp;&quot;Default IO File Name&quot; parameter. Or, you can dynamically change either or both<br>
+&nbsp;by using logs.set_file_parms(), logs.set_file_dir() and/or logs.set_file_nm()<br>
+&nbsp;for the session.<br>
+<br>
+&nbsp;By default, messages to <A HREF=#dbg>logs.dbg</A>() are suppressed. If you wish these to<br>
+&nbsp;begin appearing in your logging targets, you must change the value of the<br>
+&nbsp;&quot;Debug&quot; parameter in APP_ENV_PARM. If you are writing unit tests or trying to<br>
+&nbsp;replicate a bug using a PL/SQL client or test harness, you can bypass the<br>
+&nbsp;table-based debug toggle altogether and override current debug settings by<br>
+&nbsp;calling <A HREF=#set_dbg>set_dbg</A>(TRUE).<br>
+<br>
+&nbsp;The name of this package should have been LOG, but LOG is an Oracle keyword,<br>
+&nbsp;so I had to use a plural noun, instead of the active verb like I was hoping,<br>
+&nbsp;otherwise various PL/SQL programming editors would uppercase the word &quot;log&quot;<br>
+&nbsp;every time you tried to call this package, which is opposite to the keyword<br>
+&nbsp;case style rule of most shops.<br>
+<br>
+%design<br>
+&nbsp;PRIMARY USE OF LOGS<br>
+&nbsp;The three primary log routines <A HREF=#dbg>dbg</A>(), <A HREF=#msg>msg</A>() and <A HREF=#err>err</A>() are meant to handle all<br>
+&nbsp;verbose debugging output, application logging and error recording. But one<br>
+&nbsp;can also use <A HREF=#warn>warn</A>() and <A HREF=#info>info</A>() which wrap <A HREF=#msg>msg</A>(), making informational and<br>
+&nbsp;warning messages easier to send.<br>
+<br>
+&nbsp;LOGGING CONTENT TYPE<br>
+&nbsp;Application messages can be debug, exception/error, informational and warning<br>
+&nbsp;messages (see the CNST package for the message type code constants). I refer<br>
+&nbsp;to informational and warning messages as &quot;application logging.&quot;<br>
+<br>
+&nbsp;Application Logging<br>
+&nbsp;Application logging generally involves recording useful processing status<br>
+&nbsp;and context, audit trail data, records handled, before and after control<br>
+&nbsp;states, etc. Use <A HREF=#msg>logs.msg</A>() with severity of cnst.INFO, or use <A HREF=#info>logs.info</A>()<br>
+&nbsp;to do application logging.<br>
+<br>
+&nbsp;Error Logging<br>
+&nbsp;Error logging involves recording variable state and parameter context at the<br>
+&nbsp;time and point of error. Use <A HREF=#msg>logs.msg</A>() with severity of cnst.ERROR, or use<br>
+&nbsp;<A HREF=#err>logs.err</A>() to do error logging.<br>
+<br>
+&nbsp;Warnings<br>
+&nbsp;There are also warning messages that fall somewhere between application<br>
+&nbsp;logging and error handling. They are worrisome conditions that someone should<br>
+&nbsp;look at within the next few hours or days to determine if there is something<br>
+&nbsp;more sinister going on that warrants deeper attention. Use <A HREF=#msg>logs.msg</A>() with<br>
+&nbsp;severity of cnst.WARN, or use <A HREF=#warn>logs.warn</A>() to send warnings.<br>
+<br>
+&nbsp;Debug Logging<br>
+&nbsp;Debugging messages contain detailed, low-level context that only a programmer<br>
+&nbsp;would appreciate, so they can quickly see exactly which paths a program took<br>
+&nbsp;and what happened at each step along the way. Use <A HREF=#dbg>logs.dbg</A>() for these. Use<br>
+&nbsp;<A HREF=#dbg>logs.dbg</A>() liberally so that when the inevitable production bug pops up, it is<br>
+&nbsp;trivial to turn on debugging (%see <A HREF=#dbg>logs.dbg</A> below) and immediately see where<br>
+&nbsp;things went wrong.<br>
+<br>
+&nbsp;SUGGESTED LOG TARGETS<br>
+&nbsp;In development the targets could be set to the screen and table, both readily<br>
+&nbsp;useable. In testing, since little will be tested with SQL*Plus, logging to the<br>
+&nbsp;screen will usually be turned off. In production, logs are sent to either the<br>
+&nbsp;log table or a file, but not both (too many moving parts to manage/monitor),<br>
+&nbsp;and never to the screen. I prefer to table since it is readily available for<br>
+&nbsp;query, mining and reporting.<br>
+<br>
+%future<br>
+&nbsp;Might add the ability to send output to a named pipe, so that a 3GL application<br>
+&nbsp;could provide a constant monitor into database messages.<br>
+<br>
+<pre>
+Artisan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Comments
+============ ========= ========================================================
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1997Dec30 Creation
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2008Feb08 Refactored heavily from the <A HREF=#msg>msg</A> package.
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2008Mar10 Added explicit getters and setters for directory and log
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; file access.
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2008May15 Added line number as an optional parameter to most logging
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; routines.
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2008May20 Added fine-grained filters to debug mode, so debug logs
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; only get written for certain packages, session or user.
+
+<i>
+&nbsp;&nbsp;&nbsp; __________________________&nbsp; LGPL License&nbsp; ____________________________
+&nbsp;&nbsp;&nbsp; Copyright (C) 1997-2008 Bill Coulam
+
+&nbsp;&nbsp;&nbsp; This library is free software; you can redistribute it and/or
+&nbsp;&nbsp;&nbsp; modify it under the terms of the GNU Lesser General Public
+&nbsp;&nbsp;&nbsp; License as published by the Free Software Foundation; either
+&nbsp;&nbsp;&nbsp; version 2.1 of the License, or (at your option) any later version.
+
+&nbsp;&nbsp;&nbsp; This library is distributed in the hope that it will be useful,
+&nbsp;&nbsp;&nbsp; but WITHOUT ANY WARRANTY; without even the implied warranty of
+&nbsp;&nbsp;&nbsp; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+&nbsp;&nbsp;&nbsp; Lesser General Public License for more details.
+
+&nbsp;&nbsp;&nbsp; You should have received a copy of the GNU Lesser General Public
+&nbsp;&nbsp;&nbsp; License along with this library; if not, write to the Free Software
+&nbsp;&nbsp;&nbsp; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+
+
+<BR>
+<A NAME="Author"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Author
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Bill Coulam (<A HREF="MAILTO:bcoulam@dbartisans.com">bcoulam@dbartisans.com</A>)
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Usage"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The most simple and common use of this package is to call <A HREF=#dbg>logs.dbg</A>() to comment AND instrument your code, <A HREF=#msg>logs.msg</A>() whenever you want to record something important, and <A HREF=#err>logs.err</A>() when you need to record context of variables and database state when exceptions are trapped and handled.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR></TABLE>
+<HR>
+<A NAME="Program units"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Program units
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_targets">get_targets</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_targets:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_log_dir">get_log_dir</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_log_dir:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_log_nm">get_log_nm</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_log_nm:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_log_path">get_log_path</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_log_path:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#set_targets">set_targets</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+set_targets:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#set_log_parms">set_log_parms</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+set_log_parms:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#set_log_dir">set_log_dir</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+set_log_dir:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#set_log_nm">set_log_nm</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+set_log_nm:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#set_dbg">set_dbg</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+set_dbg:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#set_dbg2">set_dbg</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#msg">msg</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+msg:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#msg2">msg</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+msg:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#msg3">msg</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+msg:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#err">err</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+err:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#err2">err</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+err:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#warn">warn</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+warn:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#info">info</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+info:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#dbg">dbg</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+dbg:
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Constants"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Constants
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#TARGET_SCREEN">TARGET_SCREEN</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+PUBLIC CONSTANTS, VARIABLES, EXCEPTIONS, ETC.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#TARGET_FILE">TARGET_FILE</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#TARGET_TABLE">TARGET_TABLE</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#DEBUG_PARM_NM">DEBUG_PARM_NM</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+TARGET_PIPE CONSTANT VARCHAR2(10) := 'Pipe';
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="TARGET_SCREEN"></A>
+<P CLASS="TYPE_TITLE">
+TARGET_SCREEN
+</P>
+<PRE CLASS="DECL_TEXT">
+TARGET_SCREEN CONSTANT VARCHAR2(10) := 'Screen';
+</PRE>
+<P CLASS="DESC_TEXT">
+PUBLIC CONSTANTS, VARIABLES, EXCEPTIONS, ETC.<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="TARGET_FILE"></A>
+<P CLASS="TYPE_TITLE">
+TARGET_FILE
+</P>
+<PRE CLASS="DECL_TEXT">
+TARGET_FILE CONSTANT VARCHAR2(10) := 'File';
+</PRE>
+<HR>
+<A NAME="TARGET_TABLE"></A>
+<P CLASS="TYPE_TITLE">
+TARGET_TABLE
+</P>
+<PRE CLASS="DECL_TEXT">
+TARGET_TABLE CONSTANT VARCHAR2(10) := 'Table';
+</PRE>
+<HR>
+<A NAME="DEBUG_PARM_NM"></A>
+<P CLASS="TYPE_TITLE">
+DEBUG_PARM_NM
+</P>
+<PRE CLASS="DECL_TEXT">
+DEBUG_PARM_NM CONSTANT app_parm.parm_nm%TYPE := 'Debug';
+</PRE>
+<P CLASS="DESC_TEXT">
+TARGET_PIPE CONSTANT VARCHAR2(10) := 'Pipe';<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="get_targets"></A>
+<P CLASS="TYPE_TITLE">
+get_targets
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_targets RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_targets:<br>
+&nbsp;Returns the current target(s) receiving output as a delimited string (useful<br>
+&nbsp;when debugging the operations of the LOGS routines).<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="get_log_dir"></A>
+<P CLASS="TYPE_TITLE">
+get_log_dir
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_log_dir RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_log_dir:<br>
+&nbsp;Returns the name of the directory being used as the destination for file logs.<br>
+&nbsp;If the caller has not explicitly set the directory using <A HREF=#set_log_dir>set_log_dir</A>() or<br>
+&nbsp;<A HREF=#set_log_parms>set_log_parms</A>(), this will be the directory specified by the<br>
+&nbsp;&quot;Default Log File Directory&quot; parameter.<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="get_log_nm"></A>
+<P CLASS="TYPE_TITLE">
+get_log_nm
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_log_nm RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_log_nm:<br>
+&nbsp;Returns the name of the logging file. If the caller has not designated a<br>
+&nbsp;specific file name via <A HREF=#set_log_nm>set_log_nm</A>() or <A HREF=#set_log_parms>set_log_parms</A>(), this will return the<br>
+&nbsp;Default IO File Name (see io.get_default_filename).<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="get_log_path"></A>
+<P CLASS="TYPE_TITLE">
+get_log_path
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_log_path RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_log_path:<br>
+&nbsp;Returns the full path and name of the logging file. If the caller has not<br>
+&nbsp;designated a specific file via <A HREF=#set_log_nm>set_log_nm</A>() or <A HREF=#set_log_parms>set_log_parms</A>(), this will amount<br>
+&nbsp;to the default directory path and default file name.<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="set_targets"></A>
+<P CLASS="TYPE_TITLE">
+set_targets
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE set_targets
+(
+   i_stdout IN BOOLEAN DEFAULT FALSE,
+   i_table  IN BOOLEAN DEFAULT FALSE,
+   i_file   IN BOOLEAN DEFAULT FALSE
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+set_targets:<br>
+&nbsp;Routine meant to temporarily (for this session) override the default log<br>
+&nbsp;destinations specified by the parameter &quot;Default Log Targets&quot;.<br>
+&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp; &quot;Screen=Y|N,Table=Y|N,File=Y|N&quot;<br>
+&nbsp;<br>
+&nbsp;You would only call this routine, logs.set_targets(), if you need to<br>
+&nbsp;temporarily override the defaults set by that parameter.<br>
+&nbsp;<br>
+&nbsp;If set_targets isn't called AND &quot;Default Log Targets&quot; isn't configured, all<br>
+&nbsp;logging will default to the table target (APP_LOG).<br>
+&nbsp;<br>
+&nbsp;If you set the file toggle to TRUE, the filename will default to what is<br>
+&nbsp;specified by the &quot;Default IO File Name&quot; parameter that should have already been<br>
+&nbsp;set up for the IO package. If you wish the log file name to be different from<br>
+&nbsp;the default you should use <A HREF=#set_log_nm>logs.set_log_nm</A>() to change it. This will remain in<br>
+&nbsp;effect for the session.<br>
+&nbsp;<br>
+&nbsp;One call at the top of the driving procedure to set_targets() is usually<br>
+&nbsp;sufficient. If, in the middle of your code you have a special block that<br>
+&nbsp;needs to go to a different target than that set for the rest of the session,<br>
+&nbsp;you may call logs.to_table() or logs.to_file() directly.<br>
+
+<BR>
+</P>
+<A NAME="Usage"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<code><br>&nbsp;&nbsp;&nbsp; BEGIN<br> <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; logs.set_targets(FALSE,TRUE,TRUE);<br> <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; OR optionally use named notation, like so:<br> <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; logs.set_targets(<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i_stdout =&gt; FALSE<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ,&nbsp; i_table&nbsp; =&gt; TRUE<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; );<br> <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; io.p(... -- ignores targets, goes to screen<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <A HREF=#dbg>logs.dbg</A>(... -- uses targets if debug toggle is turned on<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <A HREF=#msg>logs.msg</A>(... -- uses targets<br> <br>&nbsp;&nbsp;&nbsp; END;<br>&nbsp; <code><br> <br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_stdout&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+TRUE means log messages will be routed to the screen (via io.p).<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_table&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+TRUE means log messages will be routed to the APP_LOG table.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+TRUE means log messages will be routed to a file.<br> <br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Story"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Story
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Logging can be routed to stdout, the APP_LOG table, a log file, all three, or any combination. The default logging destinations are controlled by a record named &quot;Default Log Targets&quot; in APP_PARM and APP_ENV_PARM. You should create a &quot;Default Log Targets&quot; record in these tables for each environment. The parm_val for &quot;Default Log Targets&quot; should adhere to this scheme:<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="set_log_parms"></A>
+<P CLASS="TYPE_TITLE">
+set_log_parms
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE set_log_parms
+(
+   i_file_dir IN VARCHAR2 DEFAULT io.get_default_filename,
+   i_file_nm  IN VARCHAR2 DEFAULT io.get_default_dir
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+set_log_parms:<br>
+&nbsp;Sets the target directory and/or file name for all logging. This directory and<br>
+&nbsp;file name are set system-wide by the &quot;Default Log File Directory&quot; and<br>
+&nbsp;&quot;Default IO File Name&quot; parameters seen in APP_PARM_VW. If you wish them to be<br>
+&nbsp;other than the default, call this routine to change one, or the other, or both<br>
+&nbsp;explicitly. If you leave either of the parameters blank, the default will be<br>
+&nbsp;used instead.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file_dir&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The name of the directory where you wish log files to be written if different than the default.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The name of the file if you wish the logging to go to a file named other than the default.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="set_log_dir"></A>
+<P CLASS="TYPE_TITLE">
+set_log_dir
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE set_log_dir(i_file_dir IN VARCHAR2)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+set_log_dir:<br>
+&nbsp;Sets the target directory for all logging, overriding the directory indicated by<br>
+&nbsp;the system-wide &quot;Default Log File Directory&quot; parameter.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file_dir&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The name of the logging directory (should match the name of an Oracle directory object).<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="set_log_nm"></A>
+<P CLASS="TYPE_TITLE">
+set_log_nm
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE set_log_nm(i_file_nm IN VARCHAR2)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+set_log_nm:<br>
+&nbsp;Sets the target file name for all logging, overriding the fiel name indicated<br>
+&nbsp;by the system-wide &quot;Default IO File Name&quot; parameter.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The name of the logging file.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="set_dbg"></A>
+<P CLASS="TYPE_TITLE">
+set_dbg
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE set_dbg(i_dbg_val IN VARCHAR2)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+set_dbg:<br>
+&nbsp;Toggles the state of debugging for the current session in which it is called.<br>
+&nbsp;This method of turning on debugging is really meant only for development where<br>
+&nbsp;unit tests are being conducted through SQL*Plus scripts. If you need to turn<br>
+&nbsp;debugging on in production, use the &quot;Debug&quot; parameter in APP_ENV_PARM.<br>
+&nbsp;<br>
+&nbsp;set_dbg(BOOLEAN) is meant for SQL*Plus and PL/SQL-fluent callers.<br>
+&nbsp;&nbsp; TRUE turns debugging on<br>
+&nbsp;&nbsp; FALSE turns it off<br>
+&nbsp;<br>
+&nbsp;set_dbg(VARCHAR2) is meant for non-Oracle speakers, like Java and other layers<br>
+&nbsp;&nbsp; in the application stack that might need to persist debugging messages.<br>
+&nbsp;&nbsp; 'all','on','y','yes','true' all turn debugging on<br>
+&nbsp;&nbsp; 'none','off','n','no','false' all turn debugging off<br>
+&nbsp;&nbsp; 'session=','unit=','user=' will filter debugging (%see <A HREF=#dbg>logs.dbg</A> for explanation)<br>
+&nbsp;<br>
+&nbsp;<br>
+&nbsp;Then from the same session or PL/SQL block, the developer runs the desired<br>
+&nbsp;PL/SQL routine.<br>
+&nbsp;<br>
+&nbsp;Any calls to <A HREF=#dbg>logs.dbg</A> in the underlying layers will then be routed to the<br>
+&nbsp;target(s) set either through the &quot;Default Log Targets&quot; parameter in<br>
+&nbsp;APP_ENV_PARM, or through the <A HREF=#set_targets>set_targets</A> overriding routine. If you do not set<br>
+&nbsp;any logging targets for the session through either method, then all debugging<br>
+&nbsp;will default to being routed to the APP_LOG table.<br>
+
+<BR>
+</P>
+<A NAME="Usage"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Developer logs into SQL*Plus or writes an anonymous block. In either case, the developer calls <A HREF=#set_dbg2>logs.set_dbg</A>(TRUE);<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_dbg_val&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Meant for non-PL/SQL callers.<br>
+
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+'all','on','y','yes','true'&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+all turn debugging on<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+'none','off','n','no','false'&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+all turn debugging off<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+'session=','unit=','user='&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+will filter debugging (%see <A HREF=#dbg>logs.dbg</A> for explanation)<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_state&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Meant for SQL*Plus and PL/SQL-fluent callers.<br>
+
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+TRUE&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+turns debugging on<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+FALSE&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+turns it off<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="See also"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+See also
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<A HREF=#dbg>logs.dbg</A>() for further <A HREF=#info>info</A> on the dynamic debug toggle.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="set_dbg2"></A>
+<P CLASS="TYPE_TITLE">
+set_dbg
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE set_dbg(i_state IN BOOLEAN)
+
+</PRE>
+<HR>
+<A NAME="msg"></A>
+<P CLASS="TYPE_TITLE">
+msg
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE msg
+(
+   i_msg_cd     IN app_log.msg_cd%TYPE,
+   i_sev_cd     IN app_log.sev_cd%TYPE,
+   i_msg        IN VARCHAR2 DEFAULT NULL,
+   i_reraise    IN BOOLEAN DEFAULT FALSE,
+   i_routine_nm IN app_log.routine_nm%TYPE DEFAULT NULL,
+   i_line_num   IN app_log.line_num%TYPE DEFAULT NULL
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+msg:<br>
+&nbsp;Call this version of msg() when you have a named, pre-built message in APP_MSG<br>
+&nbsp;to call upon. Pass the message code (APP_MSG.msg_cd) and leave the i_msg<br>
+&nbsp;parameter blank; this will be filled in for you as the framework looks up the<br>
+&nbsp;message based on the message code. Ensure you let msg() know what type of<br>
+&nbsp;message you want logged (%see cnst.DEBUG, cnst.INFO, cnst.WARN and cnst.ERROR).<br>
+&nbsp;<br>
+&nbsp;If are inventing a one-off message on the spot, you may pass<br>
+&nbsp;any short string, name or identifier you wish for the message code AND a<br>
+&nbsp;message. You might use msgs.DEFAULT_MSG_CD for your ad-hoc message code. If the<br>
+&nbsp;i_msg parameter is filled, log will not bother to look up the code in APP_MSG.<br>
+&nbsp;<br>
+&nbsp;All three msg() routines are built to be used within exception handlers. If<br>
+&nbsp;you just want the message to be logged, leave the i_reraise parameter blank. If<br>
+&nbsp;you want to halt processing, set i_reraise to TRUE. For example, wrap your<br>
+&nbsp;PL/SQL in a sub-block and give it its own exception block. This allows you to<br>
+&nbsp;trap errors, log them if you wish and continue with the next statement or<br>
+&nbsp;iteration, e.g.<br>
+&nbsp;Remember to explicitly pass in ERROR or <A HREF=#warn>WARN</A> for the severity. If you don't, your<br>
+&nbsp;exceptions will default to <A HREF=#info>INFO</A> messages and won't be picked up by the log-<br>
+&nbsp;scanning application. The log-scanning app does not come with the framework. It<br>
+&nbsp;must be custom-built per each shop's needs. It is usually implemented as a cron<br>
+&nbsp;or scheduled Oracle job that reads through the latest N minutes of APP_LOG<br>
+&nbsp;records, recording the last-scanned timestamp somewhere. It then emails certain<br>
+&nbsp;people or groups with high-severity errors so that issues in production can be<br>
+&nbsp;proactively detected and sometimes handled before the end users even notice or<br>
+&nbsp;report them.<br>
+
+<BR>
+</P>
+<A NAME="Usage"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<code><br>&nbsp;&nbsp;&nbsp; --- simple use of <A HREF=#msg2>logs.msg</A> (3rd overload)<br>&nbsp;&nbsp;&nbsp; <A HREF=#msg2>logs.msg</A>('Parameter was '||l_length||' characters long. Must be 500 or less.');<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; better use, inventing message on the spot<br>&nbsp;&nbsp;&nbsp; <A HREF=#msg2>logs.msg</A>('Invalid Parameter', cnst.ERROR, 'Parameter must be 500 characters or less');<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; even better use of the canned messages in APP_MSG<br>&nbsp;&nbsp;&nbsp; <A HREF=#msg2>logs.msg</A>('Invalid Parameter', cnst.ERROR);<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; best use of LOGS and parameterized canned messages in APP_MSG<br>&nbsp;&nbsp;&nbsp; <A HREF=#msg2>logs.msg</A>('Invalid Parameter', cnst.ERROR,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; msgs.fill_msg('Invalid Parameter', 'i_copyright', '500'));<br> <br>&nbsp;&nbsp;&nbsp; BEGIN<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; do some stuff, probably start a loop<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; FOR i in ...<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; BEGIN -- begin sub-block<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ... do more stuff<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; EXCEPTION<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; WHEN lx_whatever THEN<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <A HREF=#msg2>logs.msg</A>('Invalid Product', cnst.WARN);<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; WHEN DUP_VAL_ON_INDEX THEN<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <A HREF=#msg2>logs.msg</A>(c.DEFAULT_MSG_CD, cnst.ERROR,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 'That row is already in '||l_table, TRUE);<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; WHEN OTHERS THEN<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <A HREF=#err>logs.err</A>(TRUE);<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; END; -- end sub-block<br> <br>&nbsp;&nbsp;&nbsp; END; -- end outer block<br> </code>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_msg_cd&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Named message, found in APP_MSG table. You can also invent one on the spot, like &quot;My Awesome Message&quot;, or use the default Ad-Hoc Message code found in msgs.DEFAULT_MSG_CD.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_sev_cd&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Message severity. cnst.ERROR, cnst.WARN, cnst.INFO, cnst.DEBUG<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_msg&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Error/Application message. Will be truncated if longer than 32K.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_reraise&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+TRUE or FALSE. Whether you want the exception raised again (which will halt most programs unless they have a higher-level exception handler).<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_routine_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This will be determined automatically for you. Only pass this if you want to record a source name different than what the call stack says. If you do pass this in, it is usually the package.routine where the message came from. Could be the name of a trigger, object method, type body, etc.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_line_num&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This will be determined automatically for you. Only pass this in if you want to record a line number for the debug message that is different from the line on which <A HREF=#dbg>logs.dbg</A> is called.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Story"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Story
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+I was unable to give i_sev_cd a default. By doing so, the 1st and 3rd overloads of msg() conflicted. They would compile, but would conflict at runtime.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Future Work and Ideas"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Future Work and Ideas
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Add parameterized versions of <A HREF=#msg2>logs.msg</A> to match the signature of msgs.fill_msg so that msgs.fill_msg does not need to be called explicitly. It could then be called implicitly by <A HREF=#msg2>logs.msg</A> when it detects parameters are being fed to it to replaced placeholders in the canned message.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="msg2"></A>
+<P CLASS="TYPE_TITLE">
+msg
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE msg
+(
+   i_msg_id     IN app_msg.msg_id%TYPE,
+   i_sev_cd     IN VARCHAR2,
+   i_msg        IN VARCHAR2 DEFAULT NULL,
+   i_reraise    IN BOOLEAN DEFAULT FALSE,
+   i_routine_nm IN app_log.routine_nm%TYPE DEFAULT NULL,
+   i_line_num   IN app_log.line_num%TYPE DEFAULT NULL
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+msg:<br>
+&nbsp;This version of msg() is primarily used in exception handlers when dealing with<br>
+built-in or application-specific error codes. The Core framework provides a way to associate error IDs with each standard message (%see APP_MSG). However, it is much easier, and recommended, to mainly deal with and code to the message code, not the numeric identifier.<br>
+&nbsp;<br>
+Do not call RAISE_APPLICATION_ERROR explicitly. Use this version of <A HREF=#msg>logs.msg</A>()<br>
+&nbsp;instead. If reraise is TRUE and the ID is positive (from APP_MSG or invented<br>
+ad-hoc), or if the ID is in the -20000 to -20999 range, RAISE_APPLICATION_ERROR will be called for you after logging the message.<br>
+&nbsp;<br>
+Remember to explicitly pass in ERROR or <A HREF=#warn>WARN</A> for the severity. If you don't, your<br>
+&nbsp;exceptions will default to <A HREF=#info>INFO</A> messages and won't be picked up by the log-<br>
+&nbsp;scanning application. The log-scanning app does not come with the framework. It<br>
+&nbsp;must be custom-built per each shop's needs. It is usually implemented as a cron<br>
+&nbsp;or scheduled Oracle job that reads through the latest N minutes of APP_LOG<br>
+&nbsp;records, recording the last-scanned timestamp somewhere. It then emails certain<br>
+&nbsp;people or groups with high-severity errors so that issues in production can be<br>
+&nbsp;proactively detected and sometimes handled before the end users even notice or<br>
+&nbsp;report them.<br>
+
+<BR>
+</P>
+<A NAME="Usage"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<code><br>&nbsp;&nbsp;&nbsp; EXCEPTION<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; WHEN excp.gx_row_locked THEN<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; This example uses SQLCODE, but substitutes a contextual message<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; then proceeds with processing<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <A HREF=#msg>logs.msg</A>(SQLCODE, cnst.INFO, 'Another session has item'||l_item_id||' locked.');<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; WHEN lx_control_violation THEN<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; This example uses a programmer-defined error ID, raising an error<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; to the GUI<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <A HREF=#msg>logs.msg</A>(-20001, cnst.WARN, 'The number of records processed does not equal<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; the number of records input.', TRUE);<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; WHEN OTHERS THEN<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; This example uses the <A HREF=#err>err</A>() incarnation of msg which<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; automatically logs an ERROR-level SQLERRM and re-raises the exception.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; logs.err;<br> </code>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_msg_id&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Positive or negative error number, either from APP_MSG or from list of Oracle error num.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_sev_cd&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Message severity. cnst.ERROR, cnst.WARN, cnst.INFO, cnst.DEBUG<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_msg&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Error/Application message. Will be truncated to 32K if longer.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_reraise&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+TRUE or FALSE. Whether you want the exception raised again (which will halt most programs unless they have a higher-level exception handler).<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_routine_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This will be determined automatically for you. Only pass this if you want to record a source name different than what the call stack says. If you do pass this in, it is usually the package.routine where the message came from. Could be the name of a trigger, object method, type body, etc.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_line_num&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This will be determined automatically for you. Only pass this in if you want to record a line number for the debug message that is different from the line on which <A HREF=#dbg>logs.dbg</A> is called.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="msg3"></A>
+<P CLASS="TYPE_TITLE">
+msg
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE msg(i_msg IN VARCHAR2)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+msg:<br>
+&nbsp;This version of msg is provided to allow very quick and easy additions to the<br>
+&nbsp;log targets. Any calls to this version of log will have the severity defaulted<br>
+&nbsp;to <A HREF=#info>INFO</A>, the msg code to &quot;Ad-Hoc Msg&quot;, and the routine to Unknown if it can't<br>
+&nbsp;be determined from the call stack.<br>
+&nbsp;<br>
+&nbsp;This version of msg is especially helpful for quick-and-dirty debugging during<br>
+&nbsp;development when lots of errors are causing rollbacks, and you wish to see<br>
+&nbsp;what is going on, by taking advantage of the autonomous transactions that the<br>
+&nbsp;LOGS routines provide.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_msg&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Error/Application message. Will be truncated to 32K if longer.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="err"></A>
+<P CLASS="TYPE_TITLE">
+err
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE ERR
+(
+   i_reraise    IN BOOLEAN DEFAULT TRUE,
+   i_routine_nm IN app_log.routine_nm%TYPE DEFAULT NULL,
+   i_line_num   IN app_log.line_num%TYPE DEFAULT NULL
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+err:<br>
+&nbsp;This barebones version of err() will automatically fill the <A HREF=#msg>msg</A> with SQLERRM<br>
+&nbsp;before logging to the targets. It is primarily used in rare (should be outlawed)<br>
+&nbsp;WHEN OTHERS sections.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_reraise&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Defaults to TRUE, which will raise an error after logging the message. If you wish to prevent the program from halting its processing, you will need an exception handler, pass FALSE in this parameter to keep the exception from raising.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_routine_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This will be determined automatically for you. Only pass this if you want to record a source name different than what the call stack says. If you do pass this in, it is usually the package.routine where the message came from. Could be the name of a trigger, object method, type body, etc.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_line_num&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This will be determined automatically for you. Only pass this in if you want to record a line number for the debug message that is different from the line on which <A HREF=#dbg>logs.dbg</A> is called.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="err2"></A>
+<P CLASS="TYPE_TITLE">
+err
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE ERR
+(
+   i_msg        IN VARCHAR2,
+   i_reraise    IN BOOLEAN DEFAULT TRUE,
+   i_routine_nm IN app_log.routine_nm%TYPE DEFAULT NULL,
+   i_line_num   IN app_log.line_num%TYPE DEFAULT NULL
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+err:<br>
+&nbsp;This version of err is a lazy way of calling <A HREF=#msg>logs.msg</A>, as it automatically<br>
+&nbsp;assumes a sev_cd of ERROR and dispenses with standard message codes.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_msg&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+A message about the detected error and its context. Will be sent to the log targets.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_reraise&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Defaults to TRUE, which will raise an error after logging the message. If you wish to prevent the program from halting its processing, you will need an exception handler, pass FALSE in this parameter to keep the exception from raising.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_routine_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This will be determined automatically for you. Only pass this if you want to record a source name different than what the call stack says. If you do pass this in, it is usually the package.routine where the message came from. Could be the name of a trigger, object method, type body, etc.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_line_num&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This will be determined automatically for you. Only pass this in if you want to record a line number for the debug message that is different from the line on which <A HREF=#dbg>logs.dbg</A> is called.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="warn"></A>
+<P CLASS="TYPE_TITLE">
+warn
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE warn
+(
+   i_msg        IN VARCHAR2,
+   i_routine_nm IN app_log.routine_nm%TYPE DEFAULT NULL,
+   i_line_num   IN app_log.line_num%TYPE DEFAULT NULL
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+warn:<br>
+&nbsp;warn() is a lazy way of calling <A HREF=#msg>logs.msg</A>, as it automatically<br>
+&nbsp;assumes a sev_cd of WARN and dispenses with standard message codes.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_msg&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The warning you wish to record and its context, which will be sent to the log targets.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_routine_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This will be determined automatically for you. Only pass this if you want to record a source name different than what the call stack says. If you do pass this in, it is usually the package.routine where the message came from. Could be the name of a trigger, object method, type body, etc.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_line_num&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This will be determined automatically for you. Only pass this in if you want to record a line number for the debug message that is different from the line on which <A HREF=#dbg>logs.dbg</A> is called.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="info"></A>
+<P CLASS="TYPE_TITLE">
+info
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE INFO
+(
+   i_msg        IN VARCHAR2,
+   i_routine_nm IN app_log.routine_nm%TYPE DEFAULT NULL,
+   i_line_num   IN app_log.line_num%TYPE DEFAULT NULL
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+info:<br>
+&nbsp;info() is a lazy way of calling <A HREF=#msg>logs.msg</A>, as it automatically assumes a<br>
+&nbsp;severity of INFO and dispenses with standard message codes.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_msg&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The information or notes you wish to record, which will be sent to the log targets.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_routine_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This will be determined automatically for you. Only pass this if you want to record a source name different than what the call stack says. If you do pass this in, it is usually the package.routine where the message came from. Could be the name of a trigger, object method, type body, etc.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_line_num&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This will be determined automatically for you. Only pass this in if you want to record a line number for the debug message that is different from the line on which <A HREF=#dbg>logs.dbg</A> is called.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="dbg"></A>
+<P CLASS="TYPE_TITLE">
+dbg
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE dbg
+(
+   i_msg        IN app_log.log_txt%TYPE,
+   i_routine_nm IN app_log.routine_nm%TYPE DEFAULT NULL,
+   i_line_num   IN app_log.line_num%TYPE DEFAULT NULL
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+dbg:<br>
+&nbsp;Logs debug messages. Enables dynamic &quot;peeking&quot; into the workings and context of<br>
+&nbsp;routines without having to attach a debugger, take downtime, recompile code,<br>
+&nbsp;etc. Simply pass a detailed, formatted message in the first parameter. The<br>
+&nbsp;routine name and line number from which logs.dbg() was called will be found<br>
+&nbsp;transparently, unless you choose to pass in the routine and line number<br>
+&nbsp;explicitly.<br>
+&nbsp;<br>
+&nbsp;<br>
+&nbsp;TURNING ON DEBUG MODE BY PARAMETER<br>
+&nbsp;In APP_PARM is a shared parameter named &quot;Debug&quot;. Its value in APP_ENV_PARM for<br>
+&nbsp;a given application and environment follows the syntax:<br>
+&nbsp;off|all|session=&lt;session_id&gt;|unit=&lt;pkg1[,proc1,trigger1,etc...]&gt;|user=&lt;client_id&gt;<br>
+&nbsp;<br>
+&nbsp;This means there are four &quot;filters&quot; that can be applied to debug logging:<br>
+&nbsp;1) all = log all calls to logs.dbg().<br>
+&nbsp;2) session = log any calls to logs.dbg() that belong to the given session ID.<br>
+&nbsp;3) unit = log any calls to logs.dbg() that come from the given PL/SQL unit(s).<br>
+&nbsp;4) user = log any calls to logs.dbg() attributed to the given client identifier.<br>
+&nbsp;and of course<br>
+&nbsp;5) off = all calls to logs.dbg() will be ignored.<br>
+&nbsp;<br>
+&nbsp;Filters for all, session and user are single-valued. They can't be combined and<br>
+&nbsp;they can only have one value. The only filter that is multi-valued is unit.<br>
+&nbsp;If you want to show dbg() calls coming out of more than one package, just write<br>
+&nbsp;a comma or space-delimited list of package names in the parm_val column for parameter<br>
+&nbsp;&quot;Debug&quot;. Here are examples of app_env_parm.parm_val values for parameter &quot;Debug&quot;:<br>
+&nbsp;<br>
+&nbsp;off<br>
+&nbsp;all<br>
+&nbsp;session=18<br>
+&nbsp;unit=DRIVER, DAILY_LOAD_PKG, GIS_MAP_PKG, AIUD_REF_TRG<br>
+&nbsp;user=doejohn<br>
+&nbsp;<br>
+&nbsp;When done capturing debug messages for your filter, be sure to update parm_val<br>
+&nbsp;back to off.<br>
+&nbsp;<br>
+&nbsp;TURNING ON DEBUG MODE BY OVERRIDE<br>
+&nbsp;<br>
+&nbsp;DEBUG CHECK INTERVAL<br>
+&nbsp;This was designed to not impose unecessary overhead in environments with heavy<br>
+&nbsp;transaction/record processing. So rather than checking the parameters for an<br>
+&nbsp;updated Debug value on every call of logs.dbg(), it only checks every N minutes,<br>
+&nbsp;N being another configurable parameter, specified by the value of the<br>
+&nbsp;&quot;Debug Toggle Check Interval&quot;, which defaults to checking every minute if not<br>
+&nbsp;configured.<br>
+&nbsp;<br>
+&nbsp;This means that you cannot turn debug mode on and expect immediate output.<br>
+&nbsp;When you discover a session, PL/SQL unit or user that requires a look into the<br>
+&nbsp;debug logs of their process, turn on debug mode using the value in APP_ENV_PARM<br>
+&nbsp;as outlined above, then wait the N minutes before you inform the user they can<br>
+&nbsp;try again. At that point, you should be able to monitor the new data in APP_LOG<br>
+&nbsp;or the logging file to see the new debug data.<br>
+&nbsp;<br>
+&nbsp;This polling, table-based design allows you to leave your logs.dbg() calls<br>
+&nbsp;peppered throughout your code. There is no need to comment them out or use 10g<br>
+&nbsp;conditional compilation syntax to hide them for production. Since we are often<br>
+&nbsp;verbose and detailed in debugging/info messages, this is a great way of<br>
+&nbsp;documenting the code as well.<br>
+&nbsp;<br>
+&nbsp;DESIGN ALTERNATIVES REJECTED<br>
+&nbsp;We rejected the option of checking the parameter table upon every call to<br>
+&nbsp;logs.dbg(). We felt this was simply too much overhead for most systems'<br>
+&nbsp;performance goals.<br>
+&nbsp;<br>
+&nbsp;We were forced to reject the idea of using global application contexts,<br>
+&nbsp;dbms_pipe or dbms_alert, as all these mechanisms do not work at all, or well,<br>
+&nbsp;in Oracle RAC clusters.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_msg&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Fully formatted debug message. The format is up to the user of the framework.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_routine_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This will be determined automatically for you. Only pass this if you want to record a source name different than what the call stack says. If you do pass this in, it is usually the package.routine where the message came from. Could be the name of a trigger, object method, type body, etc.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_line_num&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This will be determined automatically for you. Only pass this in if you want to record a line number for the debug message that is different from the line on which logs.dbg is called.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="See also"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+See also
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<A HREF=#set_dbg>set_dbg</A>. Just call <A HREF=#set_dbg>set_dbg</A>('on') or <A HREF=#set_dbg>set_dbg</A>(TRUE) to turn debugging on for your current session. This is usually only used by anonymous PL/SQL blocks or SQL*Plus scripts in unit test harnesses.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Story"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Story
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Know that the various <A HREF=#msg>logs.msg</A> routines are meant for error_handling and logging that should always be on. Calls to the logs.dbg routine are transient. They will only log output when debugging is turned on either by parameter or by override (see below).&nbsp; If debugging has been switched on, the debug message will be written to the targets you set by parameter or override (%see <A HREF=#set_targets>set_targets</A>).<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+</BODY>
+</HTML>

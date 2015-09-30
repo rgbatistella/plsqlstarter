@@ -1,0 +1,236 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+ <HEAD>
+ <LINK REL="STYLESHEET" TYPE="text/css" HREF="plsqldoc.css">
+ <TITLE>Package timer</TITLE>
+ <META name="object" content="PACKAGE">
+ <META name="name" content="timer">
+ <META name="description" content="%author Bill Coulam (bcoulam@dbartisans.com)">
+</HEAD>
+<BODY>
+<TABLE WIDTH="100%"><TR>
+<TD><P ALIGN="LEFT"><STRONG><SMALL></SMALL></STRONG></TD>
+<TD><P ALIGN="RIGHT"><STRONG><SMALL><A HREF="index.html">index</A></SMALL></STRONG></TD>
+</TR></TABLE>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="DESC_TEXT">
+<P CLASS="MAIN_TITLE">Package timer</P>
+Container for simple routines that allow one to time the execution of code<br>
+&nbsp;blocks down to the millisecond level, using DBM_UTILITY.<br>
+&nbsp;<br>
+<pre>
+Artisan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Comments
+============ ========= ========================================================
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1997Dec30 Creation
+
+<i>
+&nbsp;&nbsp;&nbsp; __________________________&nbsp; LGPL License&nbsp; ____________________________
+&nbsp;&nbsp;&nbsp; Copyright (C) 1997-2008 Bill Coulam
+
+&nbsp;&nbsp;&nbsp; This library is free software; you can redistribute it and/or
+&nbsp;&nbsp;&nbsp; modify it under the terms of the GNU Lesser General Public
+&nbsp;&nbsp;&nbsp; License as published by the Free Software Foundation; either
+&nbsp;&nbsp;&nbsp; version 2.1 of the License, or (at your option) any later version.
+
+&nbsp;&nbsp;&nbsp; This library is distributed in the hope that it will be useful,
+&nbsp;&nbsp;&nbsp; but WITHOUT ANY WARRANTY; without even the implied warranty of
+&nbsp;&nbsp;&nbsp; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+&nbsp;&nbsp;&nbsp; Lesser General Public License for more details.
+
+&nbsp;&nbsp;&nbsp; You should have received a copy of the GNU Lesser General Public
+&nbsp;&nbsp;&nbsp; License along with this library; if not, write to the Free Software
+&nbsp;&nbsp;&nbsp; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+
+
+<BR>
+<A NAME="Author"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Author
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Bill Coulam (<A HREF="MAILTO:bcoulam@dbartisans.com">bcoulam@dbartisans.com</A>)
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR></TABLE>
+<HR>
+<A NAME="Program units"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Program units
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#elapsed">elapsed</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+elapsed:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#startme">startme</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+startme/stopme:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#stopme">stopme</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Types"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Types
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#tr_timer">tr_timer</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#tar_timer">tar_timer</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Variables"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Variables
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gar_timer">gar_timer</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="tr_timer"></A>
+<P CLASS="TYPE_TITLE">
+tr_timer
+</P>
+<PRE CLASS="DECL_TEXT">
+TYPE tr_timer  IS RECORD
+(
+   timer_nm VARCHAR2(200),
+   tn_start_tm NUMBER,
+   tn_stop_tm NUMBER,
+   tn_elapsed_tm NUMBER
+);
+</PRE>
+<HR>
+<A NAME="tar_timer"></A>
+<P CLASS="TYPE_TITLE">
+tar_timer
+</P>
+<PRE CLASS="DECL_TEXT">
+TYPE tar_timer IS TABLE OF <A HREF=#tr_timer>tr_timer</A> INDEX BY BINARY_INTEGER;
+</PRE>
+<HR>
+<A NAME="gar_timer"></A>
+<P CLASS="TYPE_TITLE">
+gar_timer
+</P>
+<PRE CLASS="DECL_TEXT">
+gar_timer  tar_timer;
+</PRE>
+<HR>
+<A NAME="elapsed"></A>
+<P CLASS="TYPE_TITLE">
+elapsed
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION elapsed(i_timer_nm IN VARCHAR2 DEFAULT USER || 'myproc') RETURN NUMBER
+
+</PRE>
+<P CLASS="DESC_TEXT">
+elapsed:<br>
+&nbsp;Returns the elapsed time, in seconds, that have passed so far for the named<br>
+&nbsp;timer. If the timer is still running, this number will not remain static. If the<br>
+&nbsp;timer is stopped this number will remain static until the package is cleared<br>
+&nbsp;from the memory, or a new record is kept for the same-named timer.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_timer_id&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+A name or tag for the timer. Will default if not given.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="startme"></A>
+<P CLASS="TYPE_TITLE">
+startme
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE startme(i_timer_nm IN VARCHAR2 DEFAULT USER || 'myproc')
+
+</PRE>
+<P CLASS="DESC_TEXT">
+startme/stopme:<br>
+&nbsp;Routines to start and stop and report on a timer. Each timer has a unique name.<br>
+&nbsp;The timer array stores an <A HREF=#elapsed>elapsed</A> time for each one. So within one routine or<br>
+&nbsp;test, you could have multiple named timers, timers within loops named by the<br>
+&nbsp;iterations, etc.<br>
+&nbsp;<br>
+&nbsp;If for some odd reason you feel the need, you can restart a timer by calling<br>
+&nbsp;start with the same name. You may also update a previously stopped timer by<br>
+&nbsp;calling stop again. I don't know why you'd do this, but it's allowed.<br>
+&nbsp;<br>
+&nbsp;Also, you may call <A HREF=#elapsed>elapsed</A>() while a timer is still running. You will get a<br>
+&nbsp;greater <A HREF=#elapsed>elapsed</A> time for each call. However, once stop has been called, any<br>
+&nbsp;further calls to <A HREF=#elapsed>elapsed</A>() will return the same value.<br>
+
+<BR>
+</P>
+<A NAME="Usage"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<code><br>&nbsp;&nbsp;&nbsp; timer.startme('mytimer');<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; call_my_proc();<br>&nbsp;&nbsp;&nbsp; <A HREF=#stopme>timer.stopme</A>('mytimer');<br>&nbsp;&nbsp;&nbsp; dbms_output.put_line('Run took '||timer.elapsed('mytimer')||' seconds.');<br> </code>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_timer_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Any alphanumeric string to uniquely identify a timer.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="stopme"></A>
+<P CLASS="TYPE_TITLE">
+stopme
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE stopme(i_timer_nm IN VARCHAR2 DEFAULT USER || 'myproc')
+
+</PRE>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+</BODY>
+</HTML>

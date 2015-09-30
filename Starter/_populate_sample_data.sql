@@ -10,13 +10,13 @@ VALUES (3, 'INV', 'Invoicing', 'Customer Billing');
 
 -- app_db
 INSERT INTO app_db (DB_ID, DB_NM, DB_DESCR)
-VALUES (app_db_seq.nextval, 'XE', 'Dev');
+VALUES (app_db_seq.nextval, '&&db_name', 'Dev');
 
 INSERT INTO app_db (DB_ID, DB_NM, DB_DESCR)
-VALUES (app_db_seq.nextval, 'MY11G', 'Test');
+VALUES (app_db_seq.nextval, 'MYTEST', 'Test');
 
 INSERT INTO app_db (DB_ID, DB_NM, DB_DESCR)
-VALUES (app_db_seq.nextval, 'MY10G', 'Prod');
+VALUES (app_db_seq.nextval, 'MYPROD', 'Prod');
 
 
 

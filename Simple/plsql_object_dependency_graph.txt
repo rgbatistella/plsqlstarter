@@ -1,0 +1,21 @@
+-------------------------------------------------------------------------------
+-- PACKAGE                   | Uses                  | Used By               --
+-------------------------------------------------------------------------------
+-- cnst                      | None                  | All                   --
+-- typ                       | None                  | All                   --
+-- dt                        | None                  | app_log_api, io, dt,  --
+--                           |                       | env, logs             --
+-- num                       | num_tt, cnst, typ     | io, logs              --
+-- str                       | str_tt, cnst, typ     | logs                  --
+-- parm                      | None                  | io, logs              --
+-- io                        | dt, num, typ, cnst    | logs                  --
+--                           | app_log_api, env,parm |                       --
+-- app_log_api               | cnst, dt, env         | io, excp, logs        --
+-- env                       | cnst, dt, typ         | api_app_log, excp, io --
+--                           |                       | logs                  --
+-- excp                      | app_log_api, cnst, env| logs                  --
+--                           | typ                   |                       --
+-- logs                      | app_log_api, cnst, io |                       --
+--                           | dt, env, excp, io, num|                       --
+--                           | parm, str, typ        |                       --
+-------------------------------------------------------------------------------

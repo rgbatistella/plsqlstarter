@@ -1,0 +1,362 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+ <HEAD>
+ <LINK REL="STYLESHEET" TYPE="text/css" HREF="plsqldoc.css">
+ <TITLE>Package cnst</TITLE>
+ <META name="object" content="PACKAGE">
+ <META name="name" content="cnst">
+ <META name="description" content="%author Bill Coulam (bcoulam@dbartisans.com)">
+</HEAD>
+<BODY>
+<TABLE WIDTH="100%"><TR>
+<TD><P ALIGN="LEFT"><STRONG><SMALL></SMALL></STRONG></TD>
+<TD><P ALIGN="RIGHT"><STRONG><SMALL><A HREF="index.html">index</A></SMALL></STRONG></TD>
+</TR></TABLE>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="DESC_TEXT">
+<P CLASS="MAIN_TITLE">Package cnst</P>
+Groups together very generic constants, and functions that act as constants.<br>
+&nbsp;<br>
+%<A HREF=#WARN>warn</A>
+&nbsp;Any constant specific to a domain, should be placed in the public specification<br>
+&nbsp;of a package dedicated to that domain, thus reducing coupling and dependency<br>
+&nbsp;upon a central constants/literals package like this one.<br>
+&nbsp;<br>
+<pre>
+Artisan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Comments
+============ ========= ========================================================
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1997Dec30 Creation
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2004Jul02 Revamped comments. Added numeric TRUE/FALSE for
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; use by binary functions in SQL statements.
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2008Jan13 Moved message type constants to MSG pkg spec.
+
+<i>
+&nbsp;&nbsp;&nbsp; __________________________&nbsp; LGPL License&nbsp; ____________________________
+&nbsp;&nbsp;&nbsp; Copyright (C) 1997-2008 Bill Coulam
+
+&nbsp;&nbsp;&nbsp; This library is free software; you can redistribute it and/or
+&nbsp;&nbsp;&nbsp; modify it under the terms of the GNU Lesser General Public
+&nbsp;&nbsp;&nbsp; License as published by the Free Software Foundation; either
+&nbsp;&nbsp;&nbsp; version 2.1 of the License, or (at your option) any later version.
+
+&nbsp;&nbsp;&nbsp; This library is distributed in the hope that it will be useful,
+&nbsp;&nbsp;&nbsp; but WITHOUT ANY WARRANTY; without even the implied warranty of
+&nbsp;&nbsp;&nbsp; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+&nbsp;&nbsp;&nbsp; Lesser General Public License for more details.
+
+&nbsp;&nbsp;&nbsp; You should have received a copy of the GNU Lesser General Public
+&nbsp;&nbsp;&nbsp; License along with this library; if not, write to the Free Software
+&nbsp;&nbsp;&nbsp; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+
+
+<BR>
+<A NAME="Author"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Author
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Bill Coulam (<A HREF="MAILTO:bcoulam@dbartisans.com">bcoulam@dbartisans.com</A>)
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR></TABLE>
+<HR>
+<A NAME="Constants"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Constants
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#PAGEWIDTH">PAGEWIDTH</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#MAX_COL_LEN">MAX_COL_LEN</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#MAX_VC2_LEN">MAX_VC2_LEN</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#SUCCESS">SUCCESS</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#FAILURE">FAILURE</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#TRUE">TRUE</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#FALSE">FALSE</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#YES">YES</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#NO">NO</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#ERROR">ERROR</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#WARN">WARN</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#INFO">INFO</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#AUDIT">AUDIT</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#DEBUG">DEBUG</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#SEPCHAR">SEPCHAR</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#PIPECHAR">PIPECHAR</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#DELIMITER">DELIMITER</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#DIR_SEPCHAR">DIR_SEPCHAR</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#SUBCHAR">SUBCHAR</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#UNKNOWN">UNKNOWN</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#UNKNOWN_USER">UNKNOWN_USER</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#UNKNOWN_STR">UNKNOWN_STR</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="PAGEWIDTH"></A>
+<P CLASS="TYPE_TITLE">
+PAGEWIDTH
+</P>
+<PRE CLASS="DECL_TEXT">
+PAGEWIDTH   CONSTANT INTEGER := 80;
+</PRE>
+<HR>
+<A NAME="MAX_COL_LEN"></A>
+<P CLASS="TYPE_TITLE">
+MAX_COL_LEN
+</P>
+<PRE CLASS="DECL_TEXT">
+MAX_COL_LEN CONSTANT INTEGER := 4000;
+</PRE>
+<HR>
+<A NAME="MAX_VC2_LEN"></A>
+<P CLASS="TYPE_TITLE">
+MAX_VC2_LEN
+</P>
+<PRE CLASS="DECL_TEXT">
+MAX_VC2_LEN CONSTANT INTEGER := 32767;
+</PRE>
+<HR>
+<A NAME="SUCCESS"></A>
+<P CLASS="TYPE_TITLE">
+SUCCESS
+</P>
+<PRE CLASS="DECL_TEXT">
+SUCCESS CONSTANT PLS_INTEGER := 0;
+</PRE>
+<HR>
+<A NAME="FAILURE"></A>
+<P CLASS="TYPE_TITLE">
+FAILURE
+</P>
+<PRE CLASS="DECL_TEXT">
+FAILURE CONSTANT PLS_INTEGER := 1;
+</PRE>
+<HR>
+<A NAME="TRUE"></A>
+<P CLASS="TYPE_TITLE">
+TRUE
+</P>
+<PRE CLASS="DECL_TEXT">
+TRUE CONSTANT PLS_INTEGER := 1;
+</PRE>
+<HR>
+<A NAME="FALSE"></A>
+<P CLASS="TYPE_TITLE">
+FALSE
+</P>
+<PRE CLASS="DECL_TEXT">
+FALSE CONSTANT PLS_INTEGER := 0;
+</PRE>
+<HR>
+<A NAME="YES"></A>
+<P CLASS="TYPE_TITLE">
+YES
+</P>
+<PRE CLASS="DECL_TEXT">
+YES CONSTANT VARCHAR2(1) := 'Y';
+</PRE>
+<HR>
+<A NAME="NO"></A>
+<P CLASS="TYPE_TITLE">
+NO
+</P>
+<PRE CLASS="DECL_TEXT">
+NO CONSTANT VARCHAR2(1) := 'N';
+</PRE>
+<HR>
+<A NAME="ERROR"></A>
+<P CLASS="TYPE_TITLE">
+ERROR
+</P>
+<PRE CLASS="DECL_TEXT">
+ERROR CONSTANT VARCHAR2(10) := 'ERROR';
+</PRE>
+<HR>
+<A NAME="WARN"></A>
+<P CLASS="TYPE_TITLE">
+WARN
+</P>
+<PRE CLASS="DECL_TEXT">
+WARN  CONSTANT VARCHAR2(10) := 'WARN';
+</PRE>
+<HR>
+<A NAME="INFO"></A>
+<P CLASS="TYPE_TITLE">
+INFO
+</P>
+<PRE CLASS="DECL_TEXT">
+INFO  CONSTANT VARCHAR2(10) := 'INFO';
+</PRE>
+<HR>
+<A NAME="AUDIT"></A>
+<P CLASS="TYPE_TITLE">
+AUDIT
+</P>
+<PRE CLASS="DECL_TEXT">
+AUDIT CONSTANT VARCHAR2(10) := 'AUDIT';
+</PRE>
+<HR>
+<A NAME="DEBUG"></A>
+<P CLASS="TYPE_TITLE">
+DEBUG
+</P>
+<PRE CLASS="DECL_TEXT">
+DEBUG  CONSTANT VARCHAR2(10) := 'DEBUG';
+</PRE>
+<HR>
+<A NAME="SEPCHAR"></A>
+<P CLASS="TYPE_TITLE">
+SEPCHAR
+</P>
+<PRE CLASS="DECL_TEXT">
+SEPCHAR CONSTANT VARCHAR2(2) := ': ';
+</PRE>
+<HR>
+<A NAME="PIPECHAR"></A>
+<P CLASS="TYPE_TITLE">
+PIPECHAR
+</P>
+<PRE CLASS="DECL_TEXT">
+PIPECHAR CONSTANT VARCHAR2(1) := '|';
+</PRE>
+<HR>
+<A NAME="DELIMITER"></A>
+<P CLASS="TYPE_TITLE">
+DELIMITER
+</P>
+<PRE CLASS="DECL_TEXT">
+DELIMITER CONSTANT VARCHAR2(1) := ',';
+</PRE>
+<HR>
+<A NAME="DIR_SEPCHAR"></A>
+<P CLASS="TYPE_TITLE">
+DIR_SEPCHAR
+</P>
+<PRE CLASS="DECL_TEXT">
+DIR_SEPCHAR CONSTANT VARCHAR2(1) := '/';
+</PRE>
+<HR>
+<A NAME="SUBCHAR"></A>
+<P CLASS="TYPE_TITLE">
+SUBCHAR
+</P>
+<PRE CLASS="DECL_TEXT">
+SUBCHAR CONSTANT VARCHAR2(1) := '@';
+</PRE>
+<HR>
+<A NAME="UNKNOWN"></A>
+<P CLASS="TYPE_TITLE">
+UNKNOWN
+</P>
+<PRE CLASS="DECL_TEXT">
+UNKNOWN CONSTANT VARCHAR2(1) := 'U';
+</PRE>
+<HR>
+<A NAME="UNKNOWN_USER"></A>
+<P CLASS="TYPE_TITLE">
+UNKNOWN_USER
+</P>
+<PRE CLASS="DECL_TEXT">
+UNKNOWN_USER CONSTANT VARCHAR2(10) := 'UNKNOWN';
+</PRE>
+<HR>
+<A NAME="UNKNOWN_STR"></A>
+<P CLASS="TYPE_TITLE">
+UNKNOWN_STR
+</P>
+<PRE CLASS="DECL_TEXT">
+UNKNOWN_STR CONSTANT VARCHAR2(10) := 'Unknown';
+</PRE>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+</BODY>
+</HTML>

@@ -1,0 +1,3388 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+ <HEAD>
+ <LINK REL="STYLESHEET" TYPE="text/css" HREF="plsqldoc.css">
+ <TITLE>Package ddl_utils</TITLE>
+ <META name="object" content="PACKAGE">
+ <META name="name" content="ddl_utils">
+ <META name="description" content="%author Bill Coulam (bcoulam@dbartisans.com)">
+</HEAD>
+<BODY>
+<TABLE WIDTH="100%"><TR>
+<TD><P ALIGN="LEFT"><STRONG><SMALL></SMALL></STRONG></TD>
+<TD><P ALIGN="RIGHT"><STRONG><SMALL><A HREF="index.html">index</A></SMALL></STRONG></TD>
+</TR></TABLE>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="DESC_TEXT">
+<P CLASS="MAIN_TITLE">Package ddl_utils</P>
+A collection of routines designed to encapsulate certain queries and operations frequently repeated in DDL scripts.<br>
+&nbsp;<br>
+&nbsp;<br>
+Forgiving.<br>
+&nbsp;&nbsp; The primary reason for writing this package was to allow our<br>
+&nbsp;&nbsp; frequent DDL modification scripts to be re-runnable, where DROP and RENAME<br>
+&nbsp;&nbsp; statements don't spew Oracle errors just because something doesn't exist<br>
+&nbsp;&nbsp; or has already been renamed. In these cases, we want information that the<br>
+&nbsp;&nbsp; item wasn't found, but no error message. This eliminates 1) having to wrap<br>
+&nbsp;&nbsp; DDL in dynamic SQL to avoid the errors (the dynamic SQL is now centralized<br>
+&nbsp;&nbsp; here), and 2) the issues with using SET TERMOUT OFF/ON, which does not work<br>
+&nbsp;&nbsp; when SQL*Plus scripts are nested.<br>
+&nbsp;<br>
+Pilot assertions.<br>
+&nbsp;&nbsp; Demonstrate to developers how assertions elegantly enforce<br>
+&nbsp;&nbsp; interface &quot;contracts&quot; and verify assumptions, without having to go<br>
+&nbsp;&nbsp; overboard with exceptions and customized error handling.<br>
+&nbsp;<br>
+&nbsp;<br>
+&nbsp;<br>
+<pre>
+Artisan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Comments
+============ ========= ========================================================
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2007Jan09 Modified to include routines for turning off
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PARALLEL, turning on LOGGING, and creating private
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; synonyms.
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2007Jan16 Modified <A HREF=#remove_parallel_all>remove_parallel_all</A> to include exception.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Modified output of <A HREF=#recompile>recompile</A> and turned off verbose
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; output by default.
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2008Mar20 Refactored <A HREF=#refresh_grants>refresh_grants</A> to only grant on objects
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; not already granted.
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2008Mar27 Added <A HREF=#rename_seq>rename_seq</A>.
+
+<i>
+&nbsp;&nbsp;&nbsp; __________________________&nbsp; LGPL License&nbsp; ____________________________
+&nbsp;&nbsp;&nbsp; Copyright (C) 1997-2008 Bill Coulam
+
+&nbsp;&nbsp;&nbsp; This library is free software; you can redistribute it and/or
+&nbsp;&nbsp;&nbsp; modify it under the terms of the GNU Lesser General Public
+&nbsp;&nbsp;&nbsp; License as published by the Free Software Foundation; either
+&nbsp;&nbsp;&nbsp; version 2.1 of the License, or (at your option) any later version.
+
+&nbsp;&nbsp;&nbsp; This library is distributed in the hope that it will be useful,
+&nbsp;&nbsp;&nbsp; but WITHOUT ANY WARRANTY; without even the implied warranty of
+&nbsp;&nbsp;&nbsp; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+&nbsp;&nbsp;&nbsp; Lesser General Public License for more details.
+
+&nbsp;&nbsp;&nbsp; You should have received a copy of the GNU Lesser General Public
+&nbsp;&nbsp;&nbsp; License along with this library; if not, write to the Free Software
+&nbsp;&nbsp;&nbsp; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+
+
+<BR>
+<A NAME="Author"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Author
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Bill Coulam (<A HREF="MAILTO:bcoulam@dbartisans.com">bcoulam@dbartisans.com</A>)
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Note"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Note
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Unless noted otherwise, all parameters that accept Oracle object names are case-insensitive.
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Story"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Story
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Requirements Self-sufficient.
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Prerequisites"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Prerequisites
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This package relies heavily on communicating to the end user with dbms_output.put_line.
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR></TABLE>
+<HR>
+<A NAME="Program units"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Program units
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_db_version">get_db_version</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_db_version: Replacement for DBMS_DB_VERSION, since not all 9i instances can be counted upon to have that package compiled.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#data_is_found">data_is_found</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+data_is_found: Tells you whether a given table (or an optional partition) has data in it or not.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#obj_exists">obj_exists</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+obj_exists: Tells you whether a given object exists or not.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#attr_exists">attr_exists</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+attr_exists: Determines whether a contained item, like a column, type attribute or type method, is found in the containing object.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_num_rows">get_num_rows</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_num_rows: Returns the number of rows currently in the given table.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_cons_columns">get_cons_columns</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_cons_columns: Returns a comma-delimited list of the columns that make up a constraint, e.g.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_tbl_by_cons">get_tbl_by_cons</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_tbl_by_cons: Find the table for a given constraint.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_tbl_by_idx">get_tbl_by_idx</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_tbl_by_idx: Find the table for a given index.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_search_condition">get_search_condition</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_search_condition: Returns a VARCHAR2 version of the LONG check constraint condition.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_default_value">get_default_value</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_default_value: Returns a VARCHAR2 version of the LONG default value for the given column.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#drop_tbl">drop_tbl</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+drop_tbl: Drops a single named table.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#drop_col">drop_col</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+drop_col: Drops a single column from a named table.&nbsp; If the column does not currently exist on the table, an informational message will be displayed.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#set_unused">set_unused</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+set_unused: Sets the given column on the table to UNUSED.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#drop_col_list">drop_col_list</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+drop_col_list: Drops a set of columns from a named table.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#drop_idx">drop_idx</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+drop_idx: Drops a single named index.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#drop_pk">drop_pk</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+drop_pk: Drops the named PK from the given table.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#drop_uk">drop_uk</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+drop_uk: Drops the named UK from the given table.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#drop_fk">drop_fk</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+drop_fk: Drops the named FK from the given table.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#drop_chk">drop_chk</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+drop_chk: Drops the named check constraint from the given table.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#drop_syn">drop_syn</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+drop_syn: Drops a single named synonym.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#drop_pub_syn">drop_pub_syn</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+drop_pub_syn: Drops a single named public synonym.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#drop_all_pub_syn">drop_all_pub_syn</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+drop_all_pub_syn: Drops all public synonyms owned by the calling schema.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#drop_all_priv_syn">drop_all_priv_syn</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+drop_all_priv_syn: Drops all private synonyms owned by the calling schema.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#drop_all_obj">drop_all_obj</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+drop_all_obj: Drops all database objects from the current schema.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#drop_seq">drop_seq</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+drop_seq: Drops a single named sequence.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#drop_obj">drop_obj</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+drop_obj: Drops the given PL/SQL object.&nbsp; If the object does not exist, a simple INFO message will be displayed announcing that fact.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#rename_tbl">rename_tbl</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+rename_tbl: Renames a table.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#rename_col">rename_col</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+rename_col: Renames a column.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#rename_idx">rename_idx</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+rename_idx: Renames an index.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#rename_cons">rename_cons</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+rename_cons: Renames a constraint.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#rename_seq">rename_seq</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+rename_seq: Renames a sequence.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#move_tbl">move_tbl</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+move_tbl: Moves a table from one tablespace to another.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#move_idx">move_idx</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+move_idx: Moves an index from one tablespace to another.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#rebuild_idx">rebuild_idx</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+rebuild_idx: Rebuilds an index in its existing tablespace, unless a new tablespace is specified by the caller.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#purge_dropped_objects">purge_dropped_objects</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+purge_dropped_objects: If this is a 10g database, this will empty the trash.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#tag_session">tag_session</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+tag_session: Sets MODULE, ACTION and CLIENT_INFO on v$session to given values.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#untag_session">untag_session</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+untag_session: Sets MODULE, ACTION and CLIENT_INFO on v$session to NULL.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#print_dep_fks">print_dep_fks</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+print_dep_fks: Prints out the DDL to recreate all the FKs dependent on a given table or unique constraint.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#recreate_dep_fks">recreate_dep_fks</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+recreate_dep_fks: Reads the FK specifications stored in <A HREF=#g_dep_fks>g_dep_fks</A> and recreates each one, reporting on any failures and successes.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#process_constraint_list">process_constraint_list</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+process_constraint_list: Reads an array of constraint specifications and drops, recreates or adds each one, depending on action discerned.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#remove_parallel">remove_parallel</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+remove_parallel: Removes parallelism from a named object.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#remove_parallel_all">remove_parallel_all</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+remove_parallel_all: Removes parallelism from all objects in the database.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#add_logging_all">add_logging_all</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+add_logging_all: Ensures all permanent (heap, IOT and partitioned) tables and indexes have LOGGING set on.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#enable_row_movement_all">enable_row_movement_all</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+enable_row_movement_all Enabled row movement for any partitioned tables that have row movement disabled.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#remove_default">remove_default</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+remove_default: &quot;Removes&quot; the DEFAULT value for the given column.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#change_col">change_col</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+change_col: Certain column operations (like decreasing length or precision, or changing the datatype) cannot proceed with data in the column.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#rebuild_unusable">rebuild_unusable</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+rebuild_unusable: Rebuilds any indexes that went unusable during migration/conversion/upgrade.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#reset_seq">reset_seq</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+reset_seq: Attempts to bring a sequence up to where it should be after a data import/ refresh/migration/conversion.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#mod_seq_cache">mod_seq_cache</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+mod_seq_cache: Alter the cache attribute of a named sequence.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#analyze_schema">analyze_schema</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+analyze_schema: Analyzes all new objects of the calling user.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#analyze_table">analyze_table</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+analyze_table: Analyzes a named table, or optionally a named partition of the table.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#analyze_index">analyze_index</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+analyze_index: Analyzes a named index, or optionally a named partition of the index.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#refresh_grants">refresh_grants</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+refresh_grants : Reads all of the owner's objects (minus any objects named in the exclude array) and grants basic privs to another user or role, as specified by the i_grantee parameter.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#recompile">recompile</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Recompile Utility Created:&nbsp;&nbsp; August 3, 1998
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#show_version">show_version</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+show_version: Assuming caller has set SERVEROUTPUT on or has enabled and is getting from the buffer, this procedure will display DDL_UTIL's current version number (stored internally in the package).
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_version">get_version</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_version: This function will return DDL_UTIL's current version number (stored internally in the package).
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#echo">echo</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+echo: This is only used for testing so I have something to call to &quot;ping&quot; the package and get Oracle's &quot;automatic&quot; recompiler to <A HREF=#recompile>recompile</A>, thus removing the annoying &quot;existing state of package has been discarded&quot; error.
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Types"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Types
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#type_obj_nm_arr">type_obj_nm_arr</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+associative array of object names
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#type_constraint_rec">type_constraint_rec</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+basic record for some constraint operations
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#type_constraint_recarr">type_constraint_recarr</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+associative array of constraint records
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Variables"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Variables
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#g_dep_fks">g_dep_fks</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+stands for public &quot;global array of dependent FK records&quot;
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#empty_dep_fks">empty_dep_fks</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+used only to empty out the global structure above
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#empty_obj_nm_arr">empty_obj_nm_arr</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+used as default for certain routine parameters
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Constants"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Constants
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_table">gc_table</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_index">gc_index</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_package">gc_package</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_sequence">gc_sequence</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_synonym">gc_synonym</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_trigger">gc_trigger</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_view">gc_view</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_type">gc_type</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_constraint">gc_constraint</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_column">gc_column</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_attribute">gc_attribute</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_method">gc_method</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_routine">gc_routine</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_part">gc_part</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gc_subpart">gc_subpart</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="type_obj_nm_arr"></A>
+<P CLASS="TYPE_TITLE">
+type_obj_nm_arr
+</P>
+<PRE CLASS="DECL_TEXT">
+TYPE type_obj_nm_arr IS TABLE OF CHAR(1) INDEX BY user_objects.object_name%TYPE;
+</PRE>
+<P CLASS="DESC_TEXT">
+associative array of object names<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="type_constraint_rec"></A>
+<P CLASS="TYPE_TITLE">
+type_constraint_rec
+</P>
+<PRE CLASS="DECL_TEXT">
+TYPE type_constraint_rec IS RECORD(
+   table_name             user_tables.table_name%TYPE,
+   old_constraint_name    user_constraints.constraint_name%TYPE,
+   constraint_name        user_constraints.constraint_name%TYPE,
+   constraint_type        user_constraints.constraint_type%TYPE,
+   constraint_columns     VARCHAR2(1000) DEFAULT NULL,
+   index_name             user_constraints.index_name%TYPE DEFAULT NULL,
+   tablespace_name        user_indexes.tablespace_name%TYPE DEFAULT NULL,
+   ref_table_name         user_tables.table_name%TYPE DEFAULT NULL,
+   ref_constraint_columns VARCHAR2(1000) DEFAULT NULL,
+   status                 user_constraints.status%TYPE DEFAULT 'ENABLE',
+   validated              VARCHAR2(20) DEFAULT 'VALIDATE',
+   delete_rule            VARCHAR2(40) DEFAULT NULL,
+   check_condition        VARCHAR2(2000) DEFAULT NULL);
+</PRE>
+<P CLASS="DESC_TEXT">
+basic record for some constraint operations<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="type_constraint_recarr"></A>
+<P CLASS="TYPE_TITLE">
+type_constraint_recarr
+</P>
+<PRE CLASS="DECL_TEXT">
+TYPE type_constraint_recarr IS TABLE OF <A HREF=#type_constraint_rec>type_constraint_rec</A> INDEX BY PLS_INTEGER;
+</PRE>
+<P CLASS="DESC_TEXT">
+associative array of constraint records<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="g_dep_fks"></A>
+<P CLASS="TYPE_TITLE">
+g_dep_fks
+</P>
+<PRE CLASS="DECL_TEXT">
+g_dep_fks     type_constraint_recarr;
+</PRE>
+<P CLASS="DESC_TEXT">
+stands for public &quot;global array of dependent FK records&quot;<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="empty_dep_fks"></A>
+<P CLASS="TYPE_TITLE">
+empty_dep_fks
+</P>
+<PRE CLASS="DECL_TEXT">
+empty_dep_fks type_constraint_recarr;
+</PRE>
+<P CLASS="DESC_TEXT">
+used only to empty out the global structure above<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="empty_obj_nm_arr"></A>
+<P CLASS="TYPE_TITLE">
+empty_obj_nm_arr
+</P>
+<PRE CLASS="DECL_TEXT">
+empty_obj_nm_arr type_obj_nm_arr;
+</PRE>
+<P CLASS="DESC_TEXT">
+used as default for certain routine parameters<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="gc_table"></A>
+<P CLASS="TYPE_TITLE">
+gc_table
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_table      CONSTANT user_objects.object_type%TYPE := 'TABLE';
+</PRE>
+<HR>
+<A NAME="gc_index"></A>
+<P CLASS="TYPE_TITLE">
+gc_index
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_index      CONSTANT user_objects.object_type%TYPE := 'INDEX';
+</PRE>
+<HR>
+<A NAME="gc_package"></A>
+<P CLASS="TYPE_TITLE">
+gc_package
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_package    CONSTANT user_objects.object_type%TYPE := 'PACKAGE';
+</PRE>
+<HR>
+<A NAME="gc_sequence"></A>
+<P CLASS="TYPE_TITLE">
+gc_sequence
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_sequence   CONSTANT user_objects.object_type%TYPE := 'SEQUENCE';
+</PRE>
+<HR>
+<A NAME="gc_synonym"></A>
+<P CLASS="TYPE_TITLE">
+gc_synonym
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_synonym    CONSTANT user_objects.object_type%TYPE := 'SYNONYM';
+</PRE>
+<HR>
+<A NAME="gc_trigger"></A>
+<P CLASS="TYPE_TITLE">
+gc_trigger
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_trigger    CONSTANT user_objects.object_type%TYPE := 'TRIGGER';
+</PRE>
+<HR>
+<A NAME="gc_view"></A>
+<P CLASS="TYPE_TITLE">
+gc_view
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_view       CONSTANT user_objects.object_type%TYPE := 'VIEW';
+</PRE>
+<HR>
+<A NAME="gc_type"></A>
+<P CLASS="TYPE_TITLE">
+gc_type
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_type       CONSTANT user_objects.object_type%TYPE := 'TYPE';
+</PRE>
+<HR>
+<A NAME="gc_constraint"></A>
+<P CLASS="TYPE_TITLE">
+gc_constraint
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_constraint CONSTANT user_objects.object_type%TYPE := 'CONSTRAINT';
+</PRE>
+<HR>
+<A NAME="gc_column"></A>
+<P CLASS="TYPE_TITLE">
+gc_column
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_column     CONSTANT VARCHAR2(20) := 'COLUMN';
+</PRE>
+<HR>
+<A NAME="gc_attribute"></A>
+<P CLASS="TYPE_TITLE">
+gc_attribute
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_attribute  CONSTANT VARCHAR2(20) := 'ATTRIBUTE';
+</PRE>
+<HR>
+<A NAME="gc_method"></A>
+<P CLASS="TYPE_TITLE">
+gc_method
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_method     CONSTANT VARCHAR2(20) := 'METHOD';
+</PRE>
+<HR>
+<A NAME="gc_routine"></A>
+<P CLASS="TYPE_TITLE">
+gc_routine
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_routine    CONSTANT VARCHAR2(20) := 'ROUTINE';
+</PRE>
+<HR>
+<A NAME="gc_part"></A>
+<P CLASS="TYPE_TITLE">
+gc_part
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_part       CONSTANT VARCHAR2(20) := 'PARTITION';
+</PRE>
+<HR>
+<A NAME="gc_subpart"></A>
+<P CLASS="TYPE_TITLE">
+gc_subpart
+</P>
+<PRE CLASS="DECL_TEXT">
+gc_subpart    CONSTANT VARCHAR2(20) := 'SUBPARTITION';
+</PRE>
+<HR>
+<A NAME="get_db_version"></A>
+<P CLASS="TYPE_TITLE">
+get_db_version
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_db_version RETURN NUMBER
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_db_version: Replacement for DBMS_DB_VERSION, since not all 9i instances can be counted upon to have that package compiled.<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="data_is_found"></A>
+<P CLASS="TYPE_TITLE">
+data_is_found
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION data_is_found
+(
+   i_tbl_nm  IN VARCHAR2,
+   i_part_nm IN VARCHAR2 DEFAULT NULL
+) RETURN BOOLEAN
+
+</PRE>
+<P CLASS="DESC_TEXT">
+data_is_found: Tells you whether a given table (or an optional partition) has data in it or not.<br>
+&nbsp;<br>
+%algorithm Does not rely on statistics. Will do a hard COUNT(*), but using ROWNUM &lt;= 1 to return the second it finds even one row.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_tbl_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The table you would like to check for emptiness<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_part_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The name of the partition you would like to check (instead of the entire table).<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+TRUE&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Table has data in it.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+FALSE&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Table is empty<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="obj_exists"></A>
+<P CLASS="TYPE_TITLE">
+obj_exists
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION obj_exists
+(
+   i_obj_nm   IN VARCHAR2,
+   i_obj_type IN VARCHAR2 DEFAULT NULL
+) RETURN BOOLEAN
+
+</PRE>
+<P CLASS="DESC_TEXT">
+obj_exists: Tells you whether a given object exists or not.&nbsp; The object can be any top-level object found in user_objects or user_constraints, and tablespaces.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_obj_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the table, index, etc.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_obj_type&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Optional parameter to narrow the search and force it to look only for matches object names of that type. Valid values are: <A HREF=#gc_table>gc_table</A>, <A HREF=#gc_index>gc_index</A>, <A HREF=#gc_package>gc_package</A>, <A HREF=#gc_sequence>gc_sequence</A>, <A HREF=#gc_synonym>gc_synonym</A>, <A HREF=#gc_trigger>gc_trigger</A> <A HREF=#gc_view>gc_view</A>, <A HREF=#gc_type>gc_type</A>, <A HREF=#gc_constraint>gc_constraint</A>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+TRUE&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Object exists in current schema.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+FALSE&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Object was not found.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Note"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Note
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Since this function looks at user_objects, it will not find &quot;contained&quot; things like functions/procedures inside packages, columns in tables, attributes in type specs, etc. To do that, use <A HREF=#attr_exists>attr_exists</A>() found further below.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="attr_exists"></A>
+<P CLASS="TYPE_TITLE">
+attr_exists
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION attr_exists
+(
+   i_obj_nm    IN VARCHAR2,
+   i_attr_nm   IN VARCHAR2,
+   i_attr_type IN VARCHAR2 DEFAULT <A HREF=#gc_column>gc_column</A>
+) RETURN BOOLEAN
+
+</PRE>
+<P CLASS="DESC_TEXT">
+attr_exists: Determines whether a contained item, like a column, type attribute or type method, is found in the containing object. Defaults to columns since most callers will simply want to know if a given column already exists on a table.<br>
+
+<BR>
+</P>
+<A NAME="Usage"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<code><br> DECLARE<br> BEGIN<br>&nbsp;&nbsp; IF (NOT ddl_utils.attr_exists('nm_schedule','my_new_column')) THEN<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; EXECUTE IMMEDIATE '<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ALTER TABLE nm_schedule<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ADD my_new_column VARCHAR2(500)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ';<br>&nbsp;&nbsp; ELSE<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; dbms_output.put_line('MY_NEW_COLUMN already exists on NM_SCHEDULE.');<br>&nbsp;&nbsp; END IF;<br> END;<br> <br> REM It's OK if comments are overwritten, so no need to embed in dynamic SQL as above<br> COMMENT ON COLUMN nm_schedule.my_new_column IS 'My New Column: Blah, blah, blah.';<br> </code>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_obj_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the containing table, package or user-defined type<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_attr_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the attribute whose existence is questioned.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_attr_type&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The type of the attribute. Defaults to COLUMN if not given. Valid values are:<br>
+
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+<A HREF=#gc_column>gc_column</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+For table column<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+<A HREF=#gc_attribute>gc_attribute</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+For type attribute<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+<A HREF=#gc_method>gc_method</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+For type method<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+<A HREF=#gc_routine>gc_routine</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+For packaged functions or procedures<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+<A HREF=#gc_part>gc_part</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+For table partitions<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+<A HREF=#gc_subpart>gc_subpart</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+For table subpartitions<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+TRUE&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Attribute exists within the given object.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+FALSE&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Attribute was not found.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="get_num_rows"></A>
+<P CLASS="TYPE_TITLE">
+get_num_rows
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_num_rows
+(
+   i_tbl_nm            IN VARCHAR2,
+   i_stale_count_limit IN NUMBER DEFAULT 5
+) RETURN user_tables.num_rows%TYPE
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_num_rows: Returns the number of rows currently in the given table. Will return 0 for all temporary tables.<br>
+&nbsp;<br>
+%algorithm First attempts to get the count from the statistics contained in user_tables.<br>
+If there are no statistics, or the last analyzed date was more than N days in the past, then it will full scan the table for a count.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_tbl_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the table for which you desire a count.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_stale_count_limit&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The number of days old statistics can be before the num_rows value in user_tables is considered too stale. Defaults to 5 days.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The number of rows in the table.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Story"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Story
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This package is meant to be used only during upgrades and new installs.&nbsp; That is why we expect temp tables to be empty. If some DML script has populated a temp table during an upgrade, and an attempt is made to replace the temp table, or create an index on it, an Oracle error will be raised. If you encounter this, truncate the temp table and try to re-run the DDL that failed.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="get_cons_columns"></A>
+<P CLASS="TYPE_TITLE">
+get_cons_columns
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_cons_columns(i_cons_nm IN VARCHAR2) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_cons_columns: Returns a comma-delimited list of the columns that make up a constraint, e.g.<br>
+&quot;(xp_id)&quot; for a PK or &quot;(tspa_id, element_cd, code_set_value_cd)&quot; for a UK.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_cons_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the constraint for which you wish to know the column composition.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Parentheses-enclosed, comma-delimited list of columns in the constraint.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="get_tbl_by_cons"></A>
+<P CLASS="TYPE_TITLE">
+get_tbl_by_cons
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_tbl_by_cons(i_cons_nm IN VARCHAR2) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_tbl_by_cons: Find the table for a given constraint.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_cons_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The constraint whose owning table is not known.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The table name.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="get_tbl_by_idx"></A>
+<P CLASS="TYPE_TITLE">
+get_tbl_by_idx
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_tbl_by_idx(i_idx_nm IN VARCHAR2) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_tbl_by_idx: Find the table for a given index.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_idx_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The index whose owning table is not known.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The table name.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="get_search_condition"></A>
+<P CLASS="TYPE_TITLE">
+get_search_condition
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_search_condition(i_check_nm IN VARCHAR2) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_search_condition: Returns a VARCHAR2 version of the LONG check constraint condition.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_check_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the check constraint whose search condition is desired.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The check constraint condition.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="get_default_value"></A>
+<P CLASS="TYPE_TITLE">
+get_default_value
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_default_value
+(
+   i_tbl_nm IN VARCHAR2,
+   i_col_nm IN VARCHAR2
+) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_default_value: Returns a VARCHAR2 version of the LONG default value for the given column. This is really only meant to be called by DDL_UTILS, but it has to be public in order to be useable in SQL statements internal to the body.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_tbl_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the table containing the column to be queried.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_col_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the column to be queried.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The column default value. NULL if none found.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="drop_tbl"></A>
+<P CLASS="TYPE_TITLE">
+drop_tbl
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE drop_tbl
+(
+   i_tbl_nm         IN VARCHAR2,
+   i_drop_with_data IN BOOLEAN DEFAULT FALSE
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+drop_tbl: Drops a single named table. If the table does not exist, no error is raised.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_tbl_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the table to be dropped<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_drop_with_data&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Defaults to FALSE. Set to TRUE if you don't care about any existing data in the table. If left FALSE, an error will be raised if the table still has data.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Note"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Note
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If there are dependent tables on the table being dropped, the referencing FKs will be dropped. The caller must be aware of this and call <A HREF=#recreate_dep_fks>recreate_dep_fks</A> to recreate the FKs at the end of the DDL script, after the new parent table has been recreated or replaced.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="drop_col"></A>
+<P CLASS="TYPE_TITLE">
+drop_col
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE drop_col
+(
+   i_tbl_nm IN VARCHAR2,
+   i_col_nm IN VARCHAR2
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+drop_col: Drops a single column from a named table.&nbsp; If the column does not currently exist on the table, an informational message will be displayed. If the table is deemed extremely large (over 50M rows), the companion <A HREF=#set_unused>set_unused</A>() routine will be called instead.<br>
+&nbsp;<br>
+&nbsp;<br>
+%warn Does not handle &quot;ORA-12992: cannot drop parent key column&quot;. If foolishly dropping a PK column without handling the prelimary tear-down, this routine will raise a highly deserved error.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_tbl_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the table containing the column to be dropped.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_col_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the column to be dropped.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Story"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Story
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+We designed it to not raise errors if the columns aren't there because we anticipate drop_col and <A HREF=#drop_tbl>drop_tbl</A> being the most frequently called routines from most DDL scripts, used as a way of preventing Oracle errors when migrating a DDL script to an internal environment multiple times (otherwise migrators have to manually drop tables and columns to prepare for the re-run).<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="set_unused"></A>
+<P CLASS="TYPE_TITLE">
+set_unused
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE set_unused
+(
+   i_tbl_nm IN VARCHAR2,
+   i_col_nm IN VARCHAR2
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+set_unused: Sets the given column on the table to UNUSED.<br>
+&nbsp;<br>
+%algorithm For set_unused, if the column does not currently exist, it will check the data dictionary to see if the table has any unused columns. It will then sport a warning message if the column doesn't exist, or an informational message if it likely the column was already set to unused.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_tbl_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the table containing the column to be dropped.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_col_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the column to be dropped.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="drop_col_list"></A>
+<P CLASS="TYPE_TITLE">
+drop_col_list
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE drop_col_list
+(
+   i_tbl_nm   IN VARCHAR2,
+   i_col_list IN VARCHAR2
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+drop_col_list: Drops a set of columns from a named table. If any of the columns in the list is not found on the table, then a message will be displayed.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_tbl_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the table containing the columns to be dropped.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_col_list&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+A comma-separate list of columns, e.g. 'col1, col2, col3'<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Note"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Note
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Other than ensuring the given table exists, this routine performs no error handling of any kind. So if you accidentally end the column list in a comma, or have two commas next to each other, etc., it will bomb with an Oracle error.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="drop_idx"></A>
+<P CLASS="TYPE_TITLE">
+drop_idx
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE drop_idx(i_idx_nm IN VARCHAR2)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+drop_idx: Drops a single named index. If the index does not exist, no error is raised.<br>
+&nbsp;<br>
+%algorithm Assumes that the given index is a normal index with no ties to constraints. If it turns out the index supports a PK or UK, it will call <A HREF=#drop_pk>drop_pk</A>, which will automatically remove the constraint first, and finally the requested index.<br>
+However, if the PK or UK constraints supports dependent child FKs, the FKs will be saved to <A HREF=#g_dep_fks>g_dep_fks</A> and messages will be displayed to remind the caller to call <A HREF=#recreate_dep_fks>recreate_dep_fks</A> after the PK/UK has been recreated.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_idx_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the index to be dropped.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="drop_pk"></A>
+<P CLASS="TYPE_TITLE">
+drop_pk
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE drop_pk
+(
+   i_pk_nm      IN VARCHAR2,
+   i_tbl_nm     IN VARCHAR2 DEFAULT NULL,
+   i_keep_index IN BOOLEAN DEFAULT FALSE
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+drop_pk: Drops the named PK from the given table. Will also drop the underlying index, unless i_keep_index is TRUE.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_pk_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the primary key to drop.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_tbl_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the table to which the PK belongs. Optional. Will be looked up if not given.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_keep_index&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Default is FALSE and index will be dropped. Set to TRUE if you desire to keep the index around after the constraint is gone.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="drop_uk"></A>
+<P CLASS="TYPE_TITLE">
+drop_uk
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE drop_uk
+(
+   i_uk_nm      IN VARCHAR2,
+   i_tbl_nm     IN VARCHAR2 DEFAULT NULL,
+   i_keep_index IN BOOLEAN DEFAULT FALSE
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+drop_uk: Drops the named UK from the given table. Will also drop the underlying index, unless i_keep_index is TRUE.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_pk_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the unique key to drop.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_tbl_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the table to which the UK belongs. Optional. Will be looked up if not given.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_keep_index&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Default is FALSE and index will be dropped. Set to TRUE if you desire to keep the index around after the constraint is gone.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="drop_fk"></A>
+<P CLASS="TYPE_TITLE">
+drop_fk
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE drop_fk
+(
+   i_fk_nm  IN VARCHAR2,
+   i_tbl_nm IN VARCHAR2 DEFAULT NULL
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+drop_fk: Drops the named FK from the given table.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_fk_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the foreign key to drop.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_tbl_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the table to which the FK belongs. Optional. Table will be looked up if not given.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="drop_chk"></A>
+<P CLASS="TYPE_TITLE">
+drop_chk
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE drop_chk
+(
+   i_chk_nm IN VARCHAR2,
+   i_tbl_nm IN VARCHAR2 DEFAULT NULL
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+drop_chk: Drops the named check constraint from the given table.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_chk_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the check constraint to drop.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_tbl_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the table to which the check belongs. Optional. Table will be looked up if not given.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="drop_syn"></A>
+<P CLASS="TYPE_TITLE">
+drop_syn
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE drop_syn(i_syn_nm IN VARCHAR2)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+drop_syn: Drops a single named synonym.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_syn_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the synonym to drop. Not case-sensitive.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="drop_pub_syn"></A>
+<P CLASS="TYPE_TITLE">
+drop_pub_syn
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE drop_pub_syn(i_syn_nm IN VARCHAR2)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+drop_pub_syn: Drops a single named public synonym.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_syn_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the public synonym to drop. Not case-sensitive.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="drop_all_pub_syn"></A>
+<P CLASS="TYPE_TITLE">
+drop_all_pub_syn
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE drop_all_pub_syn
+
+</PRE>
+<P CLASS="DESC_TEXT">
+drop_all_pub_syn: Drops all public synonyms owned by the calling schema.<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="drop_all_priv_syn"></A>
+<P CLASS="TYPE_TITLE">
+drop_all_priv_syn
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE drop_all_priv_syn(i_ref_owner IN VARCHAR2 DEFAULT NULL)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+drop_all_priv_syn: Drops all private synonyms owned by the calling schema.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_ref_owner&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the schema which owns the objects to which the calling schema is pointing.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Story"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Story
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If the calling schema has private synonyms pointing to objects in multiple base schemas, call this routine with the name of the schema who owns the underlying objects to the synonyms you want to drop. If you want all private synonyms to drop, call the routine with no parameters.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="drop_all_obj"></A>
+<P CLASS="TYPE_TITLE">
+drop_all_obj
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE drop_all_obj
+
+</PRE>
+<P CLASS="DESC_TEXT">
+drop_all_obj: Drops all database objects from the current schema.<br>
+&nbsp;<br>
+&nbsp;<br>
+<pre>
+User Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CR&nbsp;&nbsp;&nbsp;&nbsp; Comments
+&nbsp;&nbsp; ---- --------- ------
+WAC&nbsp; 2006Sep11&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Added check for additional application schemas.
+</pre>
+
+<BR>
+</P>
+<A NAME="Note"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Note
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Only application-owning schemas are allowed to use this routine.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="drop_seq"></A>
+<P CLASS="TYPE_TITLE">
+drop_seq
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE drop_seq(i_seq_nm IN VARCHAR2)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+drop_seq: Drops a single named sequence.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_seq_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the sequence to drop. Not case-sensitive.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="drop_obj"></A>
+<P CLASS="TYPE_TITLE">
+drop_obj
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE drop_obj
+(
+   i_obj_nm   IN VARCHAR2,
+   i_obj_type IN VARCHAR2 DEFAULT NULL
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+drop_obj: Drops the given PL/SQL object.&nbsp; If the object does not exist, a simple INFO message will be displayed announcing that fact. Valid PL/SQL objects are packages, functions, procedures, views, types, and triggers.<br>
+&nbsp;<br>
+%warn No special processing is attempted for TYPE objects. If there is code or subtypes dependent on the TYPE, Oracle errors will be raised. You must undertake the appropriate tear-down yourself.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_obj_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the PL/SQL stored object to drop. Not case-sensitive.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_obj_type&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Optional parameter to narrow the search and force it to look only for matches on object names of that type. Valid values are: <A HREF=#gc_table>gc_table</A>, <A HREF=#gc_index>gc_index</A>, <A HREF=#gc_package>gc_package</A>, <A HREF=#gc_sequence>gc_sequence</A>, <A HREF=#gc_synonym>gc_synonym</A>, <A HREF=#gc_trigger>gc_trigger</A> <A HREF=#gc_view>gc_view</A>, <A HREF=#gc_type>gc_type</A>, <A HREF=#gc_constraint>gc_constraint</A>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="rename_tbl"></A>
+<P CLASS="TYPE_TITLE">
+rename_tbl
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE rename_tbl
+(
+   i_tbl_nm     IN VARCHAR2,
+   i_new_tbl_nm IN VARCHAR2
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+rename_tbl: Renames a table. Will output an INFO message if the table has already been renamed.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_tbl_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the table being renamed.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_new_tbl_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+New name of the table.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="rename_col"></A>
+<P CLASS="TYPE_TITLE">
+rename_col
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE rename_col
+(
+   i_tbl_nm     IN VARCHAR2,
+   i_col_nm     IN VARCHAR2,
+   i_new_col_nm IN VARCHAR2
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+rename_col: Renames a column. Will output an INFO message if the column has already been renamed.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_tbl_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the table containing the column.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_col_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the column being renamed.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_new_col_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+New name of the column.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="rename_idx"></A>
+<P CLASS="TYPE_TITLE">
+rename_idx
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE rename_idx
+(
+   i_idx_nm     IN VARCHAR2,
+   i_new_idx_nm IN VARCHAR2
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+rename_idx: Renames an index. Will output an INFO message if the index has already been renamed.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_idx_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the index being renamed.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_new_idx_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+New name of the index.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="rename_cons"></A>
+<P CLASS="TYPE_TITLE">
+rename_cons
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE rename_cons
+(
+   i_cons_nm     IN VARCHAR2,
+   i_new_cons_nm IN VARCHAR2
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+rename_cons: Renames a constraint. For PK and UK constraints, also ensures that the underlying index is in-sync with the constraint name. Will output an INFO message if the constraint has already been renamed.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_cons_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the constraint being renamed.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_new_cons_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+New name of the constraint.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="rename_seq"></A>
+<P CLASS="TYPE_TITLE">
+rename_seq
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE rename_seq
+(
+   i_seq_nm     IN VARCHAR2,
+   i_new_seq_nm IN VARCHAR2
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+rename_seq: Renames a sequence. Will output an INFO message if the sequence has already been renamed.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_seq_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the sequence being renamed.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_new_seq_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+New name of the sequence.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="move_tbl"></A>
+<P CLASS="TYPE_TITLE">
+move_tbl
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE move_tbl
+(
+   i_tbl_nm         IN VARCHAR2,
+   i_new_tablespace IN VARCHAR2
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+move_tbl: Moves a table from one tablespace to another. Before moving, it will check to see if the given table already exists in the given tablespace. If it already exists in the correct tablespace, it will do nothing except report that fact.<br>
+&nbsp;<br>
+%warn Partitioned tables ARE NOT supported. Such moves of parititioned objects should be carefully evaluated and designed.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_tbl_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the table to move.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_new_tablespace&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the destination tablespace.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Note"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Note
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If this is a huge table that will take more than a few minutes, be sure to &quot;tag&quot; the session in v$session using <A HREF=#tag_session>tag_session</A>() below. Also be sure to use <A HREF=#untag_session>untag_session</A>() when the operation is complete so that v$session doesn't report information that is no longer relevant.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="move_idx"></A>
+<P CLASS="TYPE_TITLE">
+move_idx
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE move_idx
+(
+   i_idx_nm         IN VARCHAR2,
+   i_new_tablespace IN VARCHAR2
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+move_idx: Moves an index from one tablespace to another. Partitioned indexes ARE supported. Before moving, it will check to see if the given index already exists in the given tablespace. If it already exists in the correct tablespace, it will do nothing except report that fact.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_idx_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the index to move.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_new_tablespace&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the destination tablespace.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Note"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Note
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If this is a huge index that will take more than a few minutes, be sure to &quot;tag&quot; the session in v$session using <A HREF=#tag_session>tag_session</A>() below. Also be sure to use <A HREF=#untag_session>untag_session</A>() when the operation is complete so that v$session doesn't report information that is no longer relevant.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="rebuild_idx"></A>
+<P CLASS="TYPE_TITLE">
+rebuild_idx
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE rebuild_idx
+(
+   i_idx_nm             IN VARCHAR2,
+   i_new_tablespace     IN VARCHAR2 DEFAULT NULL,
+   i_part_nm            IN VARCHAR2 DEFAULT NULL,
+   i_subpart_nm         IN VARCHAR2 DEFAULT NULL,
+   i_compute_statistics IN BOOLEAN DEFAULT TRUE,
+   i_online             IN BOOLEAN DEFAULT FALSE
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+rebuild_idx: Rebuilds an index in its existing tablespace, unless a new tablespace is specified by the caller. Will automatically compute statistics as it is rebuilding unless explicitly told not to.<br>
+&nbsp;<br>
+&nbsp;<br>
+&nbsp;<br>
+%warn The partition parameters are really only meant to be called internally by the <A HREF=#rebuild_unusable>rebuild_unusable</A>() routine. rebuild_idx() does not check for adequate space when moving partitions or subpartitions to a new tablespace since <A HREF=#rebuild_unusable>rebuild_unusable</A>() will never move partitions to new tablespaces. If you want to move an index to a new tablespace, call <A HREF=#move_idx>move_idx</A>() instead.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %warn<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; You can't do both ONLINE and COMPUTE STATISTICS on versions prior to 10gR2.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %warn<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; On 10g COMPUTE STATISTICS does nothing for partitioned indexes. This<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; is a bug fixed in version 11. So do not set i_compute_statistics to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TRUE for 10g. You will have to continue gathering statistics manually<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (you can use <A HREF=#analyze_index>analyze_index</A>() below).<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %warn For some reason, 10g has a bug where if you ONLINE, you get an<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ORA-01031: insufficient privileges if you don't have CREATE ANY TABLE<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; granted to you. So for now, I've commented out the ability to do ONLINE.<br>
+
+<BR>
+</P>
+<A NAME="Usage"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+For most indexes, simply use the first parameter, e.g. <code><br> exec ddl_utils.rebuild_idx('NM_SCHEDULE_UK');<br> </code>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_idx_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the index to rebuild.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_new_tablespace&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Optional. Will rebuild the index in place if not given, or will rebuild the index in the given tablespace.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_part_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This parameter is expected to be used only by the <A HREF=#rebuild_unusable>rebuild_unusable</A>() routine in this package. Since partitioned indexes can only be rebuilt partition-by-partition, you would have to call this in a loop to rebuild every partition of a given index.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_subpart_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This parameter is expected to be used only by the <A HREF=#rebuild_unusable>rebuild_unusable</A>() routine in this package. Since composite partitioned indexes can only be rebuilt subpartition-by-subpartition, you would have to call this in a loop to rebuild every subpartition of a given index.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_compute_statistics&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Default is TRUE. Pass in FALSE if you wish to prevent gathering index statistics at the same time it is being rebuild.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_online&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Default is FALSE. Pass in TRUE if you wish the rebuild to occur while allowing users to continue hitting the table with queries that use the index.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Note"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Note
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If this is a huge index that will take more than a few minutes, be sure to &quot;tag&quot; the session in v$session using <A HREF=#tag_session>tag_session</A>() below. Also be sure to use <A HREF=#untag_session>untag_session</A>() when the operation is complete so that v$session doesn't report information that is no longer relevant.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="purge_dropped_objects"></A>
+<P CLASS="TYPE_TITLE">
+purge_dropped_objects
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE purge_dropped_objects
+
+</PRE>
+<P CLASS="DESC_TEXT">
+purge_dropped_objects: If this is a 10g database, this will empty the trash. If it is a 9i database, it will do nothing. This should be called before most large operations that deal with the user_objects view. If not called, there will be errors with recyclebin objects (all of which start with &quot;BIN$%&quot;).<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="tag_session"></A>
+<P CLASS="TYPE_TITLE">
+tag_session
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE tag_session
+(
+   i_module IN VARCHAR2,
+   i_action IN VARCHAR2,
+   i_info   IN VARCHAR2
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+tag_session: Sets MODULE, ACTION and CLIENT_INFO on v$session to given values. Optional i_num_rows parameter determines whether tagging will take place for a given call.&nbsp; You would pass i_num_rows in for suspected long or looped operations where the number of rows being operated upon is not known ahead of time.<br>
+
+<BR>
+</P>
+<A NAME="Usage"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<code><br> exec ddl_utils.tag_session('CR53885','Recreate Constraint','NM_STTLCOMP_UK');<br> <br> ALTER TABLE nm_sttl_component<br>&nbsp;&nbsp; DROP CONSTRAINT<br> ...<br> ALTER TABLE nm_sttl_component<br>&nbsp;&nbsp; ADD CONSTRAINT<br> ...<br> exec <A HREF=#analyze_index>ddl_utils.analyze_index</A>('NM_STTLCOMP_UK');<br> exec ddl_utils.untag_session;<br> </code>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_module&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The governing &quot;module&quot;, usually the CR#. The PL/SQL package name is also a frequently-used value. Limited to 48 characters.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_action&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The current &quot;action&quot;, usually something like &quot;Create Index&quot;, &quot;Move Table&quot;, etc. The packaged procedure/function name is also a frequently-used value. Limited to 32 characters.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_info&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The detail of the current step, usually the name of the table, index or constraint being created/altered. Limited to 64 characters.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="untag_session"></A>
+<P CLASS="TYPE_TITLE">
+untag_session
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE untag_session
+
+</PRE>
+<P CLASS="DESC_TEXT">
+untag_session: Sets MODULE, ACTION and CLIENT_INFO on v$session to NULL.<br>
+
+<BR>
+</P>
+<A NAME="Note"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Note
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Make sure to call this after calling <A HREF=#tag_session>tag_session</A>(). Otherwise the info fed to <A HREF=#tag_session>tag_session</A> will remain attached to your session, fooling administrators into thinking your session is still working on the module indicated in v$session, when in fact your session has ended or moved on to other actions.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="print_dep_fks"></A>
+<P CLASS="TYPE_TITLE">
+print_dep_fks
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE print_dep_fks(i_obj_nm IN VARCHAR2)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+print_dep_fks: Prints out the DDL to recreate all the FKs dependent on a given table or unique constraint.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_obj_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of table or unique index or PK/UK.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="recreate_dep_fks"></A>
+<P CLASS="TYPE_TITLE">
+recreate_dep_fks
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE recreate_dep_fks
+
+</PRE>
+<P CLASS="DESC_TEXT">
+recreate_dep_fks: Reads the FK specifications stored in <A HREF=#g_dep_fks>g_dep_fks</A> and recreates each one, reporting on any failures and successes.<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="process_constraint_list"></A>
+<P CLASS="TYPE_TITLE">
+process_constraint_list
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE process_constraint_list(i_cons_recarr IN <A HREF=#type_constraint_recarr>type_constraint_recarr</A>)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+process_constraint_list: Reads an array of constraint specifications and drops, recreates or adds each one, depending on action discerned.<br>
+&nbsp;<br>
+%algorithm If old_constraint_name is filled, but [new] constraint_name is empty, it will DROP the old constraint; if old_constraint_name and constraint_name are both filled, but different, it will rename the constraint; if old_constraint_name is empty, but constraint_name is filled, it will attempt to create the constraint using the appropriate fields in the record. If the fields are not filled properly, the constraint will not create correctly.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_cons_recarr&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Array of FK records, pre-populated by calling script.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="remove_parallel"></A>
+<P CLASS="TYPE_TITLE">
+remove_parallel
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE remove_parallel(i_obj_nm IN VARCHAR2)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+remove_parallel: Removes parallelism from a named object.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_obj_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the table or index for to be set to NOPARALLEL.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="remove_parallel_all"></A>
+<P CLASS="TYPE_TITLE">
+remove_parallel_all
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE remove_parallel_all
+
+</PRE>
+<P CLASS="DESC_TEXT">
+remove_parallel_all: Removes parallelism from all objects in the database.<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="add_logging_all"></A>
+<P CLASS="TYPE_TITLE">
+add_logging_all
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE add_logging_all
+
+</PRE>
+<P CLASS="DESC_TEXT">
+add_logging_all: Ensures all permanent (heap, IOT and partitioned) tables and indexes have LOGGING set on.<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="enable_row_movement_all"></A>
+<P CLASS="TYPE_TITLE">
+enable_row_movement_all
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE enable_row_movement_all
+
+</PRE>
+<P CLASS="DESC_TEXT">
+enable_row_movement_all Enabled row movement for any partitioned tables that have row movement disabled.<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="remove_default"></A>
+<P CLASS="TYPE_TITLE">
+remove_default
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE remove_default
+(
+   i_tbl_nm       IN VARCHAR2,
+   i_col_nm       IN VARCHAR2,
+   i_perm_removal IN BOOLEAN DEFAULT FALSE
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+remove_default: &quot;Removes&quot; the DEFAULT value for the given column. Currently this is implemented by modifying the column and adding a DEFAULT NULL. Although technically, the column still has a default value, since it is NULL, it is the same as if the default were removed.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_tbl_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the table containing the column to be modified.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_col_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the column with the DEFAULT to be removed.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_perm_removal&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+A flag that indicates<br>
+
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+FALSE&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Just alter the DEFAULT to NULL<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+TRUE&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Drop and recreate the column without a DEFAULT<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Note"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Note
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Oracle does not currently provide a way to remove a default. The only way to completely remove a DEFAULT is to drop and recreate the column. If you need to completely remove all vestiges of a DEFAULT, pass TRUE for i_perm_removal.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="change_col"></A>
+<P CLASS="TYPE_TITLE">
+change_col
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE change_col
+(
+   i_tbl_nm       IN VARCHAR2,
+   i_col_nm       IN VARCHAR2,
+   i_new_datatype IN VARCHAR2 DEFAULT NULL,
+   i_new_length   IN VARCHAR2 DEFAULT NULL
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+change_col: Certain column operations (like decreasing length or precision, or changing the datatype) cannot proceed with data in the column. A semi-complex path needs to be followed to preserve the data within the column without removing it.<br>
+&nbsp;<br>
+%algorithm This first performs error checking to ensure it has all the information it needs to proceed. Then it executes dynamic DDL to create a backup copy of the old column on the same table. Then it deletes the data in the original column and executes the desired operation, then moves the data back into the new perm column from the copy. Then it finally deletes the copy. If there is any NOT NULL constraint, it will be preserved.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_tbl_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the table containing the column to be modified.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_col_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the column with the DEFAULT to be removed.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_new_datatype&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Optional new datatype for the column.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_new_length&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Conditional new length for the column. Should be a complete length specification if given, e.g.<br>
+
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+NUMBER&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Optional. Valid lengths would look like &quot;(1)&quot;, &quot;*,0&quot;, &quot;(38,0) or &quot;(3,4)&quot;<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+VARCHAR2&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Required. Valid lengths would be between &quot;(1)&quot; and &quot;(4000)&quot;<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+DATE&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Of course do not pass in a length for dates. If the parenthesis are omitted, they will be added automatically to avoid the error at create time.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Note"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Note
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+I considered calling dbms_stats to add back any statistics lost by the drop, but have not come to a decision yet.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="rebuild_unusable"></A>
+<P CLASS="TYPE_TITLE">
+rebuild_unusable
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE rebuild_unusable
+(
+   i_compute_statistics IN BOOLEAN DEFAULT TRUE,
+   i_online             IN BOOLEAN DEFAULT FALSE
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+rebuild_unusable: Rebuilds any indexes that went unusable during migration/conversion/upgrade. It defaults to using the existing tablespace for each index/partition/subpartition.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %warn<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; You can't do both ONLINE and COMPUTE STATISTICS on versions prior to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10gR2.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %warn<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; On 10g COMPUTE STATISTICS does nothing for partitioned indexes. This<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; is a bug fixed in version 11. So do not set i_compute_statistics to<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TRUE for 10g. You will have to continue gathering statistics manually<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (you can use <A HREF=#analyze_index>analyze_index</A>() below).<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_compute_statistics&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Default is TRUE, computing the statistics for the index while it is rebuilding it. Pass in FALSE if you wish to prevent gathering index statistics at the same time it is being rebuild.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_online&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Default is FALSE. Pass in TRUE if you wish the rebuild to occur while allowing users to continue hitting the table with queries that use the index.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="reset_seq"></A>
+<P CLASS="TYPE_TITLE">
+reset_seq
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE reset_seq
+(
+   i_seq_nm IN VARCHAR2,
+   i_tbl_nm IN VARCHAR2 DEFAULT NULL
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+reset_seq: Attempts to bring a sequence up to where it should be after a data import/ refresh/migration/conversion.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_seq_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the sequence to check<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_tbl_nme&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the table for which the sequence provides surrogate key values. Required if the table name cannot be derived from the sequence name.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Story"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Story
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This is only designed to work for sequences that support the surrogate PK for a single table. Also if the table name isn't provided, the routine attempts to derive the table name from the sequence name. It assumes you have used one of four conventions to name your sequence: SEQ_TABLE_NAME, TABLE_NAME_SEQ, TABLE_NAME_ID_SEQ, SEQ_TABLE_NAME_ID.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="mod_seq_cache"></A>
+<P CLASS="TYPE_TITLE">
+mod_seq_cache
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE mod_seq_cache
+(
+   i_seq_nm        IN VARCHAR2,
+   i_new_cache_num IN NUMBER
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+mod_seq_cache: Alter the cache attribute of a named sequence.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_seq_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the sequence to modify<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_new_cache_num&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Whole positive integer for new CACHE setting. Must be 0 for NOCACHE or greater than 1. Cannot be 1.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="analyze_schema"></A>
+<P CLASS="TYPE_TITLE">
+analyze_schema
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE analyze_schema
+(
+   i_new   IN BOOLEAN DEFAULT TRUE,
+   i_stale IN BOOLEAN DEFAULT FALSE
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+analyze_schema: Analyzes all new objects of the calling user. This is appropriate for all new installs (assuming dump file was stripped of statistics) and upgrades.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_new&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+TRUE (the default) will analyze all objects without any statistics. This is worthile for all new installs and upgrades.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_stale&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+FALSE (the default) ignores objects that already have stats. TRUE will gather stats only for stale objects (objects which have changed at least 10% or been truncated since the last analyze).<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Story"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Story
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The purpose of this routine is to encapsulate our recommended standard for analyzing an application schema. If a higher degree of control is desired, either get approval to change this routine, or write a custom statistics gathering script.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Prerequisites"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Prerequisites
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The GATHER STALE option will not work if MONITORING has not been turned on for the application's tables. In 10g this is automatic as long as the init parm STATISTICS_LEVEL is TYPICAL or ALL.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="analyze_table"></A>
+<P CLASS="TYPE_TITLE">
+analyze_table
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE analyze_table
+(
+   i_tbl_nm  IN VARCHAR2,
+   i_part_nm IN VARCHAR2 DEFAULT NULL
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+analyze_table: Analyzes a named table, or optionally a named partition of the table.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_tbl_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The name of the table to be analyzed using DBMS_STATS.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_part_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Default is empty. The name of the invidual partition to which stats gathering will be limited.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Story"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Story
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The purpose of this routine is to encapsulate our recommended standard for analyzing an application table. If a higher degree of control is desired, either get approval to change this routine, or call dbms_stats.gather_table_stats directly.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+We anticipate this routine will be called for the entire table after a DDL script has backed a table up, dropped it, recreated it, and re-imported the data. As such, the partition option won't be very useful for upgrades/installs. The partition option will probably only be called internally as a convenience to developers and tuners who are playing with large amounts of test data loading and unloading in recent partitions.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="analyze_index"></A>
+<P CLASS="TYPE_TITLE">
+analyze_index
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE analyze_index
+(
+   i_idx_nm  IN VARCHAR2,
+   i_part_nm IN VARCHAR2 DEFAULT NULL
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+analyze_index: Analyzes a named index, or optionally a named partition of the index.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_idx_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The name of the index to be analyzed using DBMS_STATS.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_part_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The name of the invidual partition to which stats gathering will be limited.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Story"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Story
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The purpose of this routine is to encapsulate our recommended standard for analyzing an application index. If a higher degree of control is desired, either get approval to change this routine, or call dbms_stats.gather_index_stats directly.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="refresh_grants"></A>
+<P CLASS="TYPE_TITLE">
+refresh_grants
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE refresh_grants
+(
+   i_grantee     IN VARCHAR2 DEFAULT NULL,
+   i_read_only   IN BOOLEAN DEFAULT FALSE,
+   i_gen_script  IN BOOLEAN DEFAULT FALSE,
+   i_exclude_arr IN <A HREF=#type_obj_nm_arr>type_obj_nm_arr</A> DEFAULT <A HREF=#empty_obj_nm_arr>empty_obj_nm_arr</A>
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+refresh_grants : Reads all of the owner's objects (minus any objects named in the exclude array) and grants basic privs to another user or role, as specified by the i_grantee parameter. See parameter notes below.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_grantee&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If NULL, the default, will grant privs on the current schema's objects to the &lt;USER&gt;_FULL role -- if it exists. If that role does not exist, it will error out. Otherwise, if i_grantee is filled, it will generate the script, or run the grants, for that role or user.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_read_only&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If TRUE, the privileges for tables will be set to SELECT only. If FALSE, full grants of SELECT, INSERT, UPDATE and DELETE will be given to the defaulted or named grantee.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_gen_script&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If TRUE, and serveroutput is ON, will spit a SQL Grants script to stdout. Defaults to FALSE, which actuall grants the privs to the given role.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_exclude_arr&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Associative array of object names to exclude from all GRANT statements.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="recompile"></A>
+<P CLASS="TYPE_TITLE">
+recompile
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION RECOMPILE
+(
+   i_owner   IN VARCHAR2 DEFAULT USER,
+   i_name    IN VARCHAR2 DEFAULT '%',
+   i_type    IN VARCHAR2 DEFAULT '%',
+   i_status  IN VARCHAR2 DEFAULT 'INVALID',
+   i_verbose IN BOOLEAN DEFAULT FALSE
+) RETURN NUMBER
+
+</PRE>
+<P CLASS="DESC_TEXT">
+Recompile Utility Created:&nbsp;&nbsp; August 3, 1998<br>
+&nbsp;<br>
+&nbsp;<br>
+Recompile Utility is designed to compile the following types of objects: <ul>
+&nbsp;<li>PROCEDURE<br>
+&nbsp;<li>FUNCTION<br>
+&nbsp;<li>PACKAGE<br>
+&nbsp;<li>PACKAGE BODY<br>
+&nbsp;<li>TRIGGER<br>
+&nbsp;<li>VIEW<br>
+&nbsp;<li>TYPE<br>
+&nbsp;<li>TYPE BODY<br>
+&nbsp;<li>MATERIALIZED VIEW<br>
+</ul>
+&nbsp;<br>
+Objects are recompiled based on object dependency hierarchy, thereby compiling all requested objects in one path. Recompile Utility can be used for Oracle 7.3 - 10g object compilation.<br>
+&nbsp;<br>
+&nbsp;<br>
+%warn No provision is made to recompile anything with DEBUG settings, or for native PL/SQL compilation.<br>
+&nbsp;<br>
+&nbsp;<br>
+&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp; RECOMPILING OBJECTS<br>
+&nbsp;<br>
+&nbsp;&nbsp; Object Owner is i_owner<br>
+&nbsp;&nbsp; Object Name is i_name<br>
+&nbsp;&nbsp; Object Type is i_type<br>
+&nbsp;&nbsp; Object Status is i_status<br>
+&nbsp;<br>
+TTT OOO.NNN is recompiled. Object status is SSS.<br>
+TTT OOO.NNN references invalid object(s) outside of this request.<br>
+OOO.NNN is TTT and can not be recompiled.<br>
+&nbsp;<br>
+where i_owner is parameter i_owner value,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i_name is parameter i_name value,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i_type is parameter i_type value and<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i_status is parameter i_status value.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TTT is object type,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; OOO is object owner,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NNN is object name and<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; SSS is object status after compilation.<br>
+&nbsp;<br>
+&nbsp;<br>
+<pre>
+Person&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Comments
+&nbsp;&nbsp; ----------- ---------
+SYakobson&nbsp;&nbsp; 1998Sep09 Fixed obj_cursor to include objects with no dependencies.
+SYakobson&nbsp;&nbsp; 1999May12 Fix for DBMS_SQL behavior change in Oracle 8 (most likely
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; it is an Oracle bug). If object recompilation has errors,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ORACLE 8 DBMS_SQL raises exception
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &quot;ORA-24333: success with compilation&quot; error, followed by
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; host environment internal error and &quot;Unsafe to proceed&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; message.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Added COMPILE_ERRORS return code.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Added TYPE and TYPE BODY objects.
+SFeuerstein 2006Jan10 Upgraded for 9i and 10g
+WAC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2006Sep13 Cleaned up function header grammar. Added plsqldoc tags.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Altered to run from within DDL_UTILS package only for
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; definer.
+</pre>
+
+<BR>
+</P>
+<A NAME="Version"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Version
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+2.0<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Author"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Author
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Solomon Yakobson<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Usage"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If parameter i_display is set to TRUE, you MUST ensure DBMS_OUTPUT buffer is large enough for produced output. Otherwise Recompile Utility will not recompile all the objects. If used in SQL*Plus, issue: <code><br> SET SERVEROUTPUT ON SIZE xxx FORMAT WRAPPED<br> </code> FORMAT WRAPPED is needed for text alignment.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_owner&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The owner of the objects to be recompiled. It accepts LIKE strings as a filter. Backslash (\) is used for escaping wildcards. Default is USER.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_name&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Filter used to define the names of objects to be recompiled. It accepts LIKE strings as a filter. Backslash (\) is used for escaping wildcards. Default is '%' - any name.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_type&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Filter used to define the types of objects to be recompiled. It accepts LIKE strings as a filter. Backslash (\) is used for escaping wildcards. Default is '%' - any type.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_status&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Filter used to define the status of objects to be recompiled. It accepts LIKE strings as a filter. Backslash (\) is used for escaping wildcards. Default is 'INVALID'.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_verbose&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+BOOLEAN parameter. TRUE means object recompile status will be written to DBMS_OUTPUT buffer. FALSE means most DBMS_OUTPUT will be suppressed. Default is FALSE.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Recompile Utility returns the following values or their combinations:<br>
+
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+0&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+SUCCESS. All requested objects are recompiled and VALID.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+1&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+INVALID_TYPE. At least one of the to-be-recompiled objects is not one of the supported object types.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+2&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+INVALID_PARENT. At least one of the to-be-recompiled objects depends on an invalid object outside of current request.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+4&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+COMPILE_ERRORS. At least one of the to-be-recompiled objects was compiled with errors and is INVALID.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Note"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Note
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Recompile Utility skips every object which is either of unsupported object type or depends on INVALID object(s) outside of current request (compilation will fail anyway). If object recompilation is not successful, Recompile Utility continues with the next object.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Story"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Story
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If parameter i_display is set to TRUE, Recompile Utility writes the following information to DBMS_OUTPUT buffer:<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="show_version"></A>
+<P CLASS="TYPE_TITLE">
+show_version
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE show_version
+
+</PRE>
+<P CLASS="DESC_TEXT">
+show_version: Assuming caller has set SERVEROUTPUT on or has enabled and is getting from the buffer, this procedure will display DDL_UTIL's current version number (stored internally in the package).<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="get_version"></A>
+<P CLASS="TYPE_TITLE">
+get_version
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_version RETURN NUMBER
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_version: This function will return DDL_UTIL's current version number (stored internally in the package).<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="echo"></A>
+<P CLASS="TYPE_TITLE">
+echo
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE ECHO
+
+</PRE>
+<P CLASS="DESC_TEXT">
+echo: This is only used for testing so I have something to call to &quot;ping&quot; the package and get Oracle's &quot;automatic&quot; recompiler to <A HREF=#recompile>recompile</A>, thus removing the annoying &quot;existing state of package has been discarded&quot; error.<br>
+
+<BR>
+</P>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+</BODY>
+</HTML>

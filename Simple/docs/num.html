@@ -1,0 +1,592 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+ <HEAD>
+ <LINK REL="STYLESHEET" TYPE="text/css" HREF="plsqldoc.css">
+ <TITLE>Package num</TITLE>
+ <META name="object" content="PACKAGE">
+ <META name="name" content="num">
+ <META name="description" content="%author Bill Coulam (bcoulam@dbartisans.com)">
+</HEAD>
+<BODY>
+<TABLE WIDTH="100%"><TR>
+<TD><P ALIGN="LEFT"><STRONG><SMALL></SMALL></STRONG></TD>
+<TD><P ALIGN="RIGHT"><STRONG><SMALL><A HREF="index.html">index</A></SMALL></STRONG></TD>
+</TR></TABLE>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="DESC_TEXT">
+<P CLASS="MAIN_TITLE">Package num</P>
+Contains utility routines to deal with numeric types, values and result sets.<br>
+&nbsp;<br>
+<pre>
+Artisan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Comments
+============ ========= ========================================================
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1997Dec30 Creation
+
+<i>
+&nbsp;&nbsp;&nbsp; __________________________&nbsp; LGPL License&nbsp; ____________________________
+&nbsp;&nbsp;&nbsp; Copyright (C) 1997-2008 Bill Coulam
+
+&nbsp;&nbsp;&nbsp; This library is free software; you can redistribute it and/or
+&nbsp;&nbsp;&nbsp; modify it under the terms of the GNU Lesser General Public
+&nbsp;&nbsp;&nbsp; License as published by the Free Software Foundation; either
+&nbsp;&nbsp;&nbsp; version 2.1 of the License, or (at your option) any later version.
+
+&nbsp;&nbsp;&nbsp; This library is distributed in the hope that it will be useful,
+&nbsp;&nbsp;&nbsp; but WITHOUT ANY WARRANTY; without even the implied warranty of
+&nbsp;&nbsp;&nbsp; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+&nbsp;&nbsp;&nbsp; Lesser General Public License for more details.
+
+&nbsp;&nbsp;&nbsp; You should have received a copy of the GNU Lesser General Public
+&nbsp;&nbsp;&nbsp; License along with this library; if not, write to the Free Software
+&nbsp;&nbsp;&nbsp; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+
+
+<BR>
+<A NAME="Author"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Author
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Bill Coulam (<A HREF="MAILTO:bcoulam@dbartisans.com">bcoulam@dbartisans.com</A>)
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR></TABLE>
+<HR>
+<A NAME="Program units"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Program units
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#bool_to_num">bool_to_num</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+bool_to_num:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#num_to_bool">num_to_bool</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+num_to_bool:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_set_diff">get_set_diff</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_set_diff:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#parse_list">parse_list</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+parse_list: This function takes a delimited list of values and returns a collection of numbers, that can subsequently be used to join in SQL queries or used in other processing.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#make_list">make_list</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+make_list:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#IaNb">IaNb</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+IaNb/IaN:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#IaN">IaN</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#is_oddb">is_oddb</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+is_odd:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#is_odd">is_odd</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#is_evenb">is_evenb</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+is_even:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#is_even">is_even</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Constants"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Constants
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#INTEGER_MASK">INTEGER_MASK</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#FLOAT_MASK">FLOAT_MASK</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="INTEGER_MASK"></A>
+<P CLASS="TYPE_TITLE">
+INTEGER_MASK
+</P>
+<PRE CLASS="DECL_TEXT">
+INTEGER_MASK CONSTANT VARCHAR2(40) := 'FM999G999G999G999';
+</PRE>
+<HR>
+<A NAME="FLOAT_MASK"></A>
+<P CLASS="TYPE_TITLE">
+FLOAT_MASK
+</P>
+<PRE CLASS="DECL_TEXT">
+FLOAT_MASK CONSTANT VARCHAR2(40) := 'FM999G999G999G990D0009';
+</PRE>
+<HR>
+<A NAME="bool_to_num"></A>
+<P CLASS="TYPE_TITLE">
+bool_to_num
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION bool_to_num(i_bool_val IN BOOLEAN) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+bool_to_num:<br>
+&nbsp;Converts a PL/SQL Boolean value to 1, 0 or NULL.<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="num_to_bool"></A>
+<P CLASS="TYPE_TITLE">
+num_to_bool
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION num_to_bool(i_num IN NUMBER) RETURN BOOLEAN
+
+</PRE>
+<P CLASS="DESC_TEXT">
+num_to_bool:<br>
+&nbsp;Converts a numeric value to PL/SQL boolean TRUE or FALSE.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_str&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+A number that represents true or false. Valid values are:<br>
+
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+1&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+and non-zero (will return TRUE)<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+0&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+or NULL (will return FALSE)<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="get_set_diff"></A>
+<P CLASS="TYPE_TITLE">
+get_set_diff
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_set_diff
+(
+   i_ntab1 IN num_tt,
+   i_ntab2 IN num_tt
+) RETURN num_tt
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_set_diff:<br>
+&nbsp;Compares two nested tables of number, returning a list of any number in set one<br>
+&nbsp;that doesn't appear in set two. The datatype of the parameters is that of the<br>
+&nbsp;independent num_tt type created during framework installation.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_ntab1&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+First collection of items to compare<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_ntab2&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Second collection of items to compare<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="General Comments"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+General Comments
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The need for this function is moot starting with 10g, due to the new SUBMULTISET comparison operator for collections.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="parse_list"></A>
+<P CLASS="TYPE_TITLE">
+parse_list
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION parse_list
+(
+   i_string       IN VARCHAR2,
+   i_delimiter    IN VARCHAR2 DEFAULT ',',
+   i_ignore_nulls IN VARCHAR2 DEFAULT 'Y'
+) RETURN num_tt
+
+</PRE>
+<P CLASS="DESC_TEXT">
+parse_list: This function takes a delimited list of values and returns a collection of numbers, that can subsequently be used to join in SQL queries or used in other processing.<br>
+&nbsp;<br>
+If your delimiter is something other than a comma, change the value of the second parameter, i_delimiter, to the delimiter you want. It can handle multiple-character delimiters if you need that, e.g. :: or =&gt; and other such dividers and seperators.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_string&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The actual delimited list that will be broke out into individual numbers in a nested table collection.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_delimiter&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Default is &quot;,&quot;. The delimiter used to split up the numeric tokens.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_ignore_nulls&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If you specify or allow the default of Y, then any consecutive delimiters in the list will be eliminated. For example, 1,2,,4,5 will only return 4 integer values. If you specify N, then consecutive delimiters will be treated as a NULL value that is desired. For example, 1,2,,4,5 will return 5 elements in the nested_table. The third value will be a NULL.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Nested table of numbers.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="make_list"></A>
+<P CLASS="TYPE_TITLE">
+make_list
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION make_list
+(
+   i_coll      IN num_tt,
+   i_delimiter IN VARCHAR2 DEFAULT ','
+) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+make_list:<br>
+&nbsp;Takes an array of numbers and returns a delimited list of the same in a single<br>
+&nbsp;string. The returned string can be up to 32757 bytes long, so the receiving<br>
+&nbsp;variable or column should be the same size, or the result should be truncated<br>
+&nbsp;using SUBSTR.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_coll&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The collection to be joined into a single string, separated by the given delimiter.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_delimiter&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+List delimiter, defaults if not given<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="IaNb"></A>
+<P CLASS="TYPE_TITLE">
+IaNb
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION ianb(i_val IN VARCHAR2) RETURN BOOLEAN
+
+</PRE>
+<P CLASS="DESC_TEXT">
+IaNb/IaN:<br>
+&nbsp;Determines if a given string is a number.<br>
+&nbsp;As in other libraries this function stands for Is a Number. Therefore, if it<br>
+&nbsp;returns true, the value is a number. If it returns false, then it is a string or<br>
+&nbsp;alphanumeric mix.<br>
+&nbsp;<br>
+&nbsp;You may pass a number to this function as well, but you probably already know<br>
+&nbsp;it's a number, so that's not useful. If you pass a number, it will be implicitly<br>
+&nbsp;converted to a string to perform the operation.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_val&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Positive or numerical decimal number. Formatted numbers with commas and decimals are fine. Formatted numbers with $ and - (in the middle like with SSN numbers, are not handled automatically. These will register as str.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+TRUE or 1 if the value is a number. FALSE or 0 if the value is not a number.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Notes"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Notes
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The suffix at the end of each version indicates the type returned by the function. The version which returns a number (using cnst.TRUE and cnst.FALSE) is for use within SQL statements, which aren't allowed to use the PL/SQL BOOLEAN datatype.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="IaN"></A>
+<P CLASS="TYPE_TITLE">
+IaN
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION ian(i_val IN VARCHAR2) RETURN INTEGER
+
+</PRE>
+<HR>
+<A NAME="is_oddb"></A>
+<P CLASS="TYPE_TITLE">
+is_oddb
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION is_oddb(i_num IN NUMBER) RETURN BOOLEAN
+
+</PRE>
+<P CLASS="DESC_TEXT">
+is_odd:<br>
+&nbsp;Returns true if the number is odd, false if it is even.<br>
+
+<BR>
+</P>
+<A NAME="Usage"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<code><br>&nbsp;&nbsp;&nbsp; IF ( <A HREF=#is_odd>num.is_odd</A>(i_list.COUNT) ) THEN...<br> </code>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_num&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Number to check<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+TRUE or 1 if the value is odd. FALSE or 0 if the value is even. NULL if the value is null.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Notes"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Notes
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The suffix at the end of each version indicates the type returned by the function. The version which returns a number (using cnst.TRUE and cnst.FALSE) is for use within SQL statements, which aren't allowed to use the PL/SQL BOOLEAN datatype.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="is_odd"></A>
+<P CLASS="TYPE_TITLE">
+is_odd
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION is_odd(i_num IN NUMBER) RETURN NUMBER
+
+</PRE>
+<HR>
+<A NAME="is_evenb"></A>
+<P CLASS="TYPE_TITLE">
+is_evenb
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION is_evenb(i_num IN NUMBER) RETURN BOOLEAN
+
+</PRE>
+<P CLASS="DESC_TEXT">
+is_even:<br>
+&nbsp;Returns true if the number is even, false if it is odd.<br>
+
+<BR>
+</P>
+<A NAME="Usage"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<code><br>&nbsp;&nbsp;&nbsp; IF ( <A HREF=#is_even>num.is_even</A>(i_list.COUNT) ) THEN...<br> </code>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_num&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Number to check<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+TRUE or 1 if the value is even. FALSE or 0 if the value is odd. NULL if the value is null.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Notes"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Notes
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The suffix at the end of each version indicates the type returned by the function. The version which returns a number (using cnst.TRUE and cnst.FALSE) is for use within SQL statements, which aren't allowed to use the PL/SQL BOOLEAN datatype.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="is_even"></A>
+<P CLASS="TYPE_TITLE">
+is_even
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION is_even(i_num IN NUMBER) RETURN NUMBER
+
+</PRE>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+</BODY>
+</HTML>

@@ -1,0 +1,394 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+ <HEAD>
+ <LINK REL="STYLESHEET" TYPE="text/css" HREF="plsqldoc.css">
+ <TITLE>Package locks</TITLE>
+ <META name="object" content="PACKAGE">
+ <META name="name" content="locks">
+ <META name="description" content="%author Bill Coulam (bcoulam@dbartisans.com)">
+</HEAD>
+<BODY>
+<TABLE WIDTH="100%"><TR>
+<TD><P ALIGN="LEFT"><STRONG><SMALL></SMALL></STRONG></TD>
+<TD><P ALIGN="RIGHT"><STRONG><SMALL><A HREF="index.html">index</A></SMALL></STRONG></TD>
+</TR></TABLE>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="DESC_TEXT">
+<P CLASS="MAIN_TITLE">Package locks</P>
+DML controller for pessimistic locks held in the object-locking table.<br>
+&nbsp;<br>
+&nbsp;<br>
+<pre>
+Artisan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Comments
+============ ========= ========================================================
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1997Dec30 Creation
+
+<i>
+&nbsp;&nbsp;&nbsp; __________________________&nbsp; LGPL License&nbsp; ____________________________
+&nbsp;&nbsp;&nbsp; Copyright (C) 1997-2008 Bill Coulam
+
+&nbsp;&nbsp;&nbsp; This library is free software; you can redistribute it and/or
+&nbsp;&nbsp;&nbsp; modify it under the terms of the GNU Lesser General Public
+&nbsp;&nbsp;&nbsp; License as published by the Free Software Foundation; either
+&nbsp;&nbsp;&nbsp; version 2.1 of the License, or (at your option) any later version.
+
+&nbsp;&nbsp;&nbsp; This library is distributed in the hope that it will be useful,
+&nbsp;&nbsp;&nbsp; but WITHOUT ANY WARRANTY; without even the implied warranty of
+&nbsp;&nbsp;&nbsp; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+&nbsp;&nbsp;&nbsp; Lesser General Public License for more details.
+
+&nbsp;&nbsp;&nbsp; You should have received a copy of the GNU Lesser General Public
+&nbsp;&nbsp;&nbsp; License along with this library; if not, write to the Free Software
+&nbsp;&nbsp;&nbsp; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+
+
+<BR>
+<A NAME="Author"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Author
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Bill Coulam (<A HREF="MAILTO:bcoulam@dbartisans.com">bcoulam@dbartisans.com</A>)
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Story"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Story
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Built-in locking capabilities in Oracle are probably a better choice.
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR></TABLE>
+<HR>
+<A NAME="Program units"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Program units
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_lock">get_lock</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_lock: Takes a lock request for a given object and optionally its unique ID (usually a table name and PK) and sees if a logical lock exists already.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_lock2">get_lock</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_lock3">get_lock</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#read_lock">read_lock</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+read_lock:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#read_lock2">read_lock</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#read_lock3">read_lock</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#del_lock">del_lock</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+del_lock:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#del_lock2">del_lock</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#del_lock3">del_lock</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Constants"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Constants
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#LOCK_GRANTED">LOCK_GRANTED</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+PUBLIC CURSORS
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#LOCK_DENIED">LOCK_DENIED</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="LOCK_GRANTED"></A>
+<P CLASS="TYPE_TITLE">
+LOCK_GRANTED
+</P>
+<PRE CLASS="DECL_TEXT">
+LOCK_GRANTED   CONSTANT PLS_INTEGER := cnst.TRUE;
+</PRE>
+<P CLASS="DESC_TEXT">
+PUBLIC CURSORS<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="LOCK_DENIED"></A>
+<P CLASS="TYPE_TITLE">
+LOCK_DENIED
+</P>
+<PRE CLASS="DECL_TEXT">
+LOCK_DENIED   CONSTANT PLS_INTEGER := cnst.FALSE;
+</PRE>
+<HR>
+<A NAME="get_lock"></A>
+<P CLASS="TYPE_TITLE">
+get_lock
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_lock
+(
+   i_lock_nm   IN app_lock.lock_nm%TYPE,
+   i_locker_id IN app_lock.locker_id%TYPE DEFAULT NULL
+) RETURN INTEGER
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_lock: Takes a lock request for a given object and optionally its unique ID (usually a table name and PK) and sees if a logical lock exists already. If it does, it returns <A HREF=#LOCK_DENIED>LOCK_DENIED</A> to the caller. Otherwise, if no lock is found, it goes ahead and creates a new row in APP_LOCK and returns <A HREF=#LOCK_GRANTED>LOCK_GRANTED</A>.<br>
+&nbsp;<br>
+The caller must decide what to do with the return code. A recommended approach if the lock is denied is to call <A HREF=#read_lock>read_lock</A>. The caller can then use the info to let the lock requestor know who currently owns the existing lock, what machine they're on, how long it's been since the lock was obtained, etc.<br>
+&nbsp;<br>
+The first version is for large-grained, name-only locks. The second version is for fine-grained locks on single PK-identified rows or single identifier items within a lock namespace. The third version is for fine-grained locks on rows in tables with multi-column PKs or rows from IOT tables.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_lock_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Fixed name upon which parties involved in lock coordination have agreed. This could be the name of the screen, process, module, or simply the name of a table. This, combined with the ID or RID, provides the unique key to any given lock.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_obj_id&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Real PK or temporary unique ID for the row, process, item, etc.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_obj_rid&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+ROWID or UROWID for the row being serially locked.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_locker_id&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Usually the user id or name which was used to authenticate to the application which uses this framework. The implication is that either the calling layer, or this PL/SQL layer must be able to obtain the login credentials.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="get_lock2"></A>
+<P CLASS="TYPE_TITLE">
+get_lock
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_lock
+(
+   i_lock_nm   IN app_lock.lock_nm%TYPE,
+   i_obj_id    IN app_lock.locked_obj_id%TYPE,
+   i_locker_id IN app_lock.locker_id%TYPE DEFAULT NULL
+) RETURN INTEGER
+
+</PRE>
+<HR>
+<A NAME="get_lock3"></A>
+<P CLASS="TYPE_TITLE">
+get_lock
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_lock
+(
+   i_lock_nm   IN app_lock.lock_nm%TYPE,
+   i_obj_rid   IN app_lock.locked_obj_rid%TYPE,
+   i_locker_id IN app_lock.locker_id%TYPE DEFAULT NULL
+) RETURN INTEGER
+
+</PRE>
+<HR>
+<A NAME="read_lock"></A>
+<P CLASS="TYPE_TITLE">
+read_lock
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION read_lock(i_lock_nm IN app_lock.lock_nm%TYPE) RETURN app_lock%ROWTYPE
+
+</PRE>
+<P CLASS="DESC_TEXT">
+read_lock:<br>
+&nbsp;The following three routines return all known information about a lock. The<br>
+&nbsp;returned record will be empty if the lock wasn't found. The first version is for<br>
+&nbsp;large-grained, name-only locks. The second version is for fine-grained locks on<br>
+&nbsp;single PK-identified rows or single identifier items within a lock namespace.<br>
+&nbsp;The third version is for fine-grained locks on rows in tables with multi-column<br>
+&nbsp;PKs or rows from IOT tables.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_lock_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Fixed name upon which parties involved in lock coordination have agreed. This could be the name of the screen, process, module, or simply the name of a table. This, combined with the ID or RID, provides the unique key to any given lock.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_obj_id&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Real PK or temporary unique ID for the row, process, item, etc.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_obj_rid&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+ROWID or UROWID for the locked item.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="read_lock2"></A>
+<P CLASS="TYPE_TITLE">
+read_lock
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION read_lock
+(
+   i_lock_nm IN app_lock.lock_nm%TYPE,
+   i_obj_id  IN app_lock.locked_obj_id%TYPE
+) RETURN app_lock%ROWTYPE
+
+</PRE>
+<HR>
+<A NAME="read_lock3"></A>
+<P CLASS="TYPE_TITLE">
+read_lock
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION read_lock
+(
+   i_lock_nm IN app_lock.lock_nm%TYPE,
+   i_obj_rid IN app_lock.locked_obj_rid%TYPE
+) RETURN app_lock%ROWTYPE
+
+</PRE>
+<HR>
+<A NAME="del_lock"></A>
+<P CLASS="TYPE_TITLE">
+del_lock
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE del_lock(i_lock_nm IN app_lock.lock_nm%TYPE)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+del_lock:<br>
+&nbsp;Removes logical lock for given lock name and optional fine-grained ID. Again,<br>
+&nbsp;like <A HREF=#read_lock>read_lock</A>, there are three versions for the different ways of identifying<br>
+&nbsp;a unique, held lock: large-grained object name; object name + (PK or item ID);<br>
+&nbsp;object_name + UROWID.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_lock_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Fixed name upon which parties involved in lock coordination have agreed. This could be the name of the screen, process, module, or simply the name of a table. This, combined with the ID or RID, provides the unique key to any given lock.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_obj_id&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Real PK or temporary unique ID for the row, process, item, etc.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_obj_rid&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+ROWID or UROWID for the locked item.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="del_lock2"></A>
+<P CLASS="TYPE_TITLE">
+del_lock
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE del_lock
+(
+   i_lock_nm IN app_lock.lock_nm%TYPE,
+   i_obj_id  IN app_lock.locked_obj_id%TYPE
+)
+
+</PRE>
+<HR>
+<A NAME="del_lock3"></A>
+<P CLASS="TYPE_TITLE">
+del_lock
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE del_lock
+(
+   i_lock_nm IN app_lock.lock_nm%TYPE,
+   i_obj_rid IN app_lock.locked_obj_rid%TYPE
+)
+
+</PRE>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+</BODY>
+</HTML>

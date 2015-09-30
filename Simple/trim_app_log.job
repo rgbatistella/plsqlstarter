@@ -1,0 +1,40 @@
+-------------------------------------------------------------------------------
+-- Create nightly schedule
+-------------------------------------------------------------------------------
+
+BEGIN
+  SYS.DBMS_SCHEDULER.CREATE_SCHEDULE
+    (
+      schedule_name    => 'DAILY_0100'
+     ,start_date       => TO_TIMESTAMP_TZ('','yyyy/mm/dd hh24:mi:ss.ff tzr')
+     ,repeat_interval  => 'FREQ=DAILY; BYHOUR=1; BYMINUTE=0'
+     ,end_date         => NULL
+     ,comments         => 'This schedule will run at 1:00 AM every day.'
+    );
+END;
+/
+
+-------------------------------------------------------------------------------
+BEGIN
+  SYS.DBMS_SCHEDULER.CREATE_JOB
+    (
+       job_name        => 'TRIM_LOG'
+      ,schedule_name   => 'DAILY_0100'
+      ,job_class       => 'DEFAULT_JOB_CLASS'
+      ,job_type        => 'PLSQL_BLOCK'
+      ,job_action      => 'DECLARE 
+   l_rows_deleted NUMBER := 0; 
+BEGIN 
+   app_log_api.trim_table(o_rows_deleted => l_rows_deleted, 
+                         i_keep_amt => 2, 
+                         i_keep_amt_uom => ''week'', 
+                         i_archive_to_file_flg => ''N''); 
+END;'
+      ,comments        => 'Job to remove old log entries'
+    );
+
+
+  SYS.DBMS_SCHEDULER.ENABLE
+    (name                  => 'TRIM_LOG');
+END;
+/

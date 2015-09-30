@@ -1,0 +1,958 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+ <HEAD>
+ <LINK REL="STYLESHEET" TYPE="text/css" HREF="plsqldoc.css">
+ <TITLE>Package mail</TITLE>
+ <META name="object" content="PACKAGE">
+ <META name="name" content="mail">
+ <META name="description" content="%author Bill Coulam (bcoulam@dbartisans.com)">
+</HEAD>
+<BODY>
+<TABLE WIDTH="100%"><TR>
+<TD><P ALIGN="LEFT"><STRONG><SMALL></SMALL></STRONG></TD>
+<TD><P ALIGN="RIGHT"><STRONG><SMALL><A HREF="index.html">index</A></SMALL></STRONG></TD>
+</TR></TABLE>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="DESC_TEXT">
+<P CLASS="MAIN_TITLE">Package mail</P>
+A container for email-related routines. There are two sets, one dedicated to<br>
+&nbsp;using JavaMail (<A HREF=#send_mail>send_mail</A>) and one dedicated to using UTL_SMTP/UTL_TCP (send,<br>
+&nbsp;begin_mail/end_mail and their attendant attachment routines). The second set is<br>
+&nbsp;commented out to simplify things, but is available if the JavaMail implementation<br>
+&nbsp;doesn't work for you. If you need to send multiple attachments, you'll need the<br>
+&nbsp;second set, since the JavaMail implementation was built to support only one<br>
+&nbsp;attachment.<br>
+&nbsp;<br>
+&nbsp;<br>
+&nbsp;<br>
+&nbsp;First ensure that you have set up the SMTP Host and Default Email Targets<br>
+&nbsp;parameters in the framework's parameter tables (APP_PARM, APP_ENV, APP_ENV_PARM).<br>
+&nbsp;See <A HREF=#send_mail>send_mail</A> below for further info on how to do that.<br>
+&nbsp;<br>
+&nbsp;EXAMPLE 1<br>
+&nbsp;<br>
+&nbsp;To send a simple email:<br>
+&nbsp;<code><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; assuming i_report_txt is a VARCHAR2 parameter filled by a previous query<br>
+&nbsp;&nbsp;&nbsp; <A HREF=#send_mail>mail.send_mail</A>(<A HREF="MAILTO:'mymanager@mycompany.com'">'mymanager@mycompany.com'</A>,'Daily Top SQL', i_report_txt);<br>
+&nbsp;</code>
+&nbsp;<br>
+&nbsp;To send a simple email to many recipients, pass in comma-delimited lists of<br>
+&nbsp;email addresses in the To, Reply-To, Cc, and Bcc fields. These lists could<br>
+&nbsp;be hard-coded, stored in the parameter tables, or dynamically generated using<br>
+&nbsp;the roles and/or environment data structures in the framework (you could have<br>
+&nbsp;an email list parameter that is different in prod, dev and test for example).<br>
+&nbsp;<br>
+&nbsp;EXAMPLE 2<br>
+&nbsp;<br>
+&nbsp;Here we send a report to a list of directors, copying a list of managers, with<br>
+&nbsp;a high priority, asking for email processing only if this is a production or<br>
+&nbsp;staging database.<br>
+&nbsp;<code><br>
+&nbsp;&nbsp;&nbsp; mail.send_mail(i_email_to =&gt; i_director_list, i_email_subject =&gt; 'Monthly Downtime',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i_email_body =&gt; i_report_txt, i_email_cc =&gt; i_manager_list,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i_email_extra =&gt; 'X-Priority: 1', i_env_list =&gt; 'Production,Staging');<br>
+&nbsp;</code>
+&nbsp;<br>
+&nbsp;EXAMPLE 3<br>
+&nbsp;<br>
+&nbsp;Let's assume you have a file on the database in a directory to which you've been<br>
+&nbsp;granted permissions to read or read/write, and you need to send that file as an<br>
+&nbsp;attachment. You would convert the file to BLOB and pass it in as the attachment.<br>
+&nbsp;<code><br>
+&nbsp;&nbsp;&nbsp; mail.send_mail(i_email_to =&gt; 'dbas@mycompany.com', i_email_subject 'Backup Report',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i_email_body =&gt; 'See the attached report',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i_attach =&gt; io.convert_file_to_blob(l_date_prefix||'_rman_bkp.rpt','RPT_DIR'),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i_attach_file_nm =&gt; l_date_prefix||'_rman_bkp.rpt');<br>
+&nbsp;</code>
+&nbsp;<br>
+&nbsp;EXAMPLE 4<br>
+&nbsp;<br>
+&nbsp;If you have some BLOB content in memory, or stored in a column somewhere, you just<br>
+&nbsp;pass it directly via the i_attach parameter. But if your content is stored in<br>
+&nbsp;memory or a column as a CLOB, it will need to be converted to BLOB first. And<br>
+&nbsp;because attachments need file names, you'll need to invent a file name for it:<br>
+&nbsp;<code><br>
+&nbsp;&nbsp;&nbsp; mail.send_mail(i_email_to =&gt; 'accountants@mycompany.com', i_email_subject 'Signature Violations!',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i_email_body =&gt; 'The attached accounts were flagged with signature violations.',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i_attach =&gt; util.convert_clob_to_blob(i_sig_viol_clob),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i_attach_file_nm =&gt; 'sig_violations.rtf');<br>
+&nbsp;</code>
+&nbsp;<br>
+&nbsp;<br>
+&nbsp;Recently, this library was completely redone, to take advantage of UTL_SMTP,<br>
+&nbsp;UTL_TCP, UTL_HTTP and Java in the database, which can be had from 9i onward. This<br>
+&nbsp;redesign adds the ability to send email directly from within PL/SQL and get<br>
+&nbsp;responses back from the SMTP server. I also synthesized about seven different<br>
+&nbsp;sets of example code found on the web (most of which were too complex or buggy)<br>
+&nbsp;in order to provide the ability to write multi-part emails, emails with text<br>
+&nbsp;or binary attachments, etc.<br>
+&nbsp;<br>
+&nbsp;The best resource was the sample code offered by Oracle at<br>
+&nbsp;<A HREF="http://www.oracle.com/technology/sample_code/tech/pl_sql/htdocs/Utl_Smtp_Sample.html">http://www.oracle.com/technology/sample_code/tech/pl_sql/htdocs/Utl_Smtp_Sample.html</A>
+&nbsp;<br>
+&nbsp;If you are on 10g, you have the additional option of using UTL_MAIL for the<br>
+&nbsp;implementation of the routines in this library. To use UTL_MAIL you need to<br>
+&nbsp;install it as SYS:<br>
+&nbsp;<br>
+&nbsp;<code><br>
+&nbsp;&nbsp; CONN sys/password AS SYSDBA<br>
+&nbsp;&nbsp; start $ORACLE_HOME/rdbms/admin/utlmail.sql<br>
+&nbsp;&nbsp; start $ORACLE_HOME/rdbms/admin/prvtmail.plb<br>
+&nbsp;</code>
+&nbsp;<br>
+&nbsp;and then set your SMTP init parameter and bounce the database:<br>
+&nbsp;<br>
+&nbsp;<code><br>
+&nbsp;&nbsp; CONN sys/password AS SYSDBA<br>
+&nbsp;&nbsp; ALTER SYSTEM SET smtp_out_server='smtp.domain.com' SCOPE=SPFILE;<br>
+&nbsp;&nbsp; SHUTDOWN IMMEDIATE<br>
+&nbsp;&nbsp; STARTUP<br>
+&nbsp;</code>
+&nbsp;<br>
+&nbsp;You would then refactor the innards of <A HREF=#send_mail>send_mail</A> to use UTL_MAIL instead.<br>
+&nbsp;<br>
+<pre>
+Artisan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Comments
+============ ========= =========================================================
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1997Dec30 Creation
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2008May08 Complete rewrite.
+
+</pre>
+&nbsp;<br>
+<i>
+&nbsp;&nbsp;&nbsp; __________________________&nbsp; LGPL License&nbsp; ____________________________<br>
+&nbsp;&nbsp;&nbsp; Copyright (C) 1997-2008 Bill Coulam<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp; This library is free software; you can redistribute it and/or<br>
+&nbsp;&nbsp;&nbsp; modify it under the terms of the GNU Lesser General Public<br>
+&nbsp;&nbsp;&nbsp; License as published by the Free Software Foundation; either<br>
+&nbsp;&nbsp;&nbsp; version 2.1 of the License, or (at your option) any later version.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp; This library is distributed in the hope that it will be useful,<br>
+&nbsp;&nbsp;&nbsp; but WITHOUT ANY WARRANTY; without even the implied warranty of<br>
+&nbsp;&nbsp;&nbsp; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU<br>
+&nbsp;&nbsp;&nbsp; Lesser General Public License for more details.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp; You should have received a copy of the GNU Lesser General Public<br>
+&nbsp;&nbsp;&nbsp; License along with this library; if not, write to the Free Software<br>
+&nbsp;&nbsp;&nbsp; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA<br>
+
+<BR>
+<A NAME="Author"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Author
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Bill Coulam (<A HREF="MAILTO:bcoulam@dbartisans.com">bcoulam@dbartisans.com</A>)
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Usage"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Since this package appears overly complex, I wanted to provide some sample usage here at the top to indicate how simple it can be to send an email from within the database.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Note"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Note
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Valid formats for email addresses are: <A HREF="MAILTO:user_id@mycompany.com">user_id@mycompany.com</A> &quot;Full Name&quot; &lt;A HREF=&quot;MAILTO:&lt;user_id@mycompany.com&gt;&quot;&gt;&lt;user_id@mycompany.com&gt;</A> Full Name &lt;A HREF=&quot;MAILTO:&lt;user_id@mycompany.com&gt;&quot;&gt;&lt;user_id@mycompany.com&gt;</A>
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Story"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Story
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This library was originally written for a lowest-common denominator 8i environment.
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR></TABLE>
+<HR>
+<A NAME="Program units"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Program units
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_targets">get_targets</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_targets:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#is_smtp_server_avail">is_smtp_server_avail</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+is_smtp_server_avail
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#set_targets">set_targets</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+set_targets:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#upd_email">upd_email</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+upd_email:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#store_mail">store_mail</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+store_mail:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#write_mail">write_mail</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+write_mail:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#send_mail">send_mail</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+send_mail:
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Constants"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Constants
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#DEFAULT_EMAIL_TARGETS">DEFAULT_EMAIL_TARGETS</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+PUBLIC CONSTANTS, VARIABLES, EXCEPTIONS, ETC.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#TCP_TIMEOUT_SECS">TCP_TIMEOUT_SECS</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#JAVA_MAILER_ID">JAVA_MAILER_ID</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+SMTP_MAILER_ID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CONSTANT VARCHAR2(256) := 'Oracle UTL_SMTP';
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#TARGET_SMTP">TARGET_SMTP</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#TARGET_FILE">TARGET_FILE</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#TARGET_TABLE">TARGET_TABLE</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#CONN_OK">CONN_OK</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The definitions of SMTP reply codes can be found in RFC 821, 2821 and 1985 In general the first digit's meanings are:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#SMTP_OK">SMTP_OK</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+positive mail system response
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="DEFAULT_EMAIL_TARGETS"></A>
+<P CLASS="TYPE_TITLE">
+DEFAULT_EMAIL_TARGETS
+</P>
+<PRE CLASS="DECL_TEXT">
+DEFAULT_EMAIL_TARGETS CONSTANT app_parm.parm_nm%TYPE := 'Default Email Targets';
+</PRE>
+<P CLASS="DESC_TEXT">
+PUBLIC CONSTANTS, VARIABLES, EXCEPTIONS, ETC.<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="TCP_TIMEOUT_SECS"></A>
+<P CLASS="TYPE_TITLE">
+TCP_TIMEOUT_SECS
+</P>
+<PRE CLASS="DECL_TEXT">
+TCP_TIMEOUT_SECS CONSTANT PLS_INTEGER := 30;
+</PRE>
+<HR>
+<A NAME="JAVA_MAILER_ID"></A>
+<P CLASS="TYPE_TITLE">
+JAVA_MAILER_ID
+</P>
+<PRE CLASS="DECL_TEXT">
+JAVA_MAILER_ID        CONSTANT VARCHAR2(256) := 'JavaMail in Oracle';
+</PRE>
+<P CLASS="DESC_TEXT">
+SMTP_MAILER_ID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CONSTANT VARCHAR2(256) := 'Oracle UTL_SMTP';<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="TARGET_SMTP"></A>
+<P CLASS="TYPE_TITLE">
+TARGET_SMTP
+</P>
+<PRE CLASS="DECL_TEXT">
+TARGET_SMTP CONSTANT VARCHAR2(10) := 'SMTP';
+</PRE>
+<HR>
+<A NAME="TARGET_FILE"></A>
+<P CLASS="TYPE_TITLE">
+TARGET_FILE
+</P>
+<PRE CLASS="DECL_TEXT">
+TARGET_FILE CONSTANT VARCHAR2(10) := 'File';
+</PRE>
+<HR>
+<A NAME="TARGET_TABLE"></A>
+<P CLASS="TYPE_TITLE">
+TARGET_TABLE
+</P>
+<PRE CLASS="DECL_TEXT">
+TARGET_TABLE CONSTANT VARCHAR2(10) := 'Table';
+</PRE>
+<HR>
+<A NAME="CONN_OK"></A>
+<P CLASS="TYPE_TITLE">
+CONN_OK
+</P>
+<PRE CLASS="DECL_TEXT">
+CONN_OK CONSTANT PLS_INTEGER := 220;
+</PRE>
+<P CLASS="DESC_TEXT">
+The definitions of SMTP reply codes can be found in RFC 821, 2821 and 1985 In general the first digit's meanings are:<br>
+&nbsp;1 positive (preliminary), 2 positive (completion), 3 positive (intermediate),<br>
+&nbsp;4 negative (transient), 5 negative (permanent)<br>
+The second digit's meanings are:<br>
+&nbsp;0 syntax, 1 information, 2 connection, 3 &amp; 4 unspecified, 5 mail system<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="SMTP_OK"></A>
+<P CLASS="TYPE_TITLE">
+SMTP_OK
+</P>
+<PRE CLASS="DECL_TEXT">
+SMTP_OK CONSTANT PLS_INTEGER := 250;
+</PRE>
+<P CLASS="DESC_TEXT">
+positive mail system response<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="get_targets"></A>
+<P CLASS="TYPE_TITLE">
+get_targets
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_targets RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_targets:<br>
+&nbsp;Returns the current target(s) to which emails are being routed.<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="is_smtp_server_avail"></A>
+<P CLASS="TYPE_TITLE">
+is_smtp_server_avail
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION is_smtp_server_avail RETURN BOOLEAN
+
+</PRE>
+<P CLASS="DESC_TEXT">
+is_smtp_server_avail<br>
+&nbsp;Function to determine if the SMTP server is available and accepting requests.<br>
+&nbsp;The address of the SMTP server is configured by the application's &quot;SMTP Host&quot;<br>
+&nbsp;parameter in APP_ENV_PARM.<br>
+&nbsp;<br>
+&nbsp;<br>
+&nbsp;<br>
+%warn<br>
+&nbsp;In my initial tests with this routine, the TCP connection would arbitrarily<br>
+&nbsp;hang. Most of the time this function returned in milliseconds. Sometimes it<br>
+&nbsp;would timeout. I have no idea what is causing that.<br>
+
+<BR>
+</P>
+<A NAME="Usage"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<code><br>&nbsp; IF (is_smtp_server_avail) THEN<br>&nbsp;&nbsp;&nbsp;&nbsp; <A HREF=#send_mail>send_mail</A>(...);<br>&nbsp; END IF:<br> </code>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+TRUE if server could be reached and accepted a HELO, FALSE otherwise.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Caveats"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Caveats
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The innards of this routine assume the SMTP port is 25. If it is anything other, change the global constant in the body of this package, or use the parameter tables and the PARMS package to table-drive the port per environment.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Story"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Story
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Concept of this routine was inspired by Barry Chase's MAIL_TOOLS.query_server.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="set_targets"></A>
+<P CLASS="TYPE_TITLE">
+set_targets
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE set_targets
+(
+   i_smtp  IN BOOLEAN DEFAULT FALSE,
+   i_table IN BOOLEAN DEFAULT FALSE,
+   i_file  IN BOOLEAN DEFAULT FALSE
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+set_targets:<br>
+&nbsp;Routine meant to temporarily override the default email targets specified by<br>
+&nbsp;the parameter &quot;Default Email Targets&quot; in APP_ENV_PARM. See <A HREF=#send_mail>send_mail</A> for<br>
+&nbsp;further info on configuring this parameter.<br>
+
+<BR>
+</P>
+<A NAME="Usage"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<code><br>&nbsp;&nbsp;&nbsp; BEGIN<br> <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; mail.set_targets(FALSE,TRUE,TRUE);<br> <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; OR optionally use named notation, like so:<br> <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; mail.set_targets(i_smtp =&gt; FALSE, i_table&nbsp; =&gt; TRUE);<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <A HREF=#send_mail>mail.send_mail</A>(...); -- uses overriden targets when routing email<br> <br>&nbsp;&nbsp;&nbsp; END;<br>&nbsp; <code><br> <br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_smtp&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+TRUE means email messages will be routed to the SMTP server.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_table&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+TRUE means email messages will be routed to the APP_EMAIL[_DOC] table.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+TRUE means email messages will be routed to the email file directory.<br> <br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Note"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Note
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If &quot;Default Email Targets&quot; isn't configured in APP_ENV_PARM for the environment, AND set_targets has not been called, send_email will route all emails only to table.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Story"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Story
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If you need to override the targets set by Default Email Targets, you call this routine with your desired targets set to TRUE. One call to set_targets at the top of the driving procedure is usually sufficient for the entire session. If, in the middle of your code you have a special block that needs to go to a different target than that set for the rest of the session, you may call <A HREF=#write_mail>mail.write_mail</A> or <A HREF=#store_mail>mail.store_mail</A> directly, both of which ignore configured or overriden targets.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="upd_email"></A>
+<P CLASS="TYPE_TITLE">
+upd_email
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE upd_email
+(
+   i_email_id   IN app_email.email_id%TYPE,
+   i_new_status IN app_email.sent_status%TYPE,
+   i_smtp_error IN app_email.smtp_error%TYPE DEFAULT NULL
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+upd_email:<br>
+&nbsp; Will update the status and error message (if any) for a given email ID.<br>
+&nbsp;<br>
+&nbsp; I'm anticipating that some shops will want to build a dedicated emailer, external<br>
+&nbsp; to Oracle, that will read the Not Sent and Error emails in APP_EMAIL and attempt<br>
+&nbsp; to send them. When attempts are successful, the emailer will call this routine<br>
+&nbsp; to update the Status to &quot;Sent&quot;. When they are not sent, they should pass in<br>
+&nbsp; &quot;Error&quot; and fill i_smtp_error with as much context about the error as possible.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_email_id&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The ID from app_email. Assumes it was read earlier.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_new_status&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Valid values are Not Sent, Sent, Send Pending, and Error.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_smtp_error&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If i_new_status is Error, make sure to pass in the SMTP error code and error message so the problem can be researched.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="store_mail"></A>
+<P CLASS="TYPE_TITLE">
+store_mail
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE store_mail
+(
+   i_email_to      IN app_email.email_to%TYPE,
+   i_email_subject IN app_email.email_subject%TYPE,
+   i_email_body    IN CLOB,
+   -- the remaining parameters below are all optional
+   i_email_from     IN app_email.email_from%TYPE DEFAULT NULL,
+   i_email_replyto  IN app_email.email_replyto%TYPE DEFAULT NULL,
+   i_email_cc       IN app_email.email_cc %TYPE DEFAULT NULL,
+   i_email_bcc      IN app_email.email_bcc%TYPE DEFAULT NULL,
+   i_email_extra    IN app_email.email_extra %TYPE DEFAULT NULL,
+   i_attach         IN BLOB DEFAULT NULL,
+   i_attach_file_nm IN VARCHAR2 DEFAULT NULL,
+   i_env_list       IN VARCHAR2 DEFAULT NULL,
+   -- the next four are only used by <A HREF=#send_mail>send_mail</A>
+   i_email_id    IN app_email.email_id%TYPE DEFAULT NULL,
+   i_sent_dt     IN app_email.sent_dt%TYPE DEFAULT NULL,
+   i_sent_status IN app_email.sent_status%TYPE DEFAULT 'Not Sent',
+   i_smtp_error  IN app_email.smtp_error%TYPE DEFAULT NULL
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+store_mail:<br>
+&nbsp;Records an email record in the APP_EMAIL table (and APP_EMAIL_DOC if there is<br>
+&nbsp;an attachment).<br>
+&nbsp;<br>
+&nbsp;<br>
+&nbsp;Another use for store_mail is to have a DB-queryable record of all emails sent<br>
+&nbsp;from the database. If your email traffic is heavy, this could take considerable<br>
+&nbsp;space. You would then want to design an automated job to periodically archive<br>
+&nbsp;and purge old email.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_email_id&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Only used when store_mail is being called by <A HREF=#send_mail>send_mail</A>.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_sent_dt&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Only used by <A HREF=#send_mail>send_mail</A> after an SMTP error.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_sent_status&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Only used by <A HREF=#send_mail>send_mail</A> after an SMTP error.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_smtp_error&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Only used by <A HREF=#send_mail>send_mail</A> after an SMTP error.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="See also"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+See also
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<A HREF=#send_mail>send_mail</A> for parameter list documentation<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Caveats"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Caveats
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+store_mail ignores the Default Email Targets parameter, recording the email in table only.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Story"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Story
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This is in anticipation of an application that requires lots of email traffic where calling <A HREF=#send_mail>send_mail</A> would be too slow. To increase throughput, the idea is that emails would be written to a table in batches. Then a separate application -- perhaps a few parallel cron-spawned processes -- could connect to Oracle, read a chunk of emails (marking sent_status as Send Pending to prevent parallel processes from duplicating work), send them with one open SMTP connection per process, then mark the emails in app_email as Sent with the timestamp (using <A HREF=#upd_email>upd_email</A>).<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="write_mail"></A>
+<P CLASS="TYPE_TITLE">
+write_mail
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE write_mail
+(
+   i_email_to      IN app_email.email_to%TYPE,
+   i_email_subject IN app_email.email_subject%TYPE,
+   i_email_body    IN CLOB,
+   -- the remaining parameters below are all optional
+   i_email_from    IN app_email.email_from%TYPE DEFAULT NULL,
+   i_email_replyto IN app_email.email_replyto%TYPE DEFAULT NULL,
+   i_email_cc      IN app_email.email_cc %TYPE DEFAULT NULL,
+   i_email_bcc     IN app_email.email_bcc%TYPE DEFAULT NULL,
+   i_email_extra   IN app_email.email_extra %TYPE DEFAULT NULL,
+   i_env_list      IN VARCHAR2 DEFAULT NULL,
+   i_email_id      IN app_email.email_id%TYPE DEFAULT NULL
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+write_mail:<br>
+&nbsp;Writes the email as a file to the directory specified by the Default Email<br>
+&nbsp;File Directory parameter.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_email_id&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Only used when write_mail is being called by <A HREF=#send_mail>send_mail</A>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="See also"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+See also
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<A HREF=#send_mail>send_mail</A> for parameter list documentation<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Note"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Note
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This is the only version of the mail routines that does not accept binary attachments.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Caveats"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Caveats
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+write_mail ignores the Default Email Targets parameter, writing the email only in the file system.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Future Work and Ideas"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Future Work and Ideas
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+It could be expanded someday to support attachments using UTL_RAW and such to write the binary data to separate files. The files would have to be related by reference within the mail message, and by shared email_id in the file names.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="send_mail"></A>
+<P CLASS="TYPE_TITLE">
+send_mail
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE send_mail
+(
+   i_email_to      IN app_email.email_to%TYPE,
+   i_email_subject IN app_email.email_subject%TYPE,
+   i_email_body    IN CLOB,
+   -- the remaining parameters below are all optional
+   i_email_from     IN app_email.email_from%TYPE DEFAULT NULL,
+   i_email_replyto  IN app_email.email_replyto%TYPE DEFAULT NULL,
+   i_email_cc       IN app_email.email_cc %TYPE DEFAULT NULL,
+   i_email_bcc      IN app_email.email_bcc%TYPE DEFAULT NULL,
+   i_email_extra    IN app_email.email_extra %TYPE DEFAULT NULL,
+   i_attach         IN BLOB DEFAULT NULL,
+   i_attach_file_nm IN VARCHAR2 DEFAULT NULL,
+   i_env_list       IN VARCHAR2 DEFAULT NULL
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+send_mail:<br>
+&nbsp;Formats and sends an email message using the JavaMail API. May also record the<br>
+&nbsp;email message in a file and the APP_EMAIL[_DOC] table depending on the email<br>
+&nbsp;targets specified by the &quot;Default Email Targets&quot; parameter for a given<br>
+&nbsp;environment.<br>
+&nbsp;<br>
+&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp; SMTP=Y|N,Table=Y|N,File=Y|N<br>
+&nbsp;<br>
+&nbsp;If this parameter is not found, emails will only be written to table, not sent<br>
+&nbsp;to SMTP or written to file. This is because we are guessing that if the<br>
+&nbsp;Default Email Targets has not been configured, then other things, like a file<br>
+&nbsp;directory and SMTP server haven't been properly set up yet either, but the<br>
+&nbsp;framework CAN count on the APP_EMAIL table being present.<br>
+&nbsp;<br>
+&nbsp;If the Default Email Targets parameter is found, then it will be parsed and<br>
+&nbsp;emails will be routed to the specified targets.<br>
+&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; For example, if a caller were to pass:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i_env_list =&gt; 'Production, Staging'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; send_mail would determine if the current database it is on is<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; a production or staging DB (using APP_ENV_VW) and ignore the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; email altogether if it were running on dev, test, build, etc.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_email_to&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Required. Comma-delimited list of recipients.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_email_subject&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Required. The standard email Subject header.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_email_body&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Required. The standard email Body header.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_email_from&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Optional. Ideally filled with a valid email address.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_email_replyto&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Optional. Single or comma-delimited list of reply-to addresses.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_email_cc&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Optional. Comma-delimited list of carbon-copy recipients.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_email_bcc&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Optional. Comma-delimited list of blind carbon-copy recipients.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_email_extra:&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Optional extra smtp headers. These have the form of: &quot;field: value&quot; where field begins with &quot;X-&quot;, e.g. X-Priority: 1 Most X- header fields depend on the particular email gateway and client(s) used by each company.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_attach&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Email attachment in binary format. It is anticipated that most email attachments, if used at all, will be rich text or Word docs, Excel docs, PDF docs and images. If your attachment is textual, it can be converted to BLOB fairly easily. If your attachment is already a file on the database host file system, read and convert it to BLOB using io.convert_file_to_blob. If your attachment is a CLOB column or in-memory variable, convert it to BLOB using util.convert_clob_to_blob;<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_attach_file_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the attachment which the user's email reader will see and use, e.g. &quot;monthly_report.pdf&quot;. Correct file extensions are very important as we transparently determine the MIME type of the attachment using the extension (%see util.get_mime_type for the list and algorithm).<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_env_list&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Optional comma-delimited list of valid environments (see APP_ENV.env_nm) where this email should be processed. If this is NULL or empty, the email will be processed on all environments. If a list of environments is given, the email will only be processed if this session is running on one of the specified environments.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Note"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Note
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Only the first three fields are required. If the From is empty, it will be filled by calling env.get_schema_email_address, which is not a valid email address, but does at least let the recipients know where the email came from.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Story"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Story
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The syntax for Default Email Targets is<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+</BODY>
+</HTML>

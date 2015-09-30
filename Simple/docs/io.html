@@ -1,0 +1,1516 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+ <HEAD>
+ <LINK REL="STYLESHEET" TYPE="text/css" HREF="plsqldoc.css">
+ <TITLE>Package io</TITLE>
+ <META name="object" content="PACKAGE">
+ <META name="name" content="io">
+ <META name="description" content="%author">
+</HEAD>
+<BODY>
+<TABLE WIDTH="100%"><TR>
+<TD><P ALIGN="LEFT"><STRONG><SMALL></SMALL></STRONG></TD>
+<TD><P ALIGN="RIGHT"><STRONG><SMALL><A HREF="index.html">index</A></SMALL></STRONG></TD>
+</TR></TABLE>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="DESC_TEXT">
+<P CLASS="MAIN_TITLE">Package io</P>
+A collection of routines related to reading and writing files on the DB host<br>
+&nbsp;operating system.<br>
+&nbsp;<br>
+&nbsp;<br>
+&nbsp;<br>
+&nbsp;<br>
+<pre>
+Artisan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Comments
+============ ========= ========================================================
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1997Dec30 Creation
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2008Jan13 Moved the default directory function from package &quot;C&quot; to
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; here.
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2008Feb05 Added a few functions and simplified others.
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2008May07 Added <A HREF=#convert_file_to_blob>convert_file_to_blob</A>
+
+</pre>
+&nbsp;<br>
+<i>
+&nbsp;&nbsp;&nbsp; __________________________&nbsp; LGPL License&nbsp; ____________________________<br>
+&nbsp;&nbsp;&nbsp; Copyright (C) 1997-2008 Bill Coulam<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp; This library is free software; you can redistribute it and/or<br>
+&nbsp;&nbsp;&nbsp; modify it under the terms of the GNU Lesser General Public<br>
+&nbsp;&nbsp;&nbsp; License as published by the Free Software Foundation; either<br>
+&nbsp;&nbsp;&nbsp; version 2.1 of the License, or (at your option) any later version.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp; This library is distributed in the hope that it will be useful,<br>
+&nbsp;&nbsp;&nbsp; but WITHOUT ANY WARRANTY; without even the implied warranty of<br>
+&nbsp;&nbsp;&nbsp; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU<br>
+&nbsp;&nbsp;&nbsp; Lesser General Public License for more details.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp; You should have received a copy of the GNU Lesser General Public<br>
+&nbsp;&nbsp;&nbsp; License along with this library; if not, write to the Free Software<br>
+&nbsp;&nbsp;&nbsp; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA<br>
+
+<BR>
+<A NAME="Author"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Author
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Bill Coulam (<A HREF="MAILTO:bcoulam@dbartisans.com">bcoulam@dbartisans.com</A>)
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Design Notes"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Design Notes
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Meant to be the interface to the world outside Oracle.
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Future Feature Exploration"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Future Feature Exploration
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Routines to read and write BLOB columns from and to binary files.<br> Routines to read and write Unicode data.<br> Routine to receive an array of lines and write them before flush and close.<br> Routine to read all lines from a file and return an array.<br> Routine to read all lines within a given range.
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Pre-requisites"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Pre-requisites
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This package will not function at all, unless you have a &quot;Default IO Directory&quot; and &quot;Default IO File Name&quot; parameter defined for each application.
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR></TABLE>
+<HR>
+<A NAME="Program units"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Program units
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_default_dir">get_default_dir</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_default_dir:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#set_default_dir">set_default_dir</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+set_default_dir:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_default_filename">get_default_filename</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_default_filename:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#set_default_filename">set_default_filename</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+set_default_filename:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#file_exists">file_exists</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+file_exists:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#file_length_lines">file_length_lines</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+file_length_lines:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#file_length_bytes">file_length_bytes</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+file_length_bytes:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#read_line">read_line</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+read_line:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#convert_file_to_blob">convert_file_to_blob</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+convert_file_to_blob:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#write_line">write_line</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+write_line:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#write_lines">write_lines</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+write_lines:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#rename_file">rename_file</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+rename_file:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#delete_file">delete_file</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+delete_file: Overlay for UTL_FILE.fremove.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#copy_file">copy_file</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+copy_file: Copies a file.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#move_file">move_file</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+move_file: Moves the given file from one location to another.
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#get_file_props">get_file_props</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+get_file_props:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#p">p</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+p[rint]:
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#p2">p</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#p3">p</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#p4">p</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#p5">p</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#p6">p</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#p7">p</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Exceptions"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Exceptions
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gx_file_already_exists">gx_file_already_exists</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Constants"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Constants
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#MAX_FILE_LINE_LEN">MAX_FILE_LINE_LEN</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="gx_file_already_exists"></A>
+<P CLASS="TYPE_TITLE">
+gx_file_already_exists
+</P>
+<PRE CLASS="DECL_TEXT">
+gx_file_already_exists EXCEPTION;
+</PRE>
+<HR>
+<A NAME="MAX_FILE_LINE_LEN"></A>
+<P CLASS="TYPE_TITLE">
+MAX_FILE_LINE_LEN
+</P>
+<PRE CLASS="DECL_TEXT">
+MAX_FILE_LINE_LEN CONSTANT INTEGER := 32767;
+</PRE>
+<HR>
+<A NAME="get_default_dir"></A>
+<P CLASS="TYPE_TITLE">
+get_default_dir
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_default_dir RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_default_dir:<br>
+&nbsp;Returns default directory used for file operations on the DB host system.<br>
+
+<BR>
+</P>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The default directory name. This is a 9i-style Oracle DIRECTORY object.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="set_default_dir"></A>
+<P CLASS="TYPE_TITLE">
+set_default_dir
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE set_default_dir(i_default_dir IN VARCHAR2)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+set_default_dir:<br>
+&nbsp;Overrides the default directory used for file operations on the DB host system.<br>
+&nbsp;This is useful if you will be a doing a lot of write operations to file and<br>
+&nbsp;don't wish to pass the Directory name in on every call. Routine<br>
+&nbsp;logs.set_targets uses this procedure for this very reason.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_default_dir&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The new default directory name. This must be a valid Oracle DIRECTORY object.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="get_default_filename"></A>
+<P CLASS="TYPE_TITLE">
+get_default_filename
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION get_default_filename RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_default_filename:<br>
+&nbsp;Returns default filename used for file operations on the DB host system, when<br>
+&nbsp;no other filename is presented by the caller for use.<br>
+
+<BR>
+</P>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The default filename. This is either set up in APP_PARM, or if not configured, defaults to the date + DB Name + current schema + .log<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="set_default_filename"></A>
+<P CLASS="TYPE_TITLE">
+set_default_filename
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE set_default_filename(i_default_filename IN VARCHAR2)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+set_default_filename:<br>
+&nbsp;Overrides default filename used for file operations on the DB host system, when<br>
+&nbsp;no other filename is presented by the caller for use.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_default_filename&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The new default filename. This must be a valid filename plus extension, e.g. myapp.log<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="file_exists"></A>
+<P CLASS="TYPE_TITLE">
+file_exists
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION file_exists
+(
+   i_file_nm  IN VARCHAR DEFAULT <A HREF=#get_default_filename>get_default_filename</A>,
+   i_file_dir IN VARCHAR2 DEFAULT <A HREF=#get_default_dir>get_default_dir</A>
+) RETURN BOOLEAN
+
+</PRE>
+<P CLASS="DESC_TEXT">
+file_exists:<br>
+&nbsp;Uses utl_file.fgetattr to determine if a file exists.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The filename must be a valid filename for your DB OS. Don't use spaces and special characters (except underscore) unless necessary. If you do, be sure to test well.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file_dir&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If not provided, the file will be written to the default IO directory. If you specify a directory, it must already exist and have proper permissions set up. Don't end this string in a slash.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+TRUE&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If the file exists.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+FALSE&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If the file cannot be found in the directory specified, and/or by the filename given.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Pre-requisites"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Pre-requisites
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The directory needs to exist.<br> The user must have been granted READ privilege to the directory.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="file_length_lines"></A>
+<P CLASS="TYPE_TITLE">
+file_length_lines
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION file_length_lines
+(
+   i_file_nm  IN VARCHAR2 DEFAULT <A HREF=#get_default_filename>get_default_filename</A>,
+   i_file_dir IN VARCHAR2 DEFAULT <A HREF=#get_default_dir>get_default_dir</A>
+) RETURN INTEGER
+
+</PRE>
+<P CLASS="DESC_TEXT">
+file_length_lines:<br>
+&nbsp;Returns the number of lines in the given file.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The filename must be a valid filename for your DB OS. Don't use spaces and special characters (except underscore) unless necessary. If you do, be sure to test well.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file_dir&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If not provided, the file will be written to the default IO directory. If you specify a directory, it must already exist and have proper permissions set up. Don't end this string in a slash.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Raises"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Raises
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+UTL_FILE.INVALID_FILENAME&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Invalid filename. Check spelling.<br> UTL_FILE.INVALID_PATH Invalid path. Checking spelling and existence of directory.<br> UTL_FILE.INVALID_OPERATION Invalid operation.<br> UTL_FILE.READ_ERROR Read error.<br> UTL_FILE.ACCESS_DENIED Access denied.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+0&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If the file exists, but has no lines.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+#&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Number of lines in the file.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Pre-requisites"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Pre-requisites
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The directory needs to exist.<br> The user must have been granted READ privilege to the directory.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="file_length_bytes"></A>
+<P CLASS="TYPE_TITLE">
+file_length_bytes
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION file_length_bytes
+(
+   i_file_nm  IN VARCHAR DEFAULT <A HREF=#get_default_filename>get_default_filename</A>,
+   i_file_dir IN VARCHAR2 DEFAULT <A HREF=#get_default_dir>get_default_dir</A>
+) RETURN NUMBER
+
+</PRE>
+<P CLASS="DESC_TEXT">
+file_length_bytes:<br>
+&nbsp;Uses utl_file.fgetattr to determine file length in terms of bytes. You may want<br>
+&nbsp;to call <A HREF=#file_exists>io.file_exists</A> before calling this function to ensure the named file<br>
+&nbsp;can be found.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The filename must be a valid filename for your DB OS. Don't use spaces and special characters (except underscore) unless necessary. If you do, be sure to test well.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file_dir&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If not provided, the file will be written to the default IO directory. If you specify a directory, it must already exist and have proper permissions set up. Don't end this string in a slash.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Returns the length of the file in bytes.<br> Returns 0 if the file does not exist.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Pre-requisites"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Pre-requisites
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The directory needs to exist.<br> The user must have been granted READ privilege to the directory.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="read_line"></A>
+<P CLASS="TYPE_TITLE">
+read_line
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION read_line
+(
+   i_file_nm  IN VARCHAR2 DEFAULT <A HREF=#get_default_filename>get_default_filename</A>,
+   i_line_num IN INTEGER DEFAULT 1,
+   i_file_dir IN VARCHAR2 DEFAULT <A HREF=#get_default_dir>get_default_dir</A>
+) RETURN VARCHAR2
+
+</PRE>
+<P CLASS="DESC_TEXT">
+read_line:<br>
+&nbsp;Reads a line from the given file. The most useful part of this function is the<br>
+&nbsp;fact that it is a function, rather than a procedure with OUT parameters requiring<br>
+&nbsp;further interpretation. If you know the exact line that you want, you just call<br>
+&nbsp;this function and the result is immediately useable through the VARCHAR2<br>
+&nbsp;return value.<br>
+
+<BR>
+</P>
+<A NAME="Usage"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+read_line would generally be called after an initial call to get_num_lines(). The caller could then read one line at a time in a FOR LOOP going from 1..num_lines. This is rather inefficient, but provided by the IO API anyway.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The filename must be a valid filename for your DB OS. Don't use spaces and special characters (except underscore) unless necessary. If you do, be sure to test well.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file_dir&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If not provided, the file will be written to the default IO directory. If you specify a directory, it must already exist and have proper permissions set up. Don't end this string in a slash.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_line_num&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The line number desired. This will default to the first line if not specified.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Requested line from the named file.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Pre-requisites"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Pre-requisites
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The directory needs to exist.<br> The user must have been granted READ privilege to the directory.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="convert_file_to_blob"></A>
+<P CLASS="TYPE_TITLE">
+convert_file_to_blob
+</P>
+<PRE CLASS="DECL_TEXT">
+FUNCTION convert_file_to_blob
+(
+   i_file_nm  IN VARCHAR2 DEFAULT <A HREF=#get_default_filename>get_default_filename</A>,
+   i_file_dir IN VARCHAR2 DEFAULT <A HREF=#get_default_dir>get_default_dir</A>
+) RETURN BLOB
+
+</PRE>
+<P CLASS="DESC_TEXT">
+convert_file_to_blob:<br>
+&nbsp;Reads a file from the filesystem and places the bytes into a BLOB that can<br>
+&nbsp;then be manipulated like other LOBs.<br>
+
+<BR>
+</P>
+<A NAME="Usage"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<code><br>&nbsp;&nbsp;&nbsp; UPDATE app_email_doc<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; SET doc_content = io.convert_file_to_blob('incoming_ids.xls')<br>&nbsp;&nbsp;&nbsp;&nbsp; WHERE email_doc_id = 64;<br> </code>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The filename must be a valid filename for your DB OS. Don't use spaces and special characters (except underscore) unless necessary. If you do, be sure to test well.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file_dir&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If not provided, the file will be written to the default IO directory. If you specify a directory, it must already exist and have proper permissions set up. Don't end this string in a slash.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Returns"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Returns
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Content of the file, written within a BLOB.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Pre-requisites"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Pre-requisites
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The directory and file need to exist.<br> The user must have been granted READ and WRITE privilege to the directory.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="write_line"></A>
+<P CLASS="TYPE_TITLE">
+write_line
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE write_line
+(
+   i_msg      IN VARCHAR2,
+   i_file_nm  IN VARCHAR2 DEFAULT <A HREF=#get_default_filename>get_default_filename</A>,
+   i_file_dir IN VARCHAR2 DEFAULT <A HREF=#get_default_dir>get_default_dir</A>,
+   i_mode     IN VARCHAR2 DEFAULT 'A'
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+write_line:<br>
+&nbsp;Core routine for writing output to files. Defaults to Append mode, creating the<br>
+&nbsp;given file if it doesn't already exist. Change mode to [W]rite mode if you wish<br>
+&nbsp;to overwrite an existing file.<br>
+&nbsp;<br>
+&nbsp;<br>
+%warn<br>
+&nbsp;This routine is kept dumb on purpose. It simply does what it is told. Any<br>
+&nbsp;intelligence or business logic around filenames, lengths, directories, log<br>
+&nbsp;formats, etc. must be handled earlier by higher layers.<br>
+<br>
+&nbsp;The innards of write_line is misbehaving. It adds an empty line at the end of<br>
+&nbsp;the file. I haven't had time to find out why yet.<br>
+<br>
+
+<BR>
+</P>
+<A NAME="Usage"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<code><br>&nbsp;&nbsp;&nbsp; io.write_line('ERROR: '||i_op_request||' is not supported.','myapp.log');<br> <br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_msg&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Line or string to write to file. Must be less than 32K.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The filename must be a valid filename for your DB OS. Don't<br> use spaces and special characters (except underscore) unless<br> necessary. If you do, be sure to test well.<br> <br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file_dir&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If not provided, the file will be written to the default IO<br> directory. If you specify a directory, it must already exist<br> and have proper permissions set up. Don't end this string in<br> a slash.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_mode&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+File write mode. Must be w, W, a or A.<br> <br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Pre-requisites"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Pre-requisites
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The directory needs to exist.<br> The user must have been granted READ and WRITE privilege to the directory.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="write_lines"></A>
+<P CLASS="TYPE_TITLE">
+write_lines
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE write_lines
+(
+   i_msgs     IN typ.tas_maxvc2,
+   i_file_nm  IN VARCHAR2 DEFAULT <A HREF=#get_default_filename>get_default_filename</A>,
+   i_file_dir IN VARCHAR2 DEFAULT <A HREF=#get_default_dir>get_default_dir</A>,
+   i_mode     IN VARCHAR2 DEFAULT 'A'
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+write_lines:<br>
+&nbsp;Secondary routine for writing output to files. Defaults to Append mode, creating<br>
+&nbsp;the given file if it doesn't already exist. Change mode to [W]rite mode if you<br>
+&nbsp;wish to overwrite an existing file. Use this routine when file writing needs to<br>
+&nbsp;be optimized. The file is only opened once, and all lines in the i_msgs array<br>
+&nbsp;are written, then the file is closed (as opposed to opening and closing for<br>
+&nbsp;each call to <A HREF=#write_line>write_line</A>).<br>
+&nbsp;<br>
+&nbsp;<br>
+%warn<br>
+&nbsp;This routine is kept dumb on purpose. It simply does what it is told. Any<br>
+&nbsp;intelligence or business logic around filenames, lengths, directories, log<br>
+&nbsp;formats, etc. must be handled earlier by higher layers.<br>
+<br>
+
+<BR>
+</P>
+<A NAME="Usage"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<code><br>&nbsp; DECLARE<br>&nbsp;&nbsp;&nbsp;&nbsp; l_msg_array typ.tas_maxvc2;<br>&nbsp; BEGIN<br>&nbsp;&nbsp;&nbsp;&nbsp; l_msg_array(1) := 'This is the first line of text.';<br>&nbsp;&nbsp;&nbsp;&nbsp; l_msg_array(2) := 'This is the second line of text.';<br>&nbsp;&nbsp;&nbsp;&nbsp; l_msg_array(3) := 'And, you guessed it, the third line of text.';<br>&nbsp;&nbsp;&nbsp;&nbsp; io.write_lines(l_msg_array,'myapp.log');<br>&nbsp; END;<br> <br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_msg&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Line or string to write to file. Must be less than 32K.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The filename must be a valid filename for your DB OS. Don't<br> use spaces and special characters (except underscore) unless<br> necessary. If you do, be sure to test well.<br> <br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file_dir&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If not provided, the file will be written to the default IO<br> directory. If you specify a directory, it must already exist<br> and have proper permissions set up. Don't end this string in<br> a slash.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_mode&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+File write mode. Must be w, W, a or A.<br> <br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Pre-requisites"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Pre-requisites
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The directory needs to exist.<br> The user must have been granted READ and WRITE privilege to the directory.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="rename_file"></A>
+<P CLASS="TYPE_TITLE">
+rename_file
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE rename_file
+(
+   i_old_file_nm  IN VARCHAR2,
+   i_new_file_nm  IN VARCHAR2,
+   i_old_file_dir IN VARCHAR2 DEFAULT <A HREF=#get_default_dir>get_default_dir</A>,
+   i_overwrite    IN VARCHAR2 DEFAULT 'N'
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+rename_file:<br>
+&nbsp;Overlay for UTL_FILE.frename, just so this package is complete. This routine<br>
+&nbsp;assumes that the rename operation is desired in the same directory as the source<br>
+&nbsp;file. If you wish to both rename the file and move it to a different directory, use<br>
+&nbsp;<A HREF=#move_file>io.move_file</A>() instead.<br>
+
+<BR>
+</P>
+<A NAME="Usage"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<code><br>&nbsp;&nbsp;&nbsp; BEGIN<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; io.rename_file('old_file.txt','new_file.txt');<br>&nbsp;&nbsp;&nbsp; END;<br> <br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_old_file_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the file to rename.<br> <br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_new_file_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Desired name for the renamed file.<br> <br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_old_file_dir&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Location of the file to be renamed.<br> <br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_overwrite&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Set to 'Y' if you wish the rename operation to overwrite<br> any existing file that has the new file name.<br> <br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="General Comments"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+General Comments
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This routine will raise an error if there is already a file with the new file name, or if the old file name cannot be found.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Pre-requisites"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Pre-requisites
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The directory needs to exist.<br> The user must have been granted READ and WRITE privilege to the directory.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="delete_file"></A>
+<P CLASS="TYPE_TITLE">
+delete_file
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE delete_file
+(
+   i_file_nm  IN VARCHAR2,
+   i_file_dir IN VARCHAR2 DEFAULT <A HREF=#get_default_dir>get_default_dir</A>
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+delete_file: Overlay for UTL_FILE.fremove. Deletes the given file from the underlying file system.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The filename must be a valid filename for your DB OS. Don't use spaces and special characters (except underscore) unless necessary. If you do, be sure to test well.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file_dir&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If not provided, the file will be written to the default IO directory. If you specify a directory, it must already exist and have proper permissions set up. Don't end this string in a slash.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Warning"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Warning
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Will mute the error if the file does not exist in the given location, so be sure to give valid values for both parameters.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Pre-requisites"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Pre-requisites
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The directory needs to exist.<br> The user must have been granted READ and WRITE privilege to the directory.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="copy_file"></A>
+<P CLASS="TYPE_TITLE">
+copy_file
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE copy_file
+(
+   i_src_file  IN VARCHAR2,
+   i_dest_file IN VARCHAR2,
+   i_src_dir   IN VARCHAR2 DEFAULT <A HREF=#get_default_dir>get_default_dir</A>,
+   i_dest_dir  IN VARCHAR2 DEFAULT <A HREF=#get_default_dir>get_default_dir</A>
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+copy_file: Copies a file. The source and destination directory can be the same, but the file name would have to be different.<br>
+
+<BR>
+</P>
+<A NAME="Usage"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<code><br>&nbsp;&nbsp;&nbsp; BEGIN<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; --- source and destination directories are the same<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; io.copy_file('load.log','2007-07-18_load.log');<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; --- source and destination directories differ<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; io.copy_file('error.log','2007-06-01_error.log','ERR_DIR','ERR_HIST');<br>&nbsp;&nbsp;&nbsp; END;<br> <br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_src_file&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Name of the file to be copied.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_dest_file&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The desired name of the copied file.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_src_dir&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The location of the file to be copied.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_dest_dir&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The desired location of the copied file.<br> <br> <br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="General Comments"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+General Comments
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+This wrapper of UTL_FILE ignores the capability of copying only a portion of the source file to a destination file. If that is desired, augment this routine with a few more parameters to specify the begin and end lines.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Pre-requisites"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Pre-requisites
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The directories needs to exist.<br> The user must have been granted READ and WRITE privilege to the directory.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="move_file"></A>
+<P CLASS="TYPE_TITLE">
+move_file
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE move_file
+(
+   i_src_dir   IN VARCHAR2,
+   i_src_file  IN VARCHAR2,
+   i_dest_dir  IN VARCHAR2,
+   i_dest_file IN VARCHAR2,
+   i_overwrite IN VARCHAR2 DEFAULT 'N'
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+move_file: Moves the given file from one location to another. You may also rename the file during the move operation. If all you need to do is rename a file in-place, use <A HREF=#rename_file>rename_file</A>() instead.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_src_dir&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The location of the file to move.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_src_file&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The name of the file to move.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_dest_dir&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The target location of the move operation.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_dest_file&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The name the file should have in the target location after the move operation is complete.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_overwrite&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Y allows a file in the destination with the same name to be overwritten. N does not permit an overwrite.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Raises"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Raises
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+<A HREF=#gx_file_already_exists>IO.gx_file_already_exists</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+If the destination file already exists and the overwrite parameter is FALSE.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Pre-requisites"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Pre-requisites
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The directories needs to exist.<br> The user must have been granted READ and WRITE privilege to the directory.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="get_file_props"></A>
+<P CLASS="TYPE_TITLE">
+get_file_props
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE get_file_props
+(
+   i_file_nm  IN VARCHAR2 DEFAULT <A HREF=#get_default_filename>get_default_filename</A>,
+   i_file_dir IN VARCHAR2 DEFAULT <A HREF=#get_default_dir>get_default_dir</A>,
+   ob_exists  OUT BOOLEAN,
+   on_length  OUT NUMBER -- null if file didn't exist
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+get_file_props:<br>
+&nbsp;Determines whether a given file exists and how long it is.<br>
+
+<BR>
+</P>
+<A NAME="Parameters"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Parameters
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file_nm&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The name of the file whose properties are desired.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+i_file_dir&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The location of the file.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+ob_exists&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+TRUE if file exists, FALSE if not.<br>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+on_length&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Length of the file (in bytes). If KB, MB or other such measure is desired, convert using powers of 2. This value will be NULL if the file does not exist.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Pre-requisites"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Pre-requisites
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The directory needs to exist.<br> The user must have been granted READ privilege to the directory.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="p"></A>
+<P CLASS="TYPE_TITLE">
+p
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE p
+(
+   i_str  IN VARCHAR2, -- will be printed to stdout
+   i_str2 IN VARCHAR2 DEFAULT NULL
+)
+
+</PRE>
+<P CLASS="DESC_TEXT">
+p[rint]:<br>
+&nbsp;Prints characters to stdout (SQL*Plus consolue, Unix console, stdout redirected<br>
+&nbsp;to file, etc.)<br>
+&nbsp;<br>
+&nbsp;The first incarnation of the p() routine, which only takes one or (optional)<br>
+&nbsp;two strings, is the base version called by all the others. It was designed to<br>
+&nbsp;handle character strings longer than 255 chars by breaking it up, based on the<br>
+&nbsp;default pagewidth set in the C package.<br>
+&nbsp;<br>
+&nbsp;If this is being compiled on 10gR2, 255 is no longer a hard limit for<br>
+&nbsp;dbms_output, but lines longer than 80-100 characters wide are still difficult<br>
+&nbsp;to read. So we recommend sticking with the default of 80 as a width.<br>
+&nbsp;<br>
+&nbsp;Note: 10g and newer Oracle still restricts lines to less than 32K characters.<br>
+&nbsp;<br>
+&nbsp;The remaining versions of [p]rint were designed (1) for type-overridden name<br>
+&nbsp;consistency so a whole API didn't need to be learned, (2) to be a whole lot<br>
+&nbsp;shorter to type than &quot;dbms_output.put_line&quot; and (3) to simplify some common<br>
+&nbsp;uses for dbms_output.<br>
+&nbsp;<br>
+&nbsp;<br>
+&nbsp;This is very useful for manual debugging, showing the name of a variable, then<br>
+&nbsp;showing the variable's value. The p() routine eliminates a little extra typing<br>
+&nbsp;by taking care of the concatenations for you.<br>
+
+<BR>
+</P>
+<A NAME="Usage"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Usage
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+<code><br>&nbsp;&nbsp;&nbsp; <A HREF=#p2>io.p</A>('i_my_date',i_my_date);<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; VS.<br>&nbsp;&nbsp;&nbsp; dbms_output.put_line('i_my_date'||' : '||i_my_date);<br> <br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Warning"></A>
+<TABLE CLASS="LIST_TABLE"><TR><TD CLASS="LIST_TITLE">
+Warning
+</TD></TR></TABLE>
+<TABLE CLASS="LIST_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+The tag versions of p() (those that are str/date, str/num and str/bool) were NOT designed to handle large VARCHAR2 values. The i_str parameter in those versions of p() are meant only for short tags to highlight, group and offset the message.<br>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="p2"></A>
+<P CLASS="TYPE_TITLE">
+p
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE p
+(
+   i_date IN DATE, -- will be printed to stdout, using given format
+   i_fmt  IN VARCHAR2 DEFAULT dt.dtm_mask
+)
+
+</PRE>
+<HR>
+<A NAME="p3"></A>
+<P CLASS="TYPE_TITLE">
+p
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE p
+(
+   i_num IN NUMBER, -- will be printed to stdout, using format
+   i_fmt IN VARCHAR2 DEFAULT num.float_mask
+)
+
+</PRE>
+<HR>
+<A NAME="p4"></A>
+<P CLASS="TYPE_TITLE">
+p
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE p(i_bool IN BOOLEAN -- will be converted to "TRUE", "FALSE" or NULL for printout
+            )
+
+</PRE>
+<HR>
+<A NAME="p5"></A>
+<P CLASS="TYPE_TITLE">
+p
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE p
+(
+   i_str  IN VARCHAR2, -- used as label, preceding date value
+   i_date IN DATE,
+   i_fmt  IN VARCHAR2 DEFAULT dt.dtm_mask
+)
+
+</PRE>
+<HR>
+<A NAME="p6"></A>
+<P CLASS="TYPE_TITLE">
+p
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE p
+(
+   i_str IN VARCHAR2, -- used as label, preceding numeric value
+   i_num IN NUMBER,
+   i_fmt IN VARCHAR2 DEFAULT num.float_mask
+)
+
+</PRE>
+<HR>
+<A NAME="p7"></A>
+<P CLASS="TYPE_TITLE">
+p
+</P>
+<PRE CLASS="DECL_TEXT">
+PROCEDURE p
+(
+   i_str  IN VARCHAR2, -- used as label, preceding boolean (string) value
+   i_bool IN BOOLEAN -- will be converted to "TRUE", "FALSE" or NULL for printout
+)
+
+</PRE>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+</BODY>
+</HTML>

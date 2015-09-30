@@ -1,0 +1,45 @@
+[Item1]
+Description=parm.get_val
+TestScript=ut.parm.get_val_valid.tst
+Enabled=True
+Performance=
+Var1Name=result
+Var1Enabled=True
+Var1Type=String
+Var1InputValue=
+Var1OutputValue=Off
+Var2Name=i_parm_nm
+Var2Enabled=True
+Var2Type=String
+Var2InputValue=Debug
+Var2OutputValue=
+[Item2]
+Description=parm.get_val (bogus parameter name)
+TestScript=ut.parm.get_val_invalid.tst
+Enabled=True
+Performance=
+Var1Name=result
+Var1Enabled=True
+Var1Type=String
+Var1InputValue=
+Var1OutputValue=
+Var2Name=i_parm_nm
+Var2Enabled=True
+Var2Type=String
+Var2InputValue=Bogus Parameter
+Var2OutputValue=
+[Item3]
+Description=parm.get_val_trimjunk
+TestScript=ut.parm.get_val_trimjunk.tst
+Enabled=True
+Performance=
+Var1Name=result
+Var1Enabled=True
+Var1Type=String
+Var1InputValue=
+Var1OutputValue=Off
+Var2Name=i_parm_nm
+Var2Enabled=True
+Var2Type=String
+Var2InputValue=  Debug 
+Var2OutputValue=

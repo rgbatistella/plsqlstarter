@@ -32,6 +32,7 @@ Artisan      Date      Comments
 bcoulam      1997Dec30 Creation
 bcoulam      2007Nov01 Updated.
 bcoulam      2010Mar18 Updated during 11g tests. Smoothed some rough edges.
+bcoulam      2014Feb03 Updated for 12c.
 
 <i>
     __________________________  LGPL License  ____________________________
@@ -52,8 +53,8 @@ bcoulam      2010Mar18 Updated during 11g tests. Smoothed some rough edges.
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
     
 *******************************************************************************/
-
-SPOOL C:\temp\__InstallStarterFmwk.log
+ACCEPT logpath CHAR DEFAULT 'C:\Temp' PROMPT "Enter the directory for the installation log file (Default is C:\Temp): "
+SPOOL &&logpath\__InstallStarterFmwk.log
 SET CONCAT +
 
 -------------------------------------------------------------------------------
@@ -77,7 +78,7 @@ ACCEPT db_name CHAR DEFAULT '&&core_db' PROMPT "Enter the database SID or servic
 ACCEPT default_tablespace CHAR DEFAULT 'USERS' PROMPT "Enter the framework account's default tablespace (Default is USERS): "
 ACCEPT index_tablespace CHAR DEFAULT '&&default_tablespace' PROMPT "Enter the tablespace for the framework's indexes (Default is &&default_tablespace): "
 ACCEPT temp_tablespace CHAR DEFAULT 'TEMP' PROMPT "Enter the framework account's default temp tablespace (Default is TEMP): "
-ACCEPT mydomain CHAR PROMPT "Enter your internet domain, e.g. google.com (No Default): "
+ACCEPT mydomain CHAR PROMPT "Enter your company's internet domain, e.g. cnn.com (No Default): "
 ACCEPT smtp_server_address CHAR DEFAULT 'smtp.&&mydomain' PROMPT "SMTP server address (Default is smtp.&&mydomain). If none, enter None: "
 ACCEPT ldap_server_address CHAR DEFAULT 'ldap.&&mydomain' PROMPT "LDAP directory server address (Default is ldap.&&mydomain+:389). If none, enter None: "
 PAUSE Press RETURN to create the account, or Ctrl+C to quit...
@@ -97,7 +98,7 @@ PROMPT For example, you could create a CORE_EXTAB for a directory where files ar
 PROMPT or a CORE_MAIL, for file-based records of emails sent from within Oracle, or a CORE_BFILE
 PROMPT for a place where incoming binary files are dropped for later inclusion or reading.
 PROMPT
-ACCEPT core_dir_path CHAR DEFAULT 'C:\temp' PROMPT "Enter the full path for DB output files (Default is C:\temp): "
+ACCEPT core_dir_path CHAR DEFAULT '&&logpath' PROMPT "Enter the full path for DB output files (Default is C:\temp): "
 ACCEPT core_log_path CHAR DEFAULT '&core_dir_path+\logs' PROMPT "Enter the path for DB-written log files (Default is &core_dir_path+\logs): "
 ACCEPT core_mail_path CHAR DEFAULT '&core_dir_path+\mail' PROMPT "Enter the path for DB-written email files (Default is &core_dir_path+\mail): "
 

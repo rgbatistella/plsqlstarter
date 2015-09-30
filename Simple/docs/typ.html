@@ -1,0 +1,459 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+ <HEAD>
+ <LINK REL="STYLESHEET" TYPE="text/css" HREF="plsqldoc.css">
+ <TITLE>Package typ</TITLE>
+ <META name="object" content="PACKAGE">
+ <META name="name" content="typ">
+ <META name="description" content="%author Bill Coulam (bcoulam@dbartisans.com)">
+</HEAD>
+<BODY>
+<TABLE WIDTH="100%"><TR>
+<TD><P ALIGN="LEFT"><STRONG><SMALL></SMALL></STRONG></TD>
+<TD><P ALIGN="RIGHT"><STRONG><SMALL><A HREF="index.html">index</A></SMALL></STRONG></TD>
+</TR></TABLE>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="DESC_TEXT">
+<P CLASS="MAIN_TITLE">Package typ</P>
+Collection of application specific PL/SQL table types and user-defined<br>
+&nbsp;types (subtypes, records and tables of records).<br>
+&nbsp;<br>
+<pre>
+Artisan&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Comments
+============ ========= ========================================================
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1997Dec30 Creation
+bcoulam&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2004Jul22 Updated and simplified
+
+<i>
+&nbsp;&nbsp;&nbsp; __________________________&nbsp; LGPL License&nbsp; ____________________________
+&nbsp;&nbsp;&nbsp; Copyright (C) 1997-2008 Bill Coulam
+
+&nbsp;&nbsp;&nbsp; This library is free software; you can redistribute it and/or
+&nbsp;&nbsp;&nbsp; modify it under the terms of the GNU Lesser General Public
+&nbsp;&nbsp;&nbsp; License as published by the Free Software Foundation; either
+&nbsp;&nbsp;&nbsp; version 2.1 of the License, or (at your option) any later version.
+
+&nbsp;&nbsp;&nbsp; This library is distributed in the hope that it will be useful,
+&nbsp;&nbsp;&nbsp; but WITHOUT ANY WARRANTY; without even the implied warranty of
+&nbsp;&nbsp;&nbsp; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+&nbsp;&nbsp;&nbsp; Lesser General Public License for more details.
+
+&nbsp;&nbsp;&nbsp; You should have received a copy of the GNU Lesser General Public
+&nbsp;&nbsp;&nbsp; License along with this library; if not, write to the Free Software
+&nbsp;&nbsp;&nbsp; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+
+
+<BR>
+<A NAME="Author"></A>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="LIST_TITLE">
+Author
+</TD></TR></TABLE>
+<TABLE CLASS="MAIN_TABLE">
+<TR><TD VALIGN="TOP" CLASS="LIST_ITEM" WIDTH=1%>
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Bill Coulam (<A HREF="MAILTO:bcoulam@dbartisans.com">bcoulam@dbartisans.com</A>)
+</TD></TR>
+</TABLE>
+<BR>
+</TD></TR></TABLE>
+<HR>
+<A NAME="Types"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Types
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#t_maxobjnm">t_maxobjnm</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#t_maxfqnm">t_maxfqnm</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#t_maxcol">t_maxcol</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#t_maxvc2">t_maxvc2</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#t_msg">t_msg</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#t_rc">t_rc</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#t_mime_type">t_mime_type</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#t_module">t_module</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#t_action">t_action</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#t_client_info">t_client_info</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#t_client_id">t_client_id</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#t_instance_nm">t_instance_nm</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#t_host_nm">t_host_nm</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#tab">tab</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#tad">tad</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#tan">tan</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#tas_small">tas_small</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#tas_medium">tas_medium</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#tas_large">tas_large</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#tas_maxcol">tas_maxcol</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#tas_maxvc2">tas_maxvc2</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+</TABLE>
+<BR>
+<A NAME="Variables"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Variables
+</TD></TR></TABLE>
+<TABLE CLASS="SUB_TABLE">
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gab">gab</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+Empty instances of the generic associative array types defined above These are to be used in 9iAS PL/SQL-web parameter lists as default values
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gad">gad</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gan">gan</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gas_small">gas_small</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gas_medium">gas_medium</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gas_large">gas_large</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gas_maxcol">gas_maxcol</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+<TR><TD VALIGN="TOP" CLASS="TYPE_ITEM">
+<A HREF="#gas_maxvc2">gas_maxvc2</A>&nbsp;&nbsp;
+</TD><TD CLASS="DESC_TEXT" WIDTH=95%>
+
+</TD></TR>
+</TABLE>
+<BR>
+<HR>
+<A NAME="t_maxobjnm"></A>
+<P CLASS="TYPE_TITLE">
+t_maxobjnm
+</P>
+<PRE CLASS="DECL_TEXT">
+SUBTYPE t_maxobjnm IS VARCHAR2(30);
+</PRE>
+<HR>
+<A NAME="t_maxfqnm"></A>
+<P CLASS="TYPE_TITLE">
+t_maxfqnm
+</P>
+<PRE CLASS="DECL_TEXT">
+SUBTYPE t_maxfqnm  IS VARCHAR2(61);
+</PRE>
+<HR>
+<A NAME="t_maxcol"></A>
+<P CLASS="TYPE_TITLE">
+t_maxcol
+</P>
+<PRE CLASS="DECL_TEXT">
+SUBTYPE t_maxcol IS VARCHAR2(4000);
+</PRE>
+<HR>
+<A NAME="t_maxvc2"></A>
+<P CLASS="TYPE_TITLE">
+t_maxvc2
+</P>
+<PRE CLASS="DECL_TEXT">
+SUBTYPE t_maxvc2 IS VARCHAR2(32767);
+</PRE>
+<HR>
+<A NAME="t_msg"></A>
+<P CLASS="TYPE_TITLE">
+t_msg
+</P>
+<PRE CLASS="DECL_TEXT">
+SUBTYPE t_msg    IS t_maxcol;
+</PRE>
+<HR>
+<A NAME="t_rc"></A>
+<P CLASS="TYPE_TITLE">
+t_rc
+</P>
+<PRE CLASS="DECL_TEXT">
+SUBTYPE t_rc     IS PLS_INTEGER;
+</PRE>
+<HR>
+<A NAME="t_mime_type"></A>
+<P CLASS="TYPE_TITLE">
+t_mime_type
+</P>
+<PRE CLASS="DECL_TEXT">
+SUBTYPE t_mime_type IS VARCHAR2(100);
+</PRE>
+<HR>
+<A NAME="t_module"></A>
+<P CLASS="TYPE_TITLE">
+t_module
+</P>
+<PRE CLASS="DECL_TEXT">
+SUBTYPE t_module IS VARCHAR2(48);
+</PRE>
+<HR>
+<A NAME="t_action"></A>
+<P CLASS="TYPE_TITLE">
+t_action
+</P>
+<PRE CLASS="DECL_TEXT">
+SUBTYPE t_action IS VARCHAR2(32);
+</PRE>
+<HR>
+<A NAME="t_client_info"></A>
+<P CLASS="TYPE_TITLE">
+t_client_info
+</P>
+<PRE CLASS="DECL_TEXT">
+SUBTYPE t_client_info IS VARCHAR2(64);
+</PRE>
+<HR>
+<A NAME="t_client_id"></A>
+<P CLASS="TYPE_TITLE">
+t_client_id
+</P>
+<PRE CLASS="DECL_TEXT">
+SUBTYPE t_client_id IS VARCHAR2(64);
+</PRE>
+<HR>
+<A NAME="t_instance_nm"></A>
+<P CLASS="TYPE_TITLE">
+t_instance_nm
+</P>
+<PRE CLASS="DECL_TEXT">
+SUBTYPE t_instance_nm IS VARCHAR2(16);
+</PRE>
+<HR>
+<A NAME="t_host_nm"></A>
+<P CLASS="TYPE_TITLE">
+t_host_nm
+</P>
+<PRE CLASS="DECL_TEXT">
+SUBTYPE t_host_nm IS VARCHAR2(64);
+</PRE>
+<HR>
+<A NAME="tab"></A>
+<P CLASS="TYPE_TITLE">
+tab
+</P>
+<PRE CLASS="DECL_TEXT">
+TYPE tab        IS TABLE OF BOOLEAN        INDEX BY BINARY_INTEGER;
+</PRE>
+<HR>
+<A NAME="tad"></A>
+<P CLASS="TYPE_TITLE">
+tad
+</P>
+<PRE CLASS="DECL_TEXT">
+TYPE tad        IS TABLE OF DATE           INDEX BY BINARY_INTEGER;
+</PRE>
+<HR>
+<A NAME="tan"></A>
+<P CLASS="TYPE_TITLE">
+tan
+</P>
+<PRE CLASS="DECL_TEXT">
+TYPE tan        IS TABLE OF NUMBER         INDEX BY BINARY_INTEGER;
+</PRE>
+<HR>
+<A NAME="tas_small"></A>
+<P CLASS="TYPE_TITLE">
+tas_small
+</P>
+<PRE CLASS="DECL_TEXT">
+TYPE tas_small  IS TABLE OF VARCHAR2(30)   INDEX BY BINARY_INTEGER;
+</PRE>
+<HR>
+<A NAME="tas_medium"></A>
+<P CLASS="TYPE_TITLE">
+tas_medium
+</P>
+<PRE CLASS="DECL_TEXT">
+TYPE tas_medium IS TABLE OF VARCHAR2(255)  INDEX BY BINARY_INTEGER;
+</PRE>
+<HR>
+<A NAME="tas_large"></A>
+<P CLASS="TYPE_TITLE">
+tas_large
+</P>
+<PRE CLASS="DECL_TEXT">
+TYPE tas_large  IS TABLE OF VARCHAR2(2000) INDEX BY BINARY_INTEGER;
+</PRE>
+<HR>
+<A NAME="tas_maxcol"></A>
+<P CLASS="TYPE_TITLE">
+tas_maxcol
+</P>
+<PRE CLASS="DECL_TEXT">
+TYPE tas_maxcol IS TABLE OF <A HREF=#t_maxcol>t_maxcol</A>       INDEX BY BINARY_INTEGER;
+</PRE>
+<HR>
+<A NAME="tas_maxvc2"></A>
+<P CLASS="TYPE_TITLE">
+tas_maxvc2
+</P>
+<PRE CLASS="DECL_TEXT">
+TYPE tas_maxvc2 IS TABLE OF <A HREF=#t_maxvc2>t_maxvc2</A>       INDEX BY BINARY_INTEGER;
+</PRE>
+<HR>
+<A NAME="gab"></A>
+<P CLASS="TYPE_TITLE">
+gab
+</P>
+<PRE CLASS="DECL_TEXT">
+gab        tab;
+</PRE>
+<P CLASS="DESC_TEXT">
+Empty instances of the generic associative array types defined above These are to be used in 9iAS PL/SQL-web parameter lists as default values<br>
+
+<BR>
+</P>
+<HR>
+<A NAME="gad"></A>
+<P CLASS="TYPE_TITLE">
+gad
+</P>
+<PRE CLASS="DECL_TEXT">
+gad        tad;
+</PRE>
+<HR>
+<A NAME="gan"></A>
+<P CLASS="TYPE_TITLE">
+gan
+</P>
+<PRE CLASS="DECL_TEXT">
+gan        tan;
+</PRE>
+<HR>
+<A NAME="gas_small"></A>
+<P CLASS="TYPE_TITLE">
+gas_small
+</P>
+<PRE CLASS="DECL_TEXT">
+gas_small  tas_small;
+</PRE>
+<HR>
+<A NAME="gas_medium"></A>
+<P CLASS="TYPE_TITLE">
+gas_medium
+</P>
+<PRE CLASS="DECL_TEXT">
+gas_medium tas_medium;
+</PRE>
+<HR>
+<A NAME="gas_large"></A>
+<P CLASS="TYPE_TITLE">
+gas_large
+</P>
+<PRE CLASS="DECL_TEXT">
+gas_large  tas_large;
+</PRE>
+<HR>
+<A NAME="gas_maxcol"></A>
+<P CLASS="TYPE_TITLE">
+gas_maxcol
+</P>
+<PRE CLASS="DECL_TEXT">
+gas_maxcol tas_maxcol;
+</PRE>
+<HR>
+<A NAME="gas_maxvc2"></A>
+<P CLASS="TYPE_TITLE">
+gas_maxvc2
+</P>
+<PRE CLASS="DECL_TEXT">
+gas_maxvc2 tas_maxvc2;
+</PRE>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+</BODY>
+</HTML>

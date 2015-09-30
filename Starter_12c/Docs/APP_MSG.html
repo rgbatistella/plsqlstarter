@@ -1,0 +1,449 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+ <HEAD>
+ <LINK REL="STYLESHEET" TYPE="text/css" HREF="plsqldoc.css">
+ <TITLE>Table APP_MSG</TITLE>
+ <META name="object" content="TABLE">
+ <META name="name" content="APP_MSG">
+ <META name="description" content="Standard Messages (AM): Stores static messages and dynamic message templates used within the systems sharing Core.">
+ <META name="columns" content="MSG_ID APP_ID MSG_CD MSG MSG_DESCR MSG_SOLN">
+</HEAD>
+<BODY>
+<TABLE WIDTH="100%"><TR>
+<TD><P ALIGN="LEFT"><STRONG><SMALL></SMALL></STRONG></TD>
+<TD><P ALIGN="RIGHT"><STRONG><SMALL><A HREF="index.html">index</A></SMALL></STRONG></TD>
+</TR></TABLE>
+<TABLE CLASS="MAIN_TABLE"><TR><TD CLASS="DESC_TEXT">
+<P CLASS="MAIN_TITLE">Table APP_MSG</P>
+Standard Messages (AM): Stores static messages and dynamic message templates used within the systems sharing Core. Static messages are repeated in logging targets as-is. Message templates have placeholder symbols that allow contextual substitution at runtime (which allows a higher degree of message re-use within and across systems).
+</TD></TR></TABLE>
+<HR>
+<A NAME="Columns"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Columns
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Type
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Optional
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Default
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Comments
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+MSG_ID
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+NUMBER
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Message ID: Surrogate key for this table.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+<A HREF="SEC_PMSN.html">APP_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+NUMBER
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Application ID: Foreign key to <A HREF="APP.html">APP</A>. Even though this column indicates which application 
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+owns"
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+the
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+message
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+the
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+row
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+can
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+and
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+should
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+be
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+re-used
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+by
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+other
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+applications
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+if
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+applicable.
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+This
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+is
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+why
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+the
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+natural
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+key
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+does
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+not
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+include
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+app_id."
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+<A HREF="APP_LOG.html">MSG_CD</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(240)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Message Code: Short code or name that identifies a message within a given subsystem.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+MSG
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(1020)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Message: The full text of the standard message or message template. If the message is a template with placeholders, surround the substitutable placeholders with the substitution character defined in the C package (default is @).
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+MSG_DESCR
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(4000)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Message Description: If the message text contains placeholders, e.g. 
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+@1@
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+not
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+allowed
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+to
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+read
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+from
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+table
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+@2@"
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+this
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+field
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+provides
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+a
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+place
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+to
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+describe
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+what
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+those
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+placeholders
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+mean.
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+In
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+the
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+example
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+provided
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+here
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+the
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+MSG_DESC
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+could
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+be
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+1 = <A HREF="APP.html">app.app_cd</A>, 2 = table name being read.
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+MSG_SOLN
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+VARCHAR2(4000)
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Y
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+&nbsp;
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Message Solution: Optional steps, hints, or actions the user might take to report or solve the problem on their own.
+</TD>
+</TR>
+</TABLE>
+<HR>
+<A NAME="Primary Key"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Primary Key
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+APP_MSG_PK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+MSG_ID
+</TD>
+</TR>
+</TABLE>
+<HR>
+<A NAME="Unique Keys"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Unique Keys
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+APP_MSG_UK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="APP_LOG.html">MSG_CD</A>
+</TD>
+</TR>
+</TABLE>
+<HR>
+<A NAME="Foreign Keys"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Foreign Keys
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Referencing Table
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+AM_APP_ID_FK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="SEC_PMSN.html">APP_ID</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="APP.html">APP</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="SEC_PMSN.html">APP_ID</A>
+</TD>
+</TR>
+</TABLE>
+<HR>
+<A NAME="Indexes"></A>
+<TABLE CLASS="SUB_TABLE"><TR><TD CLASS="SUB_TITLE">
+Indexes
+</TD></TR></TABLE>
+<TABLE CLASS="SIMPLE_TABLE">
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Name
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Columns
+</U>
+</TD>
+<TD VALIGN="TOP" CLASS="LIST_ITEM"><U>
+Type
+</U>
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+APP_MSG_PK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+MSG_ID
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Unique
+</TD>
+</TR>
+<TR>
+<TD VALIGN="TOP" CLASS="LIST_ITEM">
+APP_MSG_UK
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+<A HREF="APP_LOG.html">MSG_CD</A>
+</TD>
+<TD VALIGN="TOP" CLASS="DESC_TEXT">
+Unique
+</TD>
+</TR>
+</TABLE>
+<HR>
+<P>&nbsp;</P>
+<P>&nbsp;</P>
+</BODY>
+</HTML>

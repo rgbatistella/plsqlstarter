@@ -1,0 +1,2 @@
+SET SERVEROUTPUT ON SIZE 1000000
+EXEC top.proc('logs');
