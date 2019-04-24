@@ -25,7 +25,7 @@ BEGIN
       ,job_action      => 'DECLARE 
    l_rows_deleted NUMBER := 0; 
 BEGIN 
-   app_log_api.trim_table(o_rows_deleted => l_rows_deleted, 
+   logs.trim_table(o_rows_deleted => l_rows_deleted, 
                          i_keep_amt => 2, 
                          i_keep_amt_uom => ''week'', 
                          i_archive_to_file_flg => ''N''); 
