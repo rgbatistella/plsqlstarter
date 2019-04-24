@@ -74,14 +74,14 @@ END str_to_bool;
 FUNCTION get_diacritic_list RETURN VARCHAR2
 IS
 BEGIN
-   RETURN 'ÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞ‗אבגדהוזחטיךכלםמןנסעףפץצקרשתûü‎‏ÿÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏ';
+   RETURN 'ÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞ‗אבגדהוזחנטיךכלםמןסעףפץצקרשתûü‎‏ÿÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏ';
 END get_diacritic_list;
 
 --------------------------------------------------------------------------------
 FUNCTION get_diacritic_map RETURN VARCHAR2
 IS
 BEGIN
-   RETURN 'DNOOOOOxOUUUUYPBaaaaaaaceeeeiiiionooooo-ouuuuypyAAAAAAACEEEEIIII';
+   RETURN 'DNOOOOOxOUUUUYPBaaaaaaacdeeeeiiiinooooo-ouuuuypyAAAAAAACEEEEIIII';
 END get_diacritic_map;
 
 --------------------------------------------------------------------------------

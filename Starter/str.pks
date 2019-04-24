@@ -62,6 +62,24 @@ empty_str_tab str_tt := str_tt();
 --------------------------------------------------------------------------------
 --                              PUBLIC FUNCTIONS
 --------------------------------------------------------------------------------
+
+/**-----------------------------------------------------------------------------
+bool_to_str:
+ Converts a PL/SQL Boolean value to "TRUE", "FALSE" or "NULL".
+------------------------------------------------------------------------------*/
+FUNCTION bool_to_str(i_bool_val IN BOOLEAN) RETURN VARCHAR2;
+
+/**-----------------------------------------------------------------------------
+str_to_bool:
+ Converts a string value to PL/SQL Boolean TRUE or FALSE.
+ 
+%param i_str A character or string that represents true or false. Valid values are:
+             {*} TRUE: true, TRUE, t, T, y, Y, yes, YES, 1
+             {*} FALSE: false, FALSE, f, F, n, N, no, NO, 0
+             {*} NULL: empty string or NULL
+------------------------------------------------------------------------------*/
+FUNCTION str_to_bool(i_str IN VARCHAR2) RETURN BOOLEAN;
+
 /**-----------------------------------------------------------------------------
 get_diacritic_list:
  Returns a string of foreign characters which maps 1:1, character for character,

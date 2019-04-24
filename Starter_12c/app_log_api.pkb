@@ -187,7 +187,7 @@ BEGIN
 END trim_table;
 
 --------------------------------------------------------------------------------
---                  PACKAGE INITIALIZATIOINS (RARELY USED)
+--                  PACKAGE INITIALIZATIONS (RARELY USED)
 --------------------------------------------------------------------------------
    
 END app_log_api;

@@ -28,6 +28,16 @@ public class OraMail {
     {
         int returnCode = 0;
 
+         //temporary code to fix a bug in 11.2.0.4 that will be patched by Oracle at a future date.
+         MailcapCommandMap mc = (MailcapCommandMap)CommandMap.getDefaultCommandMap();
+         mc.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html");
+         mc.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
+         mc.addMailcap("text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain");
+         mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed");
+         mc.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822");
+         CommandMap.setDefaultCommandMap(mc);
+
+
         try {
             Properties props = System.getProperties();
             props.put("mail.smtp.host", SMTPServer);
@@ -55,7 +65,7 @@ public class OraMail {
             if (body != null) {
                 MimeBodyPart mbp1 = new MimeBodyPart();
                 mbp1.setDisposition(Part.INLINE);
-                mbp1.setDataHandler(new DataHandler(new CLOBDataSource(body, "text/plain")));
+                mbp1.setDataHandler(new DataHandler(new CLOBDataSource(body, "text/html")));
                 // now construct the multipart, adding the body part previously built
                 mp.addBodyPart(mbp1);
             }

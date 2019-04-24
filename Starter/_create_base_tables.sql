@@ -257,6 +257,7 @@ CREATE SEQUENCE app_email_seq
 CREATE TABLE app_email
 (
  email_id                       NUMBER NOT NULL
+,crt_dt                         DATE NOT NULL
 ,app_id                         NUMBER NOT NULL
 ,email_to                       VARCHAR2(4000 CHAR) NOT NULL
 ,email_subject                  VARCHAR2(500  CHAR) NOT NULL
@@ -278,6 +279,7 @@ PCTFREE 10 PCTUSED 90
 
 COMMENT ON TABLE  app_email IS 'Email (AEM): Generic table for use in applications that have email requirements.';
 COMMENT ON COLUMN app_email.email_id IS 'Email ID: Surrogate key for this table.';
+COMMENT ON COLUMN app_email.crt_dt IS 'Create Date: Date and time (down to the second) when the email was created/generated, written to this table, and attempted to send.';
 COMMENT ON COLUMN app_email.app_id IS 'Application ID: Foreign key to APP. The application which "owns" the emailed info.';
 COMMENT ON COLUMN app_email.email_to IS 'To: Standard email To field.';
 COMMENT ON COLUMN app_email.email_subject IS 'Subject: Standard email Subject field.';

@@ -1,4 +1,4 @@
-CREATE OR REPLACE FORCE VIEW app_codeset_vw
+CREATE OR REPLACE VIEW app_codeset_vw
 BEQUEATH CURRENT_USER
 AS
 SELECT acs.codeset_id,

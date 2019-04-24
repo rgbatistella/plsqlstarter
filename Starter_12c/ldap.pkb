@@ -463,7 +463,7 @@ BEGIN
    l_attr_val_tab := get_entry_attrs(i_entry_filter,i_attr_list,i_search_base,i_search_scope);
    IF (l_attr_val_tab.count > 0) THEN
       FOR i IN l_attr_val_tab.FIRST..l_attr_val_tab.LAST LOOP
-         l_val_arr(LOWER(l_attr_val_tab(i).attr_nm)) := l_attr_val_tab(i).attr_val;
+         l_val_arr(l_attr_val_tab(i).attr_nm) := l_attr_val_tab(i).attr_val;
       END LOOP;
    END IF;
    RETURN l_val_arr;

@@ -7,6 +7,7 @@ Bill Coulam (bcoulam@dbartisans.com)
 Artisan      Date      Comments
 ============ ========= ========================================================
 bcoulam      2008Jan13 Creation
+</pre>
 
 <i>
     __________________________  LGPL License  ____________________________
@@ -32,7 +33,6 @@ AS
 --------------------------------------------------------------------------------
 --                 PACKAGE CONSTANTS, VARIABLES, TYPES, EXCEPTIONS
 --------------------------------------------------------------------------------
---gc_pkg_nm CONSTANT user_source.name%TYPE := 'parm';
 
 --------------------------------------------------------------------------------
 --                        PRIVATE FUNCTIONS AND PROCEDURES

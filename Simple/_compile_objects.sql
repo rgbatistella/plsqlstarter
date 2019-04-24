@@ -3,18 +3,18 @@
 -- without access to v$session. Set conditional compilation
 -- flag baased on its existence.
 
---DECLARE
---   lx_obj_unavail EXCEPTION;
---   PRAGMA EXCEPTION_INIT(lx_obj_unavail, -942);
---   l_count INTEGER := 0;
---BEGIN
---   EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM v$session' INTO l_count;
---   EXECUTE IMMEDIATE 'ALTER SESSION SET PLSQL_CCFLAGS = ''vsession_avail:true''';
---EXCEPTION
---   WHEN lx_obj_unavail THEN
---      EXECUTE IMMEDIATE 'ALTER SESSION SET PLSQL_CCFLAGS = ''vsession_avail:false''';
---END;
---/
+DECLARE
+   lx_obj_unavail EXCEPTION;
+   PRAGMA EXCEPTION_INIT(lx_obj_unavail, -942);
+   l_count INTEGER := 0;
+BEGIN
+   EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM v$session' INTO l_count;
+   EXECUTE IMMEDIATE 'ALTER SESSION SET PLSQL_CCFLAGS = ''vsession_avail:true''';
+EXCEPTION
+   WHEN lx_obj_unavail THEN
+      EXECUTE IMMEDIATE 'ALTER SESSION SET PLSQL_CCFLAGS = ''vsession_avail:false''';
+END;
+/
 
 SET DEFINE OFF
 

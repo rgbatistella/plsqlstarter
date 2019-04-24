@@ -228,6 +228,28 @@ END err_in_excp;
 END bottom;
 /
 
+CREATE OR REPLACE PACKAGE BODY bottom AS
+PROCEDURE proc(i_str IN VARCHAR2) IS
+BEGIN
+   IF (i_str = 'unhandled') THEN
+ 	  RAISE VALUE_ERROR;
+   ELSIF (i_str = 'handled') THEN
+ 	  RAISE NO_DATA_FOUND;
+   END IF;
+EXCEPTION
+WHEN NO_DATA_FOUND THEN
+  pr(RPAD('Error#',7)||RPAD('Line#',6)||RPAD('Unit',12)||'Msg');
+  FOR i IN REVERSE 1..utl_call_stack.backtrace_depth() LOOP
+    pr(RPAD(TO_CHAR(utl_call_stack.error_number(i)),7)||
+       RPAD(TO_CHAR(utl_call_stack.backtrace_line(i)),6)||
+       RPAD(SUBSTR(utl_call_stack.backtrace_unit(i),1,12),12)||
+       utl_call_stack.error_msg(i));
+  END LOOP;
+  RAISE;
+END proc;
+END bottom;
+/
+
 SET SERVEROUTPUT ON
 EXEC top.proc('excp.throw');
 SET SERVEROUTPUT ON

@@ -493,7 +493,9 @@ BEGIN
    IF (i_obj_type IS NULL) THEN
       SELECT COUNT(*)
         INTO l_count
-        FROM user_objects
+        FROM (SELECT object_name, object_type FROM user_objects
+              UNION
+              SELECT constraint_name, constraint_type FROM user_constraints)
        WHERE object_name = l_obj_nm;
    ELSE
       l_obj_type := UPPER(i_obj_type);

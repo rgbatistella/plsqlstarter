@@ -152,7 +152,7 @@ FUNCTION get_time_diff
    i_old_dtm  IN DATE,
    i_curr_dtm IN DATE DEFAULT SYSDATE,
    i_tm_uom   IN VARCHAR2 DEFAULT 'hour'
-) RETURN NUMBER;
+) RETURN NUMBER DETERMINISTIC;
 
 /**-----------------------------------------------------------------------------
 get_time_diff_str:
@@ -174,7 +174,7 @@ FUNCTION get_time_diff_str
    i_old_dtm  IN DATE,
    i_curr_dtm IN DATE DEFAULT SYSDATE,
    i_tm_uom   IN VARCHAR2 DEFAULT 'hour'
-) RETURN VARCHAR2;
+) RETURN VARCHAR2 DETERMINISTIC;
 
 /**-----------------------------------------------------------------------------
 trunc_dt:

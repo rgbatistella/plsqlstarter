@@ -88,7 +88,7 @@ FUNCTION get_filtered_attrs
    i_filter IN VARCHAR2,
    i_attr_list    IN VARCHAR2 DEFAULT NULL,
    i_search_base  IN VARCHAR2 DEFAULT tree_base,
-   i_search_scope IN PLS_INTEGER DEFAULT 2
+   i_search_scope IN PLS_INTEGER DEFAULT dbms_ldap.SCOPE_SUBTREE
 ) RETURN t_attrs_matrix;
 
 /**----------------------------------------------------------------------------- 
@@ -112,7 +112,7 @@ FUNCTION get_entry_attr
    i_entry_filter IN VARCHAR2,
    i_attr_nm      IN VARCHAR2,
    i_search_base  IN VARCHAR2,
-   i_search_scope IN PLS_INTEGER DEFAULT dbms_ldap.scope_subtree
+   i_search_scope IN PLS_INTEGER DEFAULT dbms_ldap.SCOPE_SUBTREE
 ) RETURN VARCHAR2;
 
 /**----------------------------------------------------------------------------- 
@@ -127,7 +127,7 @@ FUNCTION get_user_attr
    i_user_filter  IN VARCHAR2,
    i_attr_nm      IN VARCHAR2,
    i_search_base  IN VARCHAR2 DEFAULT NULL,
-   i_search_scope IN PLS_INTEGER DEFAULT dbms_ldap.scope_subtree
+   i_search_scope IN PLS_INTEGER DEFAULT dbms_ldap.SCOPE_SUBTREE
 ) RETURN VARCHAR2;
 
 /**----------------------------------------------------------------------------- 
@@ -154,7 +154,7 @@ FUNCTION get_entry_attrs
    i_entry_filter IN VARCHAR2,
    i_attr_list    IN VARCHAR2,
    i_search_base  IN VARCHAR2,
-   i_search_scope IN PLS_INTEGER DEFAULT dbms_ldap.scope_subtree
+   i_search_scope IN PLS_INTEGER DEFAULT dbms_ldap.SCOPE_SUBTREE
 ) RETURN t_attr_val_tab;
 
 /**----------------------------------------------------------------------------- 
@@ -172,7 +172,7 @@ FUNCTION get_entry_attrs2
    i_entry_filter IN VARCHAR2,
    i_attr_list    IN VARCHAR2,
    i_search_base  IN VARCHAR2,
-   i_search_scope IN PLS_INTEGER DEFAULT dbms_ldap.scope_subtree
+   i_search_scope IN PLS_INTEGER DEFAULT dbms_ldap.SCOPE_SUBTREE
 ) RETURN t_val_arr;
 
 /**----------------------------------------------------------------------------- 
@@ -189,7 +189,7 @@ FUNCTION get_user_attrs
    i_user_filter  IN VARCHAR2,
    i_attr_list    IN VARCHAR2,
    i_search_base  IN VARCHAR2 DEFAULT NULL,
-   i_search_scope IN PLS_INTEGER DEFAULT dbms_ldap.scope_subtree
+   i_search_scope IN PLS_INTEGER DEFAULT dbms_ldap.SCOPE_SUBTREE
 ) RETURN t_attr_val_tab;
 
 /**----------------------------------------------------------------------------- 
@@ -207,7 +207,7 @@ FUNCTION get_user_attrs2
    i_user_filter  IN VARCHAR2,
    i_attr_list    IN VARCHAR2,
    i_search_base  IN VARCHAR2 DEFAULT NULL,
-   i_search_scope IN PLS_INTEGER DEFAULT dbms_ldap.scope_subtree
+   i_search_scope IN PLS_INTEGER DEFAULT dbms_ldap.SCOPE_SUBTREE
 ) RETURN t_val_arr;
 
 -------------------------------------------------------------------------------- 

@@ -1,4 +1,4 @@
-CREATE OR REPLACE FORCE VIEW app_vw
+CREATE OR REPLACE VIEW app_vw
 BEQUEATH CURRENT_USER
 AS
 SELECT app_id,
@@ -22,7 +22,7 @@ SELECT app_id,
 --bcoulam      2008Aug22 Rewrote to make use of more flexible logic in 
 --                       env.get_app_id.
 --bcoulam      2014Feb04 Added BEQUEATH CURRENT_USER. View now uses invoker rights
---                       of call to ENV packaged function, and is FINALLY self-
+--                       of call to ENV packaged function, and is FINALLY
 --                       self-adjusting as advertized. No more need for after-logon
 --                       triggers in accounts specified by app_db.owner_account or
 --                       app_db.access_account.

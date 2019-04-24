@@ -1,4 +1,4 @@
-CREATE OR REPLACE FORCE VIEW app_parm_vw
+CREATE OR REPLACE VIEW app_parm_vw
 BEQUEATH CURRENT_USER
 AS
 SELECT ap.parm_nm parm_nm,
@@ -24,7 +24,7 @@ SELECT ap.parm_nm parm_nm,
 --bcoulam      2008Aug22 Made to be self-adjusting by relying on app_env_vw.
 --bcoulam      2010Apr08 Added the display name and comments columns.
 --bcoulam      2014Feb04 Added BEQUEATH CURRENT_USER. View now uses invoker rights
---                       of call to ENV packaged function, and is FINALLY self-
+--                       of call to ENV packaged function, and is FINALLY
 --                       self-adjusting as advertized. No more need for after-logon
 --                       triggers in accounts specified by app_db.owner_account or
 --                       app_db.access_account.

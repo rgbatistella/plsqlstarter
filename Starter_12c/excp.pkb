@@ -62,6 +62,7 @@ BEGIN
       IF (i_routine_nm IS NULL) THEN
          l_routine_nm := utl_call_stack.concatenate_subprogram(utl_call_stack.subprogram(2));
       END IF;
+
       IF (i_line_num IS NULL) THEN
          l_line_num := utl_call_stack.unit_line(2);
       END IF;
@@ -103,7 +104,7 @@ BEGIN
    -- which is useless, so we'll try to look up a canned message using the
    -- msg_id.
    IF (i_msg IS NULL OR i_msg LIKE 'ORA-0000:%') THEN
-         l_msg := msgs.get_msg(i_msg_id);
+      l_msg := msgs.get_msg(i_msg_id);
    ELSE
       l_msg := i_msg;
    END IF;

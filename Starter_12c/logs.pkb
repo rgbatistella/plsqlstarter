@@ -195,8 +195,8 @@ BEGIN
    -- Only read the table if debugging isn't being overidden by a manual
    -- call through set_dbg.
    IF (NOT gr_debug.session_override) THEN
-
-      vld_debug_toggle_format(parm.get_val(DEBUG_PARM_NM));
+      --If the parameter couldn't be found assume debugging is off.
+      vld_debug_toggle_format(NVL(parm.get_val(DEBUG_PARM_NM),'Off'));
 
    END IF;
       

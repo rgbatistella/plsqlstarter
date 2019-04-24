@@ -3,6 +3,10 @@ CREATE OR REPLACE TRIGGER sec_user_bi
   FOR EACH ROW
 DECLARE
 BEGIN
+   IF (:new.user_id IS NULL) THEN
+      :new.user_id := sec_user_seq.NEXTVAL;
+   END IF;
+      
       IF (:new.user_nm <> LOWER(:new.user_nm)) THEN
          :new.user_nm := LOWER(:new.user_nm);
       END IF;

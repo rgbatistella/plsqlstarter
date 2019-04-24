@@ -1,4 +1,4 @@
-CREATE OR REPLACE FORCE VIEW app_env_vw
+CREATE OR REPLACE VIEW app_env_vw
 BEQUEATH CURRENT_USER
 AS
 SELECT app.app_cd,
@@ -18,7 +18,7 @@ SELECT app.app_cd,
  WHERE ae.app_id = app.app_id
    AND ae.db_id = adb.db_id
    AND adb.db_nm = UPPER(SYS_CONTEXT('userenv', 'con_name'))
-   AND ae.owner_account = SYS_CONTEXT('userenv', 'current_schema')
+   AND SYS_CONTEXT('userenv', 'current_schema') IN (ae.owner_account, ae.access_account)
 --------------------------------------------------------------------------------
 -- View to make the APP_ENV table more user-friendly, replacing IDs with names.
 -- A view that self-adjusts, showing only the environment for the current database
@@ -31,7 +31,7 @@ SELECT app.app_cd,
 --bcoulam      2008Mar07 Initial creation.
 --bcoulam      2008Aug22 Made self-adjusting.
 --bcoulam      2014Feb04 Added BEQUEATH CURRENT_USER. View now uses invoker rights
---                       of call to ENV packaged function, and is FINALLY self-
+--                       of call to ENV packaged function, and is FINALLY
 --                       self-adjusting as advertized. No more need for after-logon
 --                       triggers in accounts specified by app_db.owner_account or
 --                       app_db.access_account.

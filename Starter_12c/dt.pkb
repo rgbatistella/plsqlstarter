@@ -131,7 +131,7 @@ FUNCTION get_time_diff
    i_old_dtm  IN DATE,
    i_curr_dtm IN DATE DEFAULT SYSDATE,
    i_tm_uom   IN VARCHAR2 DEFAULT 'hour'
-) RETURN NUMBER IS
+) RETURN NUMBER DETERMINISTIC IS
    l_curr_dtm DATE;
    l_diff      NUMBER;
 BEGIN
@@ -167,7 +167,7 @@ FUNCTION get_time_diff_str
    i_old_dtm  IN DATE,
    i_curr_dtm IN DATE DEFAULT SYSDATE,
    i_tm_uom   IN VARCHAR2 DEFAULT 'hour'
-) RETURN VARCHAR2 IS
+) RETURN VARCHAR2 DETERMINISTIC IS
    l_suffix VARCHAR2(10);
 BEGIN
    IF (i_tm_uom = 'hour') THEN

@@ -33,7 +33,6 @@ AS
 --------------------------------------------------------------------------------
 --                 PACKAGE CONSTANTS, VARIABLES, TYPES, EXCEPTIONS
 --------------------------------------------------------------------------------
---gc_pkg_nm CONSTANT user_source.name%TYPE := 'str';
 
 --------------------------------------------------------------------------------
 --                        PRIVATE FUNCTIONS AND PROCEDURES
@@ -44,17 +43,45 @@ AS
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
+FUNCTION bool_to_str(i_bool_val IN BOOLEAN) RETURN VARCHAR2
+IS
+BEGIN
+   IF (i_bool_val) THEN
+      RETURN 'TRUE';
+   ELSIF (i_bool_val IS NULL) THEN
+      RETURN 'NULL';
+   ELSE
+      RETURN 'FALSE';
+   END IF;
+END bool_to_str;
+
+--------------------------------------------------------------------------------
+FUNCTION str_to_bool(i_str IN VARCHAR2) RETURN BOOLEAN
+IS
+BEGIN
+   IF (LOWER(i_str) IN ('true','y','yes','t','1')) THEN
+      RETURN TRUE;
+   ELSIF (LOWER(i_str) IN ('false','n','no','f','0')) THEN
+      RETURN FALSE;
+   ELSIF (i_str IS NULL) THEN
+      RETURN NULL;
+   ELSE
+      RAISE_APPLICATION_ERROR(-20000, 'str_to_bool does not support ['||i_str||']'); 
+   END IF;
+END str_to_bool;
+
+--------------------------------------------------------------------------------
 FUNCTION get_diacritic_list RETURN VARCHAR2
 IS
 BEGIN
-   RETURN 'ÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞ‗אבגדהוזחטיךכלםמןנסעףפץצקרשתûü‎‏ÿÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏ';
+   RETURN 'ÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞ‗אבגדהוזחנטיךכלםמןסעףפץצקרשתûü‎‏ÿÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏ';
 END get_diacritic_list;
 
 --------------------------------------------------------------------------------
 FUNCTION get_diacritic_map RETURN VARCHAR2
 IS
 BEGIN
-   RETURN 'DNOOOOOxOUUUUYPBaaaaaaaceeeeiiiionooooo-ouuuuypyAAAAAAACEEEEIIII';
+   RETURN 'DNOOOOOxOUUUUYPBaaaaaaacdeeeeiiiinooooo-ouuuuypyAAAAAAACEEEEIIII';
 END get_diacritic_map;
 
 --------------------------------------------------------------------------------

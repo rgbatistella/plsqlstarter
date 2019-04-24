@@ -406,7 +406,7 @@ END get_db_version;
 FUNCTION get_db_name RETURN VARCHAR2 IS
 BEGIN
    IF (gr_server_ctx.db_name IS NULL) THEN
-      gr_server_ctx.db_name := SYS_CONTEXT('userenv', 'con_name');
+      gr_server_ctx.db_name := UPPER(SYS_CONTEXT('userenv', 'con_name'));
    END IF;
    RETURN gr_server_ctx.db_name;
 END get_db_name;
@@ -727,6 +727,34 @@ BEGIN
 END vld_path_format;
 
 --------------------------------------------------------------------------------
+--FUNCTION get_routine_nm(i_stack_level IN PLS_INTEGER DEFAULT 2) RETURN VARCHAR2
+--IS
+--BEGIN
+----   dbms_output.put_line('From get_routine_nm');
+----   FOR i IN 1..utl_call_stack.dynamic_depth() LOOP
+----      dbms_output.put_line( str.ewc(TO_CHAR(utl_call_stack.lexical_depth(i)),9)||
+----                            str.ewc(TO_CHAR(i),6)||
+----                            str.ewc(TO_CHAR(utl_call_stack.unit_line(i)),6)||
+----                            str.ewc(utl_call_stack.concatenate_subprogram(utl_call_stack.subprogram(i)),60) );
+----   END LOOP;
+--
+--   RETURN utl_call_stack.concatenate_subprogram(utl_call_stack.subprogram(i_stack_level));
+--END get_routine_nm;
+
+--------------------------------------------------------------------------------
+--FUNCTION get_error_point(i_stack_level IN PLS_INTEGER DEFAULT 1) RETURN INTEGER
+--IS
+--BEGIN
+----   dbms_output.put_line('From get_line_of_error');
+----   FOR i IN 1..utl_call_stack.error_depth() LOOP
+----      dbms_output.put_line( str.ewc(TO_CHAR(utl_call_stack.backtrace_line(i)),10)||
+----                            str.ewc(SUBSTR(utl_call_stack.backtrace_unit(i),1,60),60) );
+----   END LOOP;
+--   RETURN utl_call_stack.backtrace_line(i_stack_level);
+--END get_error_point;
+
+
+--------------------------------------------------------------------------------
 FUNCTION get_caller_nm(i_stack_level IN PLS_INTEGER DEFAULT 3) RETURN VARCHAR2
 IS
    l_my_name app_log.routine_nm%TYPE;
@@ -795,140 +823,6 @@ BEGIN
 
    RETURN l_line_num;
 END get_my_line;
-
---------------------------------------------------------------------------------
---FUNCTION get_routine_nm
---(
---   i_pkg_nm   IN VARCHAR2,
---   i_line_num IN INTEGER
---) RETURN VARCHAR2
---IS
---   l_routine_nm app_log.routine_nm%TYPE;
---BEGIN
---   SELECT package_name || '.' || routine_name
---     INTO l_routine_nm
---     FROM -- Use RANK to get the containing routine, the one closest to the given line number
---          (SELECT t.package_name,
---                  t.routine_name,
---                  t.start_line,
---                  RANK() OVER(ORDER BY t.start_line DESC) rnk
---             FROM -- Use TRANSLATE to parse the declarations into just the routine names, so they can be joined
---                  -- to USER_ARGUMENTS to eliminate inner (nested) routines.
---                  (
---                  SELECT name AS package_name,
---                         line AS start_line,
---                         RTRIM(SUBSTR(after_token,1,INSTR(TRANSLATE(after_token,CHR(13)||CHR(10)||CHR(32)||'(/-','++++++'),'+')-1)) routine_name,
---                         text AS orig_src_line
---                    FROM -- Get all the routine declarations that came before the caller's line. One of them
---                         -- must be the routine that contains the line.
---                         (SELECT name,
---                                 line,
---                                 text,
---                                 DECODE(SIGN(INSTR(UPPER(text), 'PROCEDURE')),
---                                        1,
---                                        TRIM(SUBSTR(UPPER(text), INSTR(UPPER(text), 'PROCEDURE') + 10)),
---                                        TRIM(SUBSTR(UPPER(text), INSTR(UPPER(text), 'FUNCTION') + 9))
---                                 ) after_token
---                            FROM user_source
---                           WHERE type = 'PACKAGE BODY'
---                             AND name = UPPER(i_pkg_nm)
---                             AND line <= i_line_num -- only look at code before the caller's line number
---                             AND (UPPER(TRIM(text)) LIKE 'PROCEDURE%' OR UPPER(TRIM(text)) LIKE 'FUNCTION%'))
---                  ) t
---                  -- DISTINCT and analytic ROW_NUMBER yielded same response time, so went with more readable SQL
---                  -- 2010Mar30: Unfortunately, this hides private routines as well, so going back to behavior
---                  -- where inner routines mess it up.
-----                 ,(SELECT DISTINCT package_name, object_name FROM user_arguments) ua
-----            WHERE ua.package_name = t.package_name
-----              AND t.routine_name = ua.object_name -- eliminates inner routines
---          )
---    WHERE rnk = 1;
---
---    RETURN l_routine_nm;
---
---EXCEPTION
---   WHEN NO_DATA_FOUND THEN
---      RETURN NULL;
---END get_routine_nm;
-
---------------------------------------------------------------------------------
---FUNCTION get_routine_nm(i_stack_level IN PLS_INTEGER DEFAULT 2) RETURN VARCHAR2
---IS
---BEGIN
-----   dbms_output.put_line('From get_routine_nm');
-----   FOR i IN 1..utl_call_stack.dynamic_depth() LOOP
-----      dbms_output.put_line( str.ewc(TO_CHAR(utl_call_stack.lexical_depth(i)),9)||
-----                            str.ewc(TO_CHAR(i),6)||
-----                            str.ewc(TO_CHAR(utl_call_stack.unit_line(i)),6)||
-----                            str.ewc(utl_call_stack.concatenate_subprogram(utl_call_stack.subprogram(i)),60) );
-----   END LOOP;
---
---   RETURN utl_call_stack.concatenate_subprogram(utl_call_stack.subprogram(i_stack_level));
---END get_routine_nm;
-
---------------------------------------------------------------------------------
---FUNCTION get_error_point(i_stack_level IN PLS_INTEGER DEFAULT 1) RETURN INTEGER
---IS
---BEGIN
-----   dbms_output.put_line('From get_line_of_error');
-----   FOR i IN 1..utl_call_stack.error_depth() LOOP
-----      dbms_output.put_line( str.ewc(TO_CHAR(utl_call_stack.backtrace_line(i)),10)||
-----                            str.ewc(SUBSTR(utl_call_stack.backtrace_unit(i),1,60),60) );
-----   END LOOP;
---   RETURN utl_call_stack.backtrace_line(i_stack_level);
---END get_error_point;
-
---------------------------------------------------------------------------------
---FUNCTION line_num_here(i_stack_level IN PLS_INTEGER DEFAULT 1) RETURN INTEGER
---IS
---   lar_stack_data  tar_stack_data;
---BEGIN
---   bundle_stack_lines(lar_stack_data);
---   IF (i_stack_level <= lar_stack_data.COUNT) THEN
---      RETURN lar_stack_data(i_stack_level).line_num;
---   ELSE
---      RETURN NULL;
---   END IF;
---END line_num_here;
-
---------------------------------------------------------------------------------
---PROCEDURE caller_meta
---(
---   o_owner       OUT typ.t_maxobjnm,
---   o_caller_type OUT user_objects.object_type%TYPE,
---   o_unit_nm     OUT user_objects.object_name%TYPE,
---   o_routine_nm  OUT app_log.routine_nm%TYPE,
---   o_line_num    OUT app_log.line_num%TYPE,
---   i_stack_level IN PLS_INTEGER DEFAULT 1
---) IS
---   lar_stack_data tar_stack_data;
---BEGIN
---   bundle_stack_lines(lar_stack_data);
---
---   --ins('caller_meta: lar_stack_data.COUNT = '||lar_stack_data.COUNT);
---   
---   IF (i_stack_level <= lar_stack_data.COUNT) THEN
---      o_owner       := lar_stack_data(i_stack_level).owner;
---      o_caller_type := lar_stack_data(i_stack_level).obj_type;
---      o_unit_nm     := lar_stack_data(i_stack_level).obj_nm;
---      -- get underlying procedure/function name if called from package
---      IF (UPPER(lar_stack_data(i_stack_level).obj_type) = 'PACKAGE BODY') THEN
---         --ins('caller_meta: calling get_routine_nm('''||lar_stack_data(i_stack_level).obj_nm||
---         --                                       ''','||lar_stack_data(i_stack_level).line_num||')');
---         o_routine_nm := get_routine_nm(lar_stack_data(i_stack_level).obj_nm,
---                                        lar_stack_data(i_stack_level).line_num);
---      ELSE
---         o_routine_nm := lar_stack_data(i_stack_level).obj_nm;
---      END IF;
---      o_line_num := lar_stack_data(i_stack_level).line_num;
---   ELSE
---      o_owner       := cnst.unknown_user;
---      o_caller_type := NULL;
---      o_unit_nm     := cnst.unknown_str;
---      o_routine_nm  := cnst.unknown_str;
---      o_line_num    := NULL;
---   END IF;
---END caller_meta;
 
 --------------------------------------------------------------------------------
 PROCEDURE tag_session

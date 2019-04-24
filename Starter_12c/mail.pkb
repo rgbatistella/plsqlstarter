@@ -370,6 +370,7 @@ BEGIN
       logs.dbg('Writing to APP_EMAIL using email_id: '||l_email_id);
       INSERT INTO app_email
          (email_id,
+          crt_dt,
           app_id,
           email_to,
           email_subject,
@@ -386,6 +387,7 @@ BEGIN
           otx_sync_col)
       VALUES
          (l_email_id,
+          SYSDATE,
           env.get_app_id,
           i_email_to,
           i_email_subject,
