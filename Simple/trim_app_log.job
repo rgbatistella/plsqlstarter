@@ -15,7 +15,18 @@ END;
 /
 
 -------------------------------------------------------------------------------
+DECLARE
+   lx_job_not_there EXCEPTION;
+   PRAGMA EXCEPTION_INIT(lx_job_not_there,-27475);
 BEGIN
+ 
+   BEGIN
+      sys.dbms_scheduler.drop_job('TRIM_LOG');
+   EXCEPTION
+      WHEN lx_job_not_there THEN
+         NULL;
+   END;
+  
   SYS.DBMS_SCHEDULER.CREATE_JOB
     (
        job_name        => 'TRIM_LOG'
