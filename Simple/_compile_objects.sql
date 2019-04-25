@@ -101,6 +101,10 @@ PROMPT dt.pkb
 PROMPT logs.pkb
 @@logs.pkb
 
+PROMPT ddl_utils.pkb
+@@ddl_utils.pks
+@@ddl_utils.pkb
+
 -----------------------------------------------------------
 PROMPT Creating JOBS...
 PROMPT trim_app_log.job
