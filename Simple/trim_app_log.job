@@ -2,15 +2,22 @@
 -- Create nightly schedule
 -------------------------------------------------------------------------------
 
+DECLARE
+   lx_schedule_not_there EXCEPTION;
+   PRAGMA EXCEPTION_INIT(lx_schedule_not_there, -27476);
 BEGIN
-  SYS.DBMS_SCHEDULER.CREATE_SCHEDULE
-    (
-      schedule_name    => 'DAILY_0100'
-     ,start_date       => TO_TIMESTAMP_TZ('','yyyy/mm/dd hh24:mi:ss.ff tzr')
+   BEGIN
+   sys.dbms_scheduler.drop_schedule('DAILY_0100');
+   EXCEPTION
+      WHEN lx_schedule_not_there THEN
+         NULL;
+   END;
+
+   sys.dbms_scheduler.create_schedule(schedule_name   => 'DAILY_0100'
+                                     ,start_date      => to_timestamp_tz('','yyyy/mm/dd hh24:mi:ss.ff tzr')
      ,repeat_interval  => 'FREQ=DAILY; BYHOUR=1; BYMINUTE=0'
      ,end_date         => NULL
-     ,comments         => 'This schedule will run at 1:00 AM every day.'
-    );
+                                     ,comments        => 'This schedule will run at 1:00 AM every day.');
 END;
 /
 
