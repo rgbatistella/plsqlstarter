@@ -65,7 +65,7 @@ END get_sysdtm;
 --------------------------------------------------------------------------------
 FUNCTION get_systs RETURN TIMESTAMP IS
 BEGIN
-   RETURN LOCALTIMESTAMP;
+   RETURN SYSTIMESTAMP;
 END get_systs;
 
 --------------------------------------------------------------------------------
