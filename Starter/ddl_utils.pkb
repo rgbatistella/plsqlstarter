@@ -2084,6 +2084,36 @@ BEGIN
    END IF; 
 END drop_obj; 
  
+--------------------------------------------------------------------------------
+PROCEDURE drop_job(i_job_nm IN VARCHAR2, i_force IN BOOLEAN DEFAULT FALSE)
+IS
+   l_proc_nm user_objects.object_name%TYPE := 'drop_job'; 
+   lx_job_not_found EXCEPTION;
+   lx_not_a_job EXCEPTION;
+   PRAGMA EXCEPTION_INIT(lx_job_not_found, -27476);
+   PRAGMA EXCEPTION_INIT(lx_not_a_job, -27475);
+BEGIN
+   dbms_scheduler.drop_job(job_name => i_job_nm, force => i_force);
+EXCEPTION
+   WHEN lx_job_not_found THEN
+      inf(l_proc_nm || g_sep_char || 'Scheduler Job ' || i_job_nm || ' not found.');
+   WHEN lx_not_a_job THEN
+      inf(l_proc_nm || g_sep_char || i_job_nm || ' is not a job.');
+END drop_job;
+
+--------------------------------------------------------------------------------
+PROCEDURE drop_sched(i_sched_nm IN VARCHAR2, i_force IN BOOLEAN DEFAULT FALSE)
+IS
+   l_proc_nm user_objects.object_name%TYPE := 'drop_job'; 
+   lx_sched_not_found EXCEPTION;
+   PRAGMA EXCEPTION_INIT(lx_sched_not_found, -27476);
+BEGIN
+   dbms_scheduler.drop_schedule(schedule_name => i_sched_nm, force => i_force);
+EXCEPTION
+   WHEN lx_sched_not_found THEN
+      inf(l_proc_nm || g_sep_char || 'Scheduler Schedule ' || i_sched_nm || ' not found.');
+END drop_sched;
+ 
 -- RENAME routines 
 -------------------------------------------------------------------------------- 
 PROCEDURE rename_tbl 

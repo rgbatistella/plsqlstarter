@@ -653,6 +653,28 @@ PROCEDURE drop_seq(i_seq_nm IN VARCHAR2);
 --------------------------------------------------------------------------------
 PROCEDURE drop_obj(i_obj_nm IN VARCHAR2, i_obj_type IN VARCHAR2 DEFAULT NULL);
 
+--------------------------------------------------------------------------------
+-- drop_sched:
+-- Drops the given DBMS Scheduler Schedule.  If the schedule does not exist, a simple INFO
+-- message will be displayed announcing that fact. 
+-- 
+-- %param i_sched_nm Name of the Schedule to drop. Not case-sensitive.
+-- %param i_force  Optional parameter to specidfy if you want the FORCE option.  Defalt
+--                 is FALSE                   
+--------------------------------------------------------------------------------
+PROCEDURE drop_sched(i_sched_nm IN VARCHAR2, i_force IN BOOLEAN DEFAULT FALSE);
+
+--------------------------------------------------------------------------------
+-- drop_job:
+-- Drops the given DBMS Scheduler Job.  If the job does not exist, a simple INFO
+-- message will be displayed announcing that fact. 
+-- 
+-- %param i_job_nm Name of the Scheduler Job stored object to drop. Not case-sensitive.
+-- %param i_force  Optional parameter to specidfy if you want the FORCE option.  Defalt
+--                 is FALSE                   
+--------------------------------------------------------------------------------
+PROCEDURE drop_job(i_job_nm IN VARCHAR2, i_force IN BOOLEAN DEFAULT FALSE);
+
 
 --------------------------------------------------------------------------------
 -- rename_tbl:
