@@ -28,7 +28,7 @@ bcoulam      1997Dec30 Creation
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-    
+
 *******************************************************************************/
 AS
 
@@ -43,6 +43,7 @@ AS
 --------------------------------------------------------------------------------
 --                 PUBLIC CONSTANTS, VARIABLES, EXCEPTIONS, ETC.
 --------------------------------------------------------------------------------
+g_event_id INTEGER;
 
 --------------------------------------------------------------------------------
 --                              PUBLIC FUNCTIONS
@@ -54,10 +55,10 @@ AS
 
 /**-----------------------------------------------------------------------------
 ins:
- Using autonomous transaction, will insert the given message, and its context, 
+ Using autonomous transaction, will insert the given message, and its context,
  into the APP_LOG table. This is a key component for any application's
  debugging, error handling and audit-trail schemes.
- 
+
 %param i_log_txt Free-form text field. Place your error or debug message in here
                  along with any context that is available at the point of the
                  error.
@@ -75,12 +76,12 @@ ins:
                 grouping of related messages.
 
 %param i_routine_nm The name of the procedure, function, trigger, object or
-                    package.routine from which the message was sent. This 
+                    package.routine from which the message was sent. This
                     field is great for filtering just your messages,
                     running reports on the most buggy packages, etc.
 
 %param i_line_num The line number the caller wishes to record as being the
-                  source of the logged message and option call/error stacks.                    
+                  source of the logged message and option call/error stacks.
 ------------------------------------------------------------------------------*/
 PROCEDURE ins
 (
@@ -88,18 +89,65 @@ PROCEDURE ins
    i_sev_cd     IN app_log.sev_cd%TYPE DEFAULT cnst.INFO,
    i_msg_cd     IN app_log.msg_cd%TYPE DEFAULT NULL,
    i_routine_nm IN app_log.routine_nm%TYPE DEFAULT NULL,
-   i_line_num   IN app_log.line_num%TYPE DEFAULT NULL
+   i_line_num   IN app_log.line_num%TYPE DEFAULT NULL,
+   i_event_id   IN app_log.event_id%TYPE DEFAULT NULL
+);
+
+/**-----------------------------------------------------------------------------
+event_ins:
+ Using autonomous transaction, will insert the given event, and its context,
+ into the APP_EVENT table.
+
+%param i_name    Free-form text field. Place the name of your event in here
+                 along with any context that is available.
+
+%param i_routine_nm The name of the procedure, function, trigger, object or
+                    package.routine from which the message was sent. This
+                    field is great for filtering just your messages,
+                    running reports on the most buggy packages, etc.
+
+%param i_line_num The line number the caller wishes to record as being the
+                  source of the logged message and option call/error stacks.
+------------------------------------------------------------------------------*/
+PROCEDURE event_ins
+(
+   i_name    IN app_event.name%TYPE,
+   i_routine_nm IN app_event.routine_nm%TYPE DEFAULT NULL,
+   i_line_num   IN app_event.line_num%TYPE DEFAULT NULL
+);
+
+/**-----------------------------------------------------------------------------
+event_upd:
+ Using autonomous transaction, will insert the given event, and its context,
+ into the APP_EVENT table.
+
+%param i_name    Free-form text field. Place the name of your event in here
+                 along with any context that is available.
+
+%param i_routine_nm The name of the procedure, function, trigger, object or
+                    package.routine from which the message was sent. This
+                    field is great for filtering just your messages,
+                    running reports on the most buggy packages, etc.
+
+%param i_line_num The line number the caller wishes to record as being the
+                  source of the logged message and option call/error stacks.
+------------------------------------------------------------------------------*/
+PROCEDURE event_upd
+(
+   i_name    IN app_event.name%TYPE,
+   i_routine_nm IN app_event.routine_nm%TYPE DEFAULT NULL,
+   i_line_num   IN app_event.line_num%TYPE DEFAULT NULL
 );
 
 /**-----------------------------------------------------------------------------
 trim_table:
- This routine manages the periodic cleaning of logs from the app_log table. It 
+ This routine manages the periodic cleaning of logs from the app_log table. It
  uses simple DELETE DML. If you have large volumes of logs, rewrite APP_LOG as a
  partitioned table and use partition dropping and the reuse global index
  clause to maintain availability. There is the option to write the old rows to
  file before deleting them. You may also control the amount removed from the
  back end of app_log.
- 
+
 %usage
  You may call trim_logs manually when needed, or place in a scheduled job. The
  Core creation script creates a DBMS_JOB by default.
@@ -118,7 +166,7 @@ trim_table:
 %param i_archive_to_file_flg If set to Y will write the log rows to a file
                              before deleting them from the table.
 
-%param i_archive_file_nm The file name to use if copying APP_LOG rows to file 
+%param i_archive_file_nm The file name to use if copying APP_LOG rows to file
                          before deleting.
 ------------------------------------------------------------------------------*/
 PROCEDURE trim_table

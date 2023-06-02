@@ -747,6 +747,69 @@ ALTER TABLE app_msg
 /
 
 -------------------------------------------------------------------------------
+PROMPT Creating table APP_EVENT...
+CREATE SEQUENCE app_event_seq
+/
+
+CREATE TABLE app_event
+(
+ event_id                       INTEGER DEFAULT /*ON NULL app_event_seq.NEXTVAL */CONSTRAINT aevt_log_id_nn NOT NULL
+,app_id                         INTEGER CONSTRAINT aevt_app_id_nn NOT NULL
+,env_id                         INTEGER CONSTRAINT aevt_env_id_nn NOT NULL
+,evt_ts                         TIMESTAMP CONSTRAINT aevt_evt_ts_nn NOT NULL
+,name                           VARCHAR2(4000 CHAR) CONSTRAINT aevt_name_nn NOT NULL
+,routine_nm                     VARCHAR2(256 CHAR)
+,line_num                       INTEGER
+,call_stack                     VARCHAR2(4000 CHAR)
+,error_stack                    VARCHAR2(4000 CHAR)
+,client_id                      VARCHAR2(80 CHAR)
+,client_ip                      VARCHAR2(40 CHAR)
+,client_host                    VARCHAR2(40 CHAR)
+,client_os_user                 VARCHAR2(100 CHAR)
+)
+TABLESPACE &&default_tablespace
+PCTFREE 10 PCTUSED 90
+/
+
+COMMENT ON TABLE  app_event IS 'Events (AEVT): Application event table. This table dovetails with the LOGS package. This table is one of the output targets for logging and debugging. All debugging goes to this table by default. But application and error logging only gets written here if the targets are turned on using logs.set_targets.';
+COMMENT ON COLUMN app_event.event_id IS 'Event ID: Surrogate key for this table.';
+COMMENT ON COLUMN app_event.app_id IS 'Application ID: Foreign key to APP. The application which "owns" the logged row.';
+COMMENT ON COLUMN app_event.env_id IS 'Environment ID: Foreign key to APP_ENV. The environment wich is configured by the parameter.';
+COMMENT ON COLUMN app_event.evt_ts IS 'Event Timestamp: Timestamp of log entry.';
+COMMENT ON COLUMN app_event.name IS 'Event name: Column of free-form text for event, debugging and informational/context recording.';
+COMMENT ON COLUMN app_event.routine_nm IS 'Routine Name: The name of the trigger, type body, object method, standalone function or procedure, or packaged routine (in package.routine format) which generated the log message.';
+COMMENT ON COLUMN app_event.line_num IS 'Line Number: The line number the caller or the framework determined should be referenced in the ROUTINE_NM for this log record.';
+COMMENT ON COLUMN app_event.call_stack IS 'Call Stack: The full call stack. Will be 10g-flavored if on 11g or 10g. Will be the UTL_CALL_STACK (12c) version if on 12c or higher.';
+COMMENT ON COLUMN app_event.error_stack IS 'Error Stack: The full error stack and backtrace. Will be empty if no error is present at the time of logging.';
+COMMENT ON COLUMN app_event.client_id IS 'Client Identifier: Optional unique identifier for the end user or automated process responsible for the generation of the log message. This can be set by the frontend using ENV.INIT_CLIENT_CTX, but will default to something useful if it has not been set.';
+COMMENT ON COLUMN app_event.client_ip IS 'Client IP: Optional IPv4 or IPv6 address of the client machine.';
+COMMENT ON COLUMN app_event.client_host IS 'Client Host: Optional name of the machine the client is connecting from. For direct connections (application servers, end users with SQL*Plus, OEM, Forms, DBA tools, etc.), this is available from the USERENV context using the ''host'' parameter. For 3 and n-tier applications, if you desire to store the name of the machine the end user is operating from, the application server would have to obtain it from the user''s environment and set it using env.init_client_ctx() upon connection.';
+COMMENT ON COLUMN app_event.client_os_user IS 'Client OS User: The name of the logged in account on the operating system from which the client or user is connecting. This can be set by the application using env.init_client_ctx() upon connection.';
+
+ALTER TABLE app_event
+  ADD CONSTRAINT app_event_pk
+  PRIMARY KEY (event_id)
+  USING INDEX
+  TABLESPACE &&index_tablespace
+/
+ALTER TABLE app_event
+  ADD CONSTRAINT aevt_app_id_fk
+  FOREIGN KEY (app_id)
+  REFERENCES app (app_id)
+/
+ALTER TABLE app_event
+  ADD CONSTRAINT aevt_env_id_fk
+  FOREIGN KEY (env_id)
+  REFERENCES app_env (env_id)
+/
+CREATE INDEX aevt_app_id_idx ON app_event (app_id)
+  TABLESPACE &&index_tablespace
+/
+CREATE INDEX aevt_routine_nm_idx ON app_event (routine_nm)
+  TABLESPACE &&index_tablespace
+/
+
+-------------------------------------------------------------------------------
 PROMPT Creating table APP_LOG...
 CREATE SEQUENCE app_log_seq
 /
@@ -754,6 +817,7 @@ CREATE SEQUENCE app_log_seq
 CREATE TABLE app_log
 (
  log_id                         INTEGER DEFAULT ON NULL app_log_seq.NEXTVAL CONSTRAINT alg_log_id_nn NOT NULL
+,event_id                       INTEGER NULL
 ,app_id                         INTEGER CONSTRAINT alg_app_id_nn NOT NULL
 ,env_id                         INTEGER CONSTRAINT alg_env_id_nn NOT NULL
 ,log_ts                         TIMESTAMP CONSTRAINT alg_log_ts_nn NOT NULL
@@ -775,6 +839,7 @@ PCTFREE 10 PCTUSED 90
 
 COMMENT ON TABLE  app_log IS 'Logs (ALG): Application logging table. This table dovetails with the LOGS package. This table is one of the output targets for logging and debugging. All debugging goes to this table by default. But application and error logging only gets written here if the targets are turned on using logs.set_targets.';
 COMMENT ON COLUMN app_log.log_id IS 'Log ID: Surrogate key for this table.';
+COMMENT ON COLUMN app_log.event_id IS 'Event ID: Foreign Key to the Event table.';
 COMMENT ON COLUMN app_log.app_id IS 'Application ID: Foreign key to APP. The application which "owns" the logged row.';
 COMMENT ON COLUMN app_log.env_id IS 'Environment ID: Foreign key to APP_ENV. The environment wich is configured by the parameter.';
 COMMENT ON COLUMN app_log.log_ts IS 'Log Timestamp: Timestamp of log entry.';
@@ -814,6 +879,11 @@ ALTER TABLE app_log
   FOREIGN KEY (msg_cd)
   REFERENCES app_msg (msg_cd)
 /
+ALTER TABLE app_log
+  ADD CONSTRAINT alg_event_id_fk
+  FOREIGN KEY (event_id)
+  REFERENCES app_event (event_id)
+/
 CREATE INDEX alg_msg_cd_idx ON app_log (msg_cd)
   TABLESPACE &&index_tablespace
 /
@@ -826,6 +896,9 @@ CREATE INDEX alg_routine_nm_idx ON app_log (routine_nm)
 ALTER TABLE app_log
   ADD CONSTRAINT alg_sev_cd_chk
   CHECK (sev_cd IN ('ERROR','WARN','INFO','DEBUG'))
+/
+CREATE UNIQUE INDEX alg_event_idx ON app_log (event_id, log_id)
+  TABLESPACE &&index_tablespace
 /
 
 /*

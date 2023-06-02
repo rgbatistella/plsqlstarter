@@ -51,6 +51,27 @@ BEGIN
 END ins;
 
 --------------------------------------------------------------------------------
+PROCEDURE event_ins(ir_app_event IN app_event%ROWTYPE) IS
+   PRAGMA AUTONOMOUS_TRANSACTION;
+BEGIN
+
+   INSERT INTO app_event
+   VALUES ir_app_event;
+
+   COMMIT; -- must be here for autonomous to work
+END event_ins;
+--------------------------------------------------------------------------------
+PROCEDURE event_upd(ir_app_event IN app_event%ROWTYPE) IS
+   PRAGMA AUTONOMOUS_TRANSACTION;
+BEGIN
+
+   UPDATE app_event
+      SET ROW = ir_app_event
+   WHERE event_id = g_event_id;
+
+   COMMIT; -- must be here for autonomous to work
+END event_upd;
+--------------------------------------------------------------------------------
 --                        PUBLIC FUNCTIONS AND PROCEDURES
 --------------------------------------------------------------------------------
 
@@ -61,12 +82,14 @@ PROCEDURE ins
    i_sev_cd     IN app_log.sev_cd%TYPE DEFAULT cnst.info,
    i_msg_cd     IN app_log.msg_cd%TYPE DEFAULT NULL,
    i_routine_nm IN app_log.routine_nm%TYPE DEFAULT NULL,
-   i_line_num   IN app_log.line_num%TYPE DEFAULT NULL
+   i_line_num   IN app_log.line_num%TYPE DEFAULT NULL,
+   i_event_id   IN app_log.event_id%TYPE DEFAULT NULL
 ) IS
    lr_app_log app_log%ROWTYPE;
 BEGIN
    lr_app_log.log_id := app_log_seq.NEXTVAL;
 
+   lr_app_log.event_id    := nvl (i_event_id, g_event_id);
    lr_app_log.app_id      := env.get_app_id;
    lr_app_log.env_id      := env.get_env_id;
    lr_app_log.log_ts      := dt.get_systs;
@@ -109,6 +132,85 @@ BEGIN
    ins(lr_app_log);
 
 END ins;
+
+------------------------------------------------------------------------------
+PROCEDURE event_ins
+(
+   i_name    IN app_event.name%TYPE,
+   i_routine_nm IN app_event.routine_nm%TYPE DEFAULT NULL,
+   i_line_num   IN app_event.line_num%TYPE DEFAULT NULL
+) IS
+   lr_app_event app_event%ROWTYPE;
+BEGIN
+   lr_app_event.event_id := app_event_seq.NEXTVAL;
+   g_event_id := lr_app_event.event_id;
+   lr_app_event.app_id      := env.get_app_id;
+   lr_app_event.env_id      := env.get_env_id;
+   lr_app_event.evt_ts      := dt.get_systs;
+   -- framework routines SHOULD be passing the routine_nm and line_nm. The following NVLs which look at depth
+   -- 2 of the call stack assume that app_log_api is being called directly by a framework-consuming package
+   lr_app_event.routine_nm  := NVL(i_routine_nm, utl_call_stack.concatenate_subprogram(utl_call_stack.subprogram(2)));
+   lr_app_event.line_num    := NVL(i_line_num, utl_call_stack.unit_line(2));
+   lr_app_event.name     := i_name;
+   lr_app_event.client_id   := env.get_client_id;
+   lr_app_event.client_ip   := env.get_client_ip;
+   lr_app_event.client_host := env.get_client_host;
+   lr_app_event.client_os_user := env.get_client_os_user;
+
+   -- For now the 12c error and backtrace stacks are actually a little less informative and
+   -- harder to get into a string for logging, so we'll stick with the 9i and 10g versions
+   IF (utl_call_stack.error_depth > 0) THEN
+
+      -- although the call stack is always available, I don't really care and don't want
+      -- to spend the overhead of gathering and storing it, except for when logging
+      -- errors. Hence, the reason this is buried inside the error stack depth check.
+      -- 12c call stack is a little better in that the calling objects are fully qualified
+      -- Unfortunately the 12c call stack is missing object type. No tears for losing the
+      -- object handle though.
+      lr_app_event.call_stack := str.ewc('Lvl',4)||str.ewc('Line#',6)||'Unit Name'||CHR(10);
+      FOR i IN 2..utl_call_stack.dynamic_depth() LOOP
+         lr_app_event.call_stack := lr_app_event.call_stack||
+             str.ewc(TO_CHAR(i),4)||
+             str.ewc(TO_CHAR(utl_call_stack.unit_line(i)),6)||
+             utl_call_stack.concatenate_subprogram(utl_call_stack.subprogram(i))||CHR(10);
+      END LOOP;
+
+      lr_app_event.error_stack := 'Errors:'||CHR(10)||
+                                dbms_utility.format_error_stack||CHR(10)
+                                ||'Backtrace:'||CHR(10)||
+                                dbms_utility.format_error_backtrace;
+   END IF;
+
+   event_ins(lr_app_event);
+
+END event_ins;
+
+------------------------------------------------------------------------------
+PROCEDURE event_upd
+(
+   i_name    IN app_event.name%TYPE,
+   i_routine_nm IN app_event.routine_nm%TYPE DEFAULT NULL,
+   i_line_num   IN app_event.line_num%TYPE DEFAULT NULL
+) IS
+   lr_app_event app_event%ROWTYPE;
+BEGIN
+   lr_app_event.event_id := g_event_id;
+   lr_app_event.app_id      := env.get_app_id;
+   lr_app_event.env_id      := env.get_env_id;
+   lr_app_event.evt_ts      := dt.get_systs;
+   -- framework routines SHOULD be passing the routine_nm and line_nm. The following NVLs which look at depth
+   -- 2 of the call stack assume that app_log_api is being called directly by a framework-consuming package
+   lr_app_event.routine_nm  := NVL(i_routine_nm, utl_call_stack.concatenate_subprogram(utl_call_stack.subprogram(2)));
+   lr_app_event.line_num    := NVL(i_line_num, utl_call_stack.unit_line(2));
+   lr_app_event.name     := i_name;
+   lr_app_event.client_id   := env.get_client_id;
+   lr_app_event.client_ip   := env.get_client_ip;
+   lr_app_event.client_host := env.get_client_host;
+   lr_app_event.client_os_user := env.get_client_os_user;
+
+   event_upd(lr_app_event);
+
+END event_upd;
 
 ------------------------------------------------------------------------------
 PROCEDURE trim_table

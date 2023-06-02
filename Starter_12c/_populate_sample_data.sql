@@ -159,8 +159,8 @@ VALUES ( app_env_seq.NEXTVAL
         ,'');
 
 -- This demonstrates how you can have multiple environments on a single database,
--- (in this case TKT_DEV and TKT_TEST co-exist on the same Dev database). Such a 
--- setup is great to conserve resources and licensing costs as long as performance 
+-- (in this case TKT_DEV and TKT_TEST co-exist on the same Dev database). Such a
+-- setup is great to conserve resources and licensing costs as long as performance
 -- and load testing aren't a concern).
 INSERT INTO app_env (ENV_ID, APP_ID, ENV_NM, DB_ID, OWNER_ACCOUNT, ACCESS_ACCOUNT)
 VALUES ( app_env_seq.NEXTVAL
@@ -376,7 +376,7 @@ INSERT INTO app_env_parm (ENV_ID, PARM_ID, PARM_VAL)
 VALUES ((SELECT env_id FROM app_env ae JOIN app a ON a.app_id = ae.app_id WHERE a.app_cd = 'INV' AND ae.env_nm = 'Billing Prod')
        ,(SELECT parm_id FROM app_parm WHERE parm_nm = 'Default Log File Directory')
        ,'CORE_LOGS');
-       
+
 -- Default Email File Directory
 INSERT INTO app_env_parm (ENV_ID, PARM_ID, PARM_VAL)
 VALUES ((SELECT env_id FROM app_env ae JOIN app a ON a.app_id = ae.app_id WHERE a.app_cd = 'CORE' AND ae.env_nm = 'Core Dev')
@@ -414,7 +414,7 @@ INSERT INTO app_env_parm (ENV_ID, PARM_ID, PARM_VAL)
 VALUES ((SELECT env_id FROM app_env ae JOIN app a ON a.app_id = ae.app_id WHERE a.app_cd = 'INV' AND ae.env_nm = 'Billing Prod')
        ,(SELECT parm_id FROM app_parm WHERE parm_nm = 'Default Email File Directory')
        ,'CORE_MAIL');
-       
+
 -- Default Log Targets
 INSERT INTO app_env_parm (ENV_ID, PARM_ID, PARM_VAL)
 VALUES ((SELECT env_id FROM app_env ae JOIN app a ON a.app_id = ae.app_id WHERE a.app_cd = 'CORE' AND ae.env_nm = 'Core Dev')
@@ -452,7 +452,7 @@ INSERT INTO app_env_parm (ENV_ID, PARM_ID, PARM_VAL)
 VALUES ((SELECT env_id FROM app_env ae JOIN app a ON a.app_id = ae.app_id WHERE a.app_cd = 'INV' AND ae.env_nm = 'Billing Prod')
        ,(SELECT parm_id FROM app_parm WHERE parm_nm = 'Default Log Targets')
        ,'Screen=N,Table=Y,File=N');
-       
+
 -- Debug
 INSERT INTO app_env_parm (ENV_ID, PARM_ID, PARM_VAL)
 VALUES ((SELECT env_id FROM app_env ae JOIN app a ON a.app_id = ae.app_id WHERE a.app_cd = 'CORE' AND ae.env_nm = 'Core Dev')
@@ -490,7 +490,7 @@ INSERT INTO app_env_parm (ENV_ID, PARM_ID, PARM_VAL)
 VALUES ((SELECT env_id FROM app_env ae JOIN app a ON a.app_id = ae.app_id WHERE a.app_cd = 'INV' AND ae.env_nm = 'Billing Prod')
        ,(SELECT parm_id FROM app_parm WHERE parm_nm = 'Debug')
        ,'Off');
-       
+
 -- Debug Toggle Check Interval
 INSERT INTO app_env_parm (ENV_ID, PARM_ID, PARM_VAL)
 VALUES ((SELECT env_id FROM app_env ae JOIN app a ON a.app_id = ae.app_id WHERE a.app_cd = 'CORE' AND ae.env_nm = 'Core Dev')
@@ -605,6 +605,8 @@ VALUES (101, (SELECT app_id FROM app WHERE app_cd = 'CORE'), 'Row Lock Held', 'U
 INSERT INTO app_msg (MSG_ID, APP_ID, MSG_CD, MSG, MSG_DESCR)
 VALUES (102, (SELECT app_id FROM app WHERE app_cd = 'CORE'), 'Logical Lock Held', 'Lock on @1@ already held by @2@. Try again later.','1=table name, 2=app.app_cd');
 
+INSERT INTO app_msg (MSG_ID, APP_ID, MSG_CD, MSG, MSG_DESCR)
+VALUES (103, (SELECT app_id FROM app WHERE app_cd = 'CORE'), 'There is no event to update', 'The application tryed to update an event, but there is no current event to update',null);
 COMMIT;
 
 

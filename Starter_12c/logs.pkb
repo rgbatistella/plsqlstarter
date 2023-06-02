@@ -344,6 +344,65 @@ BEGIN
 END to_table;
 
 
+/**-----------------------------------------------------------------------------
+create_event:
+ The create_event routine creates an application event that logs are grouped
+ into.
+
+%param i_name The message to be logged to a file. Must be less than 4K characters.
+
+%param i_routine_nm Optional message source. Usually the package.routine where
+                    the message came from. Could be the name of a trigger,
+                    object method, type body, etc.
+------------------------------------------------------------------------------*/
+PROCEDURE create_event
+(
+   i_name    IN app_event.name%TYPE, -- must be <= 4K
+   i_routine_nm IN app_event.routine_nm%TYPE DEFAULT NULL,
+   i_line_num   IN app_event.line_num%TYPE DEFAULT NULL
+)
+IS
+BEGIN
+   app_log_api.event_ins(
+      format_tbl_txt(i_name),
+      i_routine_nm,
+      i_line_num
+   );
+END create_event;
+
+/**-----------------------------------------------------------------------------
+update_event:
+ The create_event routine creates an application event that logs are grouped
+ into.
+
+%param i_name The message to be logged to a file. Must be less than 4K characters.
+
+%param i_routine_nm Optional message source. Usually the package.routine where
+                    the message came from. Could be the name of a trigger,
+                    object method, type body, etc.
+%param b_create     Optional. Create a new event if g_event_id is null or raise
+                    error
+------------------------------------------------------------------------------*/
+PROCEDURE update_event
+(
+   i_name    IN app_event.name%TYPE, -- must be <= 4K
+   i_routine_nm IN app_event.routine_nm%TYPE DEFAULT NULL,
+   i_line_num   IN app_event.line_num%TYPE DEFAULT NULL,
+   b_create     IN BOOLEAN DEFAULT TRUE -- create if event is null
+)
+IS
+BEGIN
+  IF b_create AND app_log_api.g_event_id IS NULL THEN
+    logs.err('There is no event to update');
+  END IF;
+   app_log_api.event_upd(
+      format_tbl_txt(i_name),
+      i_routine_nm,
+      i_line_num
+   );
+END update_event;
+
+
 --------------------------------------------------------------------------------
 --                        PUBLIC FUNCTIONS AND PROCEDURES
 --------------------------------------------------------------------------------
@@ -378,6 +437,12 @@ IS
 BEGIN
    RETURN env.vld_path_format(env.get_dir_path(g_file_dir))||g_file_nm;
 END get_log_path;
+
+--------------------------------------------------------------------------------
+FUNCTION get_event_id RETURN INTEGER IS
+BEGIN
+  RETURN app_log_api.g_event_id;
+END;
 
 --------------------------------------------------------------------------------
 PROCEDURE set_targets

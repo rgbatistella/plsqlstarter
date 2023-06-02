@@ -24,8 +24,9 @@ CREATE OR REPLACE PACKAGE BODY top
 AS
 PROCEDURE proc(i_str IN VARCHAR2) IS
 BEGIN
+   logs.create_event('Testing logs Event');
    middle.proc(i_str);
-EXCEPTION 
+EXCEPTION
    WHEN NO_DATA_FOUND THEN
       logs.info('Caught NO_DATA_FOUND in middle.');
 END proc;
@@ -36,10 +37,10 @@ AS
 PROCEDURE proc(i_str IN VARCHAR2) IS
    -- this is only meant to test inner routines, not accuracy of $$PLSQL_LINE
    FUNCTION get_line RETURN NUMBER IS BEGIN RETURN $$PLSQL_LINE; END get_line;
-   -- this is only meant to test inner routines   
+   -- this is only meant to test inner routines
    FUNCTION get_str RETURN VARCHAR2
    IS
-   BEGIN 
+   BEGIN
       RETURN i_str;
    END get_str;
 BEGIN
@@ -58,7 +59,7 @@ END bogus_priv_proc;
 PROCEDURE proc    (i_str IN VARCHAR2, i_line IN NUMBER) IS
    lx EXCEPTION;
    PRAGMA EXCEPTION_INIT(lx, -0922);
-   
+
    PROCEDURE force_error IS
    BEGIN
       RAISE TOO_MANY_ROWS;
@@ -229,6 +230,7 @@ END bottom;
 /
 
 CREATE OR REPLACE PACKAGE BODY bottom AS
+
 PROCEDURE proc(i_str IN VARCHAR2) IS
 BEGIN
    IF (i_str = 'unhandled') THEN
@@ -238,18 +240,20 @@ BEGIN
    END IF;
 EXCEPTION
 WHEN NO_DATA_FOUND THEN
-  pr(RPAD('Error#',7)||RPAD('Line#',6)||RPAD('Unit',12)||'Msg');
+  logs.msg(RPAD('Error#',7)||RPAD('Line#',6)||RPAD('Unit',12)||'Msg');
   FOR i IN REVERSE 1..utl_call_stack.backtrace_depth() LOOP
-    pr(RPAD(TO_CHAR(utl_call_stack.error_number(i)),7)||
+   logs.msg(RPAD(TO_CHAR(utl_call_stack.error_number(i)),7)||
        RPAD(TO_CHAR(utl_call_stack.backtrace_line(i)),6)||
        RPAD(SUBSTR(utl_call_stack.backtrace_unit(i),1,12),12)||
        utl_call_stack.error_msg(i));
   END LOOP;
   RAISE;
 END proc;
+
 END bottom;
 /
-
+SELECT * FROM app_log ORDER BY 1 DESC;
+SELECT * FROM app_event ORDER BY 1 DESC;
 SET SERVEROUTPUT ON
 EXEC top.proc('excp.throw');
 SET SERVEROUTPUT ON
