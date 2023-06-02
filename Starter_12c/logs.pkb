@@ -11,7 +11,7 @@ bcoulam      2008Feb08 Refactored heavily from the msg package.
 bcoulam      2008May15 Added line number as an optional parameter to most logging
                        routines.
 bcoulam      2008May20 Added fine-grained filters to debug mode, so debug logs
-                       only get written for certain packages, session or user.                       
+                       only get written for certain packages, session or user.
 
 <i>
     __________________________  LGPL License  ____________________________
@@ -30,7 +30,7 @@ bcoulam      2008May20 Added fine-grained filters to debug mode, so debug logs
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-    
+
 *******************************************************************************/
 AS
 
@@ -87,23 +87,24 @@ BEGIN
       env.get_db_name||cnst.PIPECHAR||
       env.get_sid||cnst.PIPECHAR||
       env.get_app_cd||cnst.PIPECHAR||
+      env.get_env_nm||cnst.PIPECHAR||
       env.get_client_id||cnst.PIPECHAR||
       NVL(i_routine_nm, cnst.UNKNOWN_STR)||cnst.PIPECHAR|| -- calling package.routine, trigger, type body, etc.
       NVL(TO_CHAR(i_line_num), '-')||cnst.PIPECHAR||
       i_sev_cd||cnst.PIPECHAR||
-      i_msg_cd||cnst.PIPECHAR|| 
-      NVL(i_msg,'Message missing. Figure out why!')   
+      i_msg_cd||cnst.PIPECHAR||
+      NVL(i_msg,'Message missing. Figure out why!')
    ,1, cnst.max_vc2_len -- UTL_FILE limited to 32K
    );
 END format_log_txt;
 
 /**-----------------------------------------------------------------------------
 format_tbl_txt:
- Supposedly formats the given message for table insertion, but this was 
- simplified to just fill with a message if the given message is empty, since 
- the identifying fields -- crucial in format_log_txt -- are handled as separate 
+ Supposedly formats the given message for table insertion, but this was
+ simplified to just fill with a message if the given message is empty, since
+ the identifying fields -- crucial in format_log_txt -- are handled as separate
  columns in APP_LOG.
- 
+
  This routine also ensures the text going into APP_LOG is short enough for the
  column.
 ------------------------------------------------------------------------------*/
@@ -128,7 +129,7 @@ IS
 BEGIN
    -- Ensure the call to parms.get_parm_val actually pulled back a value
    excp.assert(i_expr => i_parm_val IS NOT NULL,
-               i_msg => 'i_parm_val is empty. Cannot validate the format of an empty parameter.'); 
+               i_msg => 'i_parm_val is empty. Cannot validate the format of an empty parameter.');
 
    -- Value must first pass syntax check. I do not try to ensure session ID,
    -- package names, or client ID are valid and known to the database. The
@@ -145,7 +146,7 @@ BEGIN
    IF (l_parm_val LIKE 'unit=%' OR l_parm_val LIKE 'user=%' OR l_parm_val LIKE 'session=%') THEN
       gr_debug.debugging_on := TRUE;
       gr_debug.debug_type := SUBSTR(l_parm_val,1,INSTR(l_parm_val,'=')-1);
-      
+
       IF (l_parm_val LIKE 'user=%') THEN
          -- Leave client ID untouched, as character case may matter
          -- with regard to unique user identifiers.
@@ -161,7 +162,7 @@ BEGIN
                      i_msg => DEBUG_PARM_NM||' value invalid. Session ID ['||
                               gr_debug.debug_trig||'] must be numeric.');
       END IF;
-                    
+
    ELSE
       -- reduce flexible toggle values to single value
       IF (l_parm_val IN ('all','on','true','y','yes')) THEN
@@ -179,11 +180,11 @@ END vld_debug_toggle_format;
 /**-----------------------------------------------------------------------------
 check_debug_toggle:
  Called by dbg() only if N minutes have passed. This interval is controlled by
- the "Debug Toggle Check Interval" in APP_PARM_VW). When called, it updates the 
- timestamp stored in the global debug structure, then reads the current debug 
+ the "Debug Toggle Check Interval" in APP_PARM_VW). When called, it updates the
+ timestamp stored in the global debug structure, then reads the current debug
  toggle value for the application in APP_PARM_VW.
- 
- If a caller has called set_dbg directly from a session, then debug is turned 
+
+ If a caller has called set_dbg directly from a session, then debug is turned
  on, period; this function will therefore not bother to read APP_PARM_VW since a
  manual call is overriding the dynamic debugging feature.
 ------------------------------------------------------------------------------*/
@@ -191,7 +192,7 @@ PROCEDURE check_debug_toggle
 IS
 BEGIN
    gr_debug.last_checked_dtm := dt.get_sysdtm; --update timestamp no matter what
-   
+
    -- Only read the table if debugging isn't being overidden by a manual
    -- call through set_dbg.
    IF (NOT gr_debug.session_override) THEN
@@ -199,7 +200,7 @@ BEGIN
       vld_debug_toggle_format(NVL(parm.get_val(DEBUG_PARM_NM),'Off'));
 
    END IF;
-      
+
 END check_debug_toggle;
 
 --------------------------------------------------------------------------------
@@ -229,10 +230,10 @@ BEGIN
    IF (l_str IS NOT NULL) THEN
       -- break the parameter value into its components by the delimiter
       l_str_targets := str.parse_list(l_str);
-         
+
       FOR i IN l_str_targets.FIRST..l_str_targets.LAST LOOP
          l_target_nm := TRIM(SUBSTR(l_str_targets(i),1,INSTR(l_str_targets(i),'=')-1));
-            
+
          IF (l_target_nm = TARGET_SCREEN) THEN
             get_target_bool(l_str_targets(i), o_to_screen);
          ELSIF (l_target_nm = TARGET_TABLE) THEN
@@ -242,7 +243,7 @@ BEGIN
          END IF;
       END LOOP;
    ELSE
-      -- couldn't find the parameter for the given environment, so default to 
+      -- couldn't find the parameter for the given environment, so default to
       -- table logging only, which should succeed if APP_LOG is created.
       o_to_screen := FALSE;
       o_to_table := TRUE;
@@ -252,11 +253,11 @@ END get_targets_for_env;
 
 /**-----------------------------------------------------------------------------
 to_file:
- The to_file routine is mainly used by the logs.msg routine if File is one of the 
- log targets. However, this public interface is provided to allow the programmer 
- to override the current session's target. There may be a need, for example, to 
- have most output going to the application's log table, but occassionally need to 
- send a line or two to a special file. This allows the programmer to avoid 
+ The to_file routine is mainly used by the logs.msg routine if File is one of the
+ log targets. However, this public interface is provided to allow the programmer
+ to override the current session's target. There may be a need, for example, to
+ have most output going to the application's log table, but occassionally need to
+ send a line or two to a special file. This allows the programmer to avoid
  having to set/reset the target more than once for the transaction/session.
 
  If to_file is called, the programmer should supply a filename. The directory
@@ -300,12 +301,12 @@ END to_file;
 
 /**-----------------------------------------------------------------------------
 to_table:
- The to_table routine is mainly used by the logs.msg routine if Table is one of 
- the log targets. However, this public interface is provided to allow the 
- programmer to override the current session's target. There may be a need, for 
- example, to have most output going to the application's log file, but 
- occassionally need to send a line or two to the APP_LOG table. This allows the 
- programmer to avoid having to set/reset the target more than once for the 
+ The to_table routine is mainly used by the logs.msg routine if Table is one of
+ the log targets. However, this public interface is provided to allow the
+ programmer to override the current session's target. There may be a need, for
+ example, to have most output going to the application's log file, but
+ occassionally need to send a line or two to the APP_LOG table. This allows the
+ programmer to avoid having to set/reset the target more than once for the
  transaction/session.
 
  By default, when to_table is called the message will be inserted into the
@@ -471,14 +472,14 @@ BEGIN
    IF (i_line_num IS NULL) THEN
       l_line_num := env.get_caller_line;
    END IF;
-   
+
    -- if msg is blank, try to look it up based on the code
    IF (i_msg IS NULL) THEN
       l_msg := msgs.get_msg(i_msg_cd);
    ELSE
       l_msg := i_msg;
    END IF;
-   
+
    -- log message to targets
    IF (g_to_screen OR g_to_file) THEN
       -- Add backtrace if available as IO.p does not add it automatically like APP_LOG_API does
@@ -488,19 +489,19 @@ BEGIN
                   dbms_utility.format_error_backtrace;
       END IF;
    END IF;
-   
+
    IF (g_to_screen) THEN
       io.p(format_log_txt(l_msg, NVL(i_msg_cd, msgs.DEFAULT_MSG_CD), NVL(i_sev_cd, cnst.INFO), l_routine_nm, l_line_num));
    END IF;
-   
+
    IF (g_to_table) THEN
       to_table(l_msg, NVL(i_msg_cd, msgs.DEFAULT_MSG_CD), NVL(i_sev_cd, cnst.INFO), l_routine_nm, l_line_num);
    END IF;
-   
+
    IF (g_to_file) THEN
       to_file(l_msg, NVL(i_msg_cd, msgs.DEFAULT_MSG_CD), NVL(i_sev_cd, cnst.INFO), l_routine_nm, l_line_num);
    END IF;
-   
+
    -- raise exception if caller wants it
    IF (i_reraise) THEN
       IF (num.IaNb(i_msg_cd)) THEN
@@ -533,16 +534,16 @@ BEGIN
    IF (i_line_num IS NULL) THEN
       l_line_num := env.get_caller_line;
    END IF;
-   
+
    l_msg := i_msg;
-   
+
    -- don't try to look up msg code if ID is an Oracle built-in error or
    -- in the raise_application_error range
    IF (i_msg_id = 100 OR i_msg_id < 0) THEN
       IF (l_msg IS NULL) THEN
          l_msg := SQLERRM(i_msg_id);
       END IF;
-      
+
       -- pass error ID and message on as is
       msg(TO_CHAR(i_msg_id), i_sev_cd, l_msg, i_reraise, l_routine_nm, l_line_num);
    ELSE
@@ -576,7 +577,7 @@ BEGIN
    IF (i_line_num IS NULL) THEN
       l_line_num := env.get_caller_line;
    END IF;
-   
+
    msg('Error Msg', cnst.ERROR, SQLERRM, i_reraise, l_routine_nm, l_line_num);
 END err;
 
@@ -599,7 +600,7 @@ BEGIN
    IF (i_line_num IS NULL) THEN
       l_line_num := env.get_caller_line;
    END IF;
-   
+
    msg('Error Msg', cnst.ERROR, i_msg, i_reraise, l_routine_nm, l_line_num);
 END err;
 
@@ -621,7 +622,7 @@ BEGIN
    IF (i_line_num IS NULL) THEN
       l_line_num := env.get_caller_line;
    END IF;
-   
+
    msg('Warning Msg', cnst.WARN, i_msg, FALSE, l_routine_nm, l_line_num);
 END warn;
 
@@ -643,7 +644,7 @@ BEGIN
    IF (i_line_num IS NULL) THEN
       l_line_num := env.get_caller_line;
    END IF;
-   
+
    msg('Info Msg', cnst.INFO, i_msg, FALSE, l_routine_nm, l_line_num);
 END info;
 
@@ -666,15 +667,15 @@ BEGIN
         OR
         -- check if minutes interval has been passed
         ((dt.get_sysdtm - gr_debug.last_checked_dtm) > g_debug_check_interval/dt.MINUTES_PER_DAY)
-       ) 
+       )
       ) THEN
       -- time to requery the parm table to see if someone wants us to
       -- start logging debug messages
       check_debug_toggle();
    END IF;
-   
+
    IF (gr_debug.debugging_on OR gr_debug.session_override) THEN
-   
+
       -- Get caller metadata if not given. I'm assuming the caller would either
       -- pass in both, or neither, or just the routine name, but never just the
       -- line number.
@@ -685,7 +686,7 @@ BEGIN
       IF (i_line_num IS NULL) THEN
          l_line_num := env.get_caller_line;
       END IF;
-      
+
       -- Caller passed in routine name; use it.
       IF (INSTR(l_routine_nm,'.') > 0) THEN
          -- assume it is a package and parse package name out for later comparison
@@ -694,23 +695,23 @@ BEGIN
          -- transfer name of standalone unit to l_unit_nm
          l_unit_nm := UPPER(l_routine_nm);
       END IF;
-      
-      -- Examine debug mode filter/trigger against values from the current 
+
+      -- Examine debug mode filter/trigger against values from the current
       -- session to see if logging the debug message is required.
       IF ( (gr_debug.debug_type = 'all') OR -- this one will be used 99% of the time,
                                             -- short-circuiting the next 3 checks
            (gr_debug.debug_type = 'session' AND gr_debug.debug_trig = env.get_session_id) OR
-           (gr_debug.debug_type = 'user' AND INSTR(env.get_client_id, gr_debug.debug_trig) > 0) OR 
+           (gr_debug.debug_type = 'user' AND INSTR(env.get_client_id, gr_debug.debug_trig) > 0) OR
            (gr_debug.debug_type = 'unit' AND INSTR(gr_debug.debug_trig, l_unit_nm) > 0) ) THEN
 
          -- goes to APP_LOG table by default, currently no way to turn that off
          to_table(i_msg, msgs.DEBUG_MSG_CD, cnst.DEBUG, l_routine_nm, l_line_num);
-         
+
          -- also goes to stdout if it is a desired target
          IF (g_to_screen) THEN
             io.p(format_log_txt(i_msg, msgs.DEBUG_MSG_CD, cnst.DEBUG, l_routine_nm, l_line_num));
          END IF;
-         
+
          -- also goes to file if it is a desired target
          IF (g_to_file) THEN
             to_file(i_msg, msgs.DEBUG_MSG_CD, cnst.DEBUG, l_routine_nm, l_line_num);
@@ -718,9 +719,9 @@ BEGIN
       ELSE
          NULL; -- do not bother writing debug message
       END IF; -- if filters will allow the debug log to be written out
-      
+
    END IF; -- if debug mode is turned on by parameter or override
-   
+
 END dbg;
 
 --------------------------------------------------------------------------------
@@ -728,11 +729,11 @@ END dbg;
 --------------------------------------------------------------------------------
 BEGIN
    get_targets_for_env(g_to_screen, g_to_table, g_to_file);
-   
+
    g_file_dir := parm.get_val('Default Log File Directory');
    g_file_nm := env.get_app_cd||'_'||parm.get_val('Default IO File Name');
    g_debug_check_interval := parm.get_val('Debug Toggle Check Interval');
-   
+
    gr_debug.debugging_on := FALSE;
    gr_debug.last_checked_dtm := NULL;
    gr_debug.session_override := FALSE;

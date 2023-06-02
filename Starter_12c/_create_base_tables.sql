@@ -1,9 +1,9 @@
--- Note that every table and every column has a comment in a standard format. 
+-- Note that every table and every column has a comment in a standard format.
 -- The table or column is first spelled out entirely, so that abbreviations and
 -- acronyms are expanded and explained. This is followed by an optional code or
--- short display name in parenthesis, then a colon, then the full explanation of 
--- the table or column. The short table code found in the parenthesis is used 
--- when creating new indexes, foreign keys, SQL table aliases, and other 
+-- short display name in parenthesis, then a colon, then the full explanation of
+-- the table or column. The short table code found in the parenthesis is used
+-- when creating new indexes, foreign keys, SQL table aliases, and other
 -- identifiers in PL/SQL. Consider creating automated jobs that check and enforce
 -- naming standards using this short table code.
 
@@ -46,7 +46,7 @@ ALTER TABLE app
   ADD CONSTRAINT app_pk
   PRIMARY KEY (app_id)
   USING INDEX
-  TABLESPACE &&index_tablespace 
+  TABLESPACE &&index_tablespace
 /
 ALTER TABLE app
    ADD CONSTRAINT app_uk
@@ -114,7 +114,7 @@ CREATE TABLE app_env
 ,app_id                        INTEGER CONSTRAINT aev_app_id_nn NOT NULL
 ,env_nm                        VARCHAR2(80 CHAR) CONSTRAINT aev_env_nm_nn NOT NULL
 ,db_id                         INTEGER CONSTRAINT aev_db_id_nn NOT NULL
-,app_version                   VARCHAR2(20 CHAR)                        
+,app_version                   VARCHAR2(20 CHAR)
 ,owner_account                 VARCHAR2(30 CHAR) CONSTRAINT aev_owner_account_nn NOT NULL
 ,access_account                VARCHAR2(30 CHAR)
 )
@@ -298,7 +298,7 @@ COMMENT ON COLUMN app_email.otx_sync_col IS 'Oracle Text Syncronization Column: 
 ALTER TABLE app_email
   ADD CONSTRAINT app_email_pk
   PRIMARY KEY (email_id)
-  USING INDEX 
+  USING INDEX
   TABLESPACE &&index_tablespace
 /
 ALTER TABLE app_email
@@ -318,7 +318,7 @@ ALTER TABLE app_email
   ADD CONSTRAINT aem_otx_sync_col_chk
   CHECK (otx_sync_col IN ('Y','N'))
 /
-               
+
 -------------------------------------------------------------------------------
 PROMPT Creating table APP_EMAIL_DOC...
 CREATE SEQUENCE app_email_doc_seq
@@ -354,17 +354,17 @@ COMMENT ON COLUMN app_email_doc.otx_charset_cd IS 'Oracle Text Characterset Code
 ALTER TABLE app_email_doc
   ADD CONSTRAINT app_email_doc_pk
   PRIMARY KEY (email_doc_id)
-  USING INDEX 
+  USING INDEX
   TABLESPACE &&index_tablespace
 /
 ALTER TABLE app_email_doc
   ADD CONSTRAINT app_email_doc_uk
   UNIQUE (email_id, file_nm)
-  USING INDEX 
+  USING INDEX
   TABLESPACE &&index_tablespace
 /
 ALTER TABLE app_email_doc
-   ADD CONSTRAINT aemd_email_id_fk 
+   ADD CONSTRAINT aemd_email_id_fk
    FOREIGN KEY (email_id)
    REFERENCES app_email(email_id)
 /
@@ -393,7 +393,7 @@ ALTER TABLE app_email_doc
 --PCTFREE 10 PCTUSED 90
 --CACHE
 --/
---  
+--
 --COMMENT ON TABLE app_lang IS 'Languages (ALANG): Stores the different written languages that the application may support.';
 --COMMENT ON COLUMN app_lang.lang_id IS 'Language ID: Surrogate key for the Application Language table.';
 --COMMENT ON COLUMN app_lang.lang_nm IS 'Language Name: Common name for the given language.';
@@ -404,14 +404,14 @@ ALTER TABLE app_email_doc
 --ALTER TABLE app_lang
 --  ADD CONSTRAINT app_lang_pk
 --  PRIMARY KEY (lang_id)
---  USING INDEX 
+--  USING INDEX
 --  TABLESPACE &&index_tablespace
 --/
 --
 --ALTER TABLE app_lang
 --  ADD CONSTRAINT app_lang_uk
 --  UNIQUE (lang_nm)
---  USING INDEX 
+--  USING INDEX
 --  TABLESPACE &&index_tablespace
 --/
 --
@@ -438,22 +438,22 @@ of experience from numerous experts, my own personal disasters with it, and
 articles you can find on the web about it (see Hoberman below)).
 
 APP_CODESET and APP_CODE should never be used in larg, intensive environments.
-Also the use of a common table for codes and lookup values does not allow child 
-tables to constrain their allowable values to subsets of the code pool. Foreign 
-keys only let you constrain to a table, not rows within a table. So from a 
-purist data modeling standpoint, a common lookup table is a bad idea. But in two 
-of the environments the author worked in, the developers complained about 
-hundreds of lookup tables -- even more so at a company where each lookup code 
+Also the use of a common table for codes and lookup values does not allow child
+tables to constrain their allowable values to subsets of the code pool. Foreign
+keys only let you constrain to a table, not rows within a table. So from a
+purist data modeling standpoint, a common lookup table is a bad idea. But in two
+of the environments the author worked in, the developers complained about
+hundreds of lookup tables -- even more so at a company where each lookup code
 set also required another table to contain the i18n translations for each code -
-- and the Java architects complained about having to create separate classes 
-(even with code generators in place) for each lookup code table. In both 
+- and the Java architects complained about having to create separate classes
+(even with code generators in place) for each lookup code table. In both
 environments.
 
 See Also:
   Steve Hoberman (data modeling guru) and thousands of his followers agree that a
-generic code model is the wrong approach for most. See 
+generic code model is the wrong approach for most. See
 http://www.information-management.com/issues/20061201/1069942-1.html
-  
+
 Summary:
  The code pool created by the two tables below should suffice for most environements,
 but proceed with caution since folks like Jonathan Lewis have shown how such
@@ -492,7 +492,7 @@ tables and queries that demand the best access paths possible.
 --  USING INDEX
 --  TABLESPACE &&index_tablespace
 --/
----- The inclusion of app_id in the AK allows multiple applications with equivalent 
+---- The inclusion of app_id in the AK allows multiple applications with equivalent
 ---- codeset names to co-exist in the same database using the same codeset table.
 ---- The inclusion of ACTIVE_FLG in the AK gives an application data owner the ability
 ---- to turn off an entire set of codes and activate a fresh set (with the same
@@ -500,7 +500,7 @@ tables and queries that demand the best access paths possible.
 --ALTER TABLE app_codeset
 --  ADD CONSTRAINT app_codeset_uk
 --  UNIQUE (app_id, codeset_nm, active_flg)
---  USING INDEX 
+--  USING INDEX
 --  TABLESPACE &&index_tablespace
 --/
 --ALTER TABLE app_codeset
@@ -556,13 +556,13 @@ tables and queries that demand the best access paths possible.
 --ALTER TABLE app_code
 --  ADD CONSTRAINT app_code_pk
 --  PRIMARY KEY (code_id)
---  USING INDEX 
+--  USING INDEX
 --  TABLESPACE &&index_tablespace
 --/
 --ALTER TABLE app_code
 --  ADD CONSTRAINT app_code_uk
 --  UNIQUE (codeset_id, code_val)
---  USING INDEX 
+--  USING INDEX
 --  TABLESPACE &&index_tablespace
 --/
 --ALTER TABLE app_code
@@ -597,26 +597,26 @@ Design Notes:
 The app_lock table is meant to accommodate several sorts of pessimistic locks.
 This table, and its PL/SQL package (API_APP_LOCK) were originally designed to
 hold large-grained logical locks for special systems that could not allow
-two replicas of the same batch process to run concurrently. It was extended to 
-allow row-level locks as well, but frankly, if you need row-level locks, you 
-should use Oracle's native mechanisms to do that (DBMS_LOCK, transactions and 
+two replicas of the same batch process to run concurrently. It was extended to
+allow row-level locks as well, but frankly, if you need row-level locks, you
+should use Oracle's native mechanisms to do that (DBMS_LOCK, transactions and
 SELECT FOR UPDATE).
 
 If you do choose to use this feature for logical, pessimistic locking, you should
 know a few rules:
 
-1) A lock must have a fixed name upon which all cooperating parties agree. 
-This can be the name of a process, screen, operation, etc. for large-grained 
+1) A lock must have a fixed name upon which all cooperating parties agree.
+This can be the name of a process, screen, operation, etc. for large-grained
 locks. Or if locking a table, the lock name must be the table name.
 
-2) Finer-grained locks are possible by passing in the PK ID of the row you wish to 
-lock (when the row has a single-column PK), or the ROWID of the row you wish to 
+2) Finer-grained locks are possible by passing in the PK ID of the row you wish to
+lock (when the row has a single-column PK), or the ROWID of the row you wish to
 lock (when the PK is multi-column or from an IOT). Since the column locked_obj_id
 is VARCHAR2, numeric PK IDs will be implicitly converted to string unless you
 do so explicitly.
 
 3) A lock must indicate which system requested requested it (app_id), and who or
-what requested and received the lock (locker_id). If the lock requester is a 
+what requested and received the lock (locker_id). If the lock requester is a
 PL/SQL routine, pass in the package.routine name for the locker_id.
 
 4) The locker_ip is optional.
@@ -629,7 +629,7 @@ Here is the general process for making use of Core's locking feature:
 a) Before beginning a query, process or operation (whatever your chosen level
 of granularity for locking), request a lock (api_app_lock.get_lock).
 b) If the lock is already held by someone else, handle it (best option is usually
-to error out, returning info on the existing lock to the user and the log so 
+to error out, returning info on the existing lock to the user and the log so
 that support can track it down and release it).
    If the lock is granted, proceed.
 c) After committing changes or rolling back due to exception handling, release
@@ -640,8 +640,8 @@ don't check for existing locks. So the success of these locks depends on a tech
 lead reviewing code to ensure Core locking is being used correctly.
 
 Note that the i_locked_obj_rid parameter of get_lock is provided as a mutually
-exclusive alternative to i_locked_obj_id due to lock records on an IOT or on a 
-heap table where the PK or UK is composed of more than one column. In these 
+exclusive alternative to i_locked_obj_id due to lock records on an IOT or on a
+heap table where the PK or UK is composed of more than one column. In these
 cases, pass the ROWID in as i_locked_obj_rid instead of the PK as i_locked_obj_id.
 */
 CREATE SEQUENCE app_lock_seq
@@ -755,6 +755,7 @@ CREATE TABLE app_log
 (
  log_id                         INTEGER DEFAULT ON NULL app_log_seq.NEXTVAL CONSTRAINT alg_log_id_nn NOT NULL
 ,app_id                         INTEGER CONSTRAINT alg_app_id_nn NOT NULL
+,env_id                         INTEGER CONSTRAINT alg_env_id_nn NOT NULL
 ,log_ts                         TIMESTAMP CONSTRAINT alg_log_ts_nn NOT NULL
 ,sev_cd                         VARCHAR2(30 CHAR) CONSTRAINT alg_sev_cd_nn NOT NULL
 ,msg_cd                         VARCHAR2(60 CHAR)
@@ -775,6 +776,7 @@ PCTFREE 10 PCTUSED 90
 COMMENT ON TABLE  app_log IS 'Logs (ALG): Application logging table. This table dovetails with the LOGS package. This table is one of the output targets for logging and debugging. All debugging goes to this table by default. But application and error logging only gets written here if the targets are turned on using logs.set_targets.';
 COMMENT ON COLUMN app_log.log_id IS 'Log ID: Surrogate key for this table.';
 COMMENT ON COLUMN app_log.app_id IS 'Application ID: Foreign key to APP. The application which "owns" the logged row.';
+COMMENT ON COLUMN app_log.env_id IS 'Environment ID: Foreign key to APP_ENV. The environment wich is configured by the parameter.';
 COMMENT ON COLUMN app_log.log_ts IS 'Log Timestamp: Timestamp of log entry.';
 COMMENT ON COLUMN app_log.sev_cd IS 'Severity: Currently limited to ERROR, WARN, INFO and DEBUG. AUDIT-class messages are supposed to be logged to APP_CHG_LOG[_DTL], not here. This column classifies the log/message entries in varying degrees of severity.';
 COMMENT ON COLUMN app_log.msg_cd IS 'Message Code: Foreign key to APP_MSG. Optional short code or name that groups similar messages within a system. This allows large quantities of log messages to be filtered, categorized and reported efficiently.';
@@ -791,13 +793,18 @@ COMMENT ON COLUMN app_log.client_os_user IS 'Client OS User: The name of the log
 ALTER TABLE app_log
   ADD CONSTRAINT app_log_pk
   PRIMARY KEY (log_id)
-  USING INDEX 
+  USING INDEX
   TABLESPACE &&index_tablespace
 /
 ALTER TABLE app_log
   ADD CONSTRAINT alg_app_id_fk
   FOREIGN KEY (app_id)
   REFERENCES app (app_id)
+/
+ALTER TABLE app_log
+  ADD CONSTRAINT alg_env_id_fk
+  FOREIGN KEY (env_id)
+  REFERENCES app_env (env_id)
 /
 CREATE INDEX alg_app_id_idx ON app_log (app_id)
   TABLESPACE &&index_tablespace
@@ -823,7 +830,7 @@ ALTER TABLE app_log
 
 /*
  Chose not to place yet another index on log_ts, as ordering by
- log_id DESC should serve the requirement to see this data in reverse 
+ log_id DESC should serve the requirement to see this data in reverse
  chronological order just fine. Also logging to this table needs to be fast to
  lessen overhead, and it already has four indexes.
 */
@@ -870,7 +877,7 @@ ALTER TABLE app_log
 --ALTER TABLE app_sql
 --  ADD CONSTRAINT app_sql_pk
 --  PRIMARY KEY (sql_id)
---  USING INDEX 
+--  USING INDEX
 --  TABLESPACE &&index_tablespace
 --/
 --ALTER TABLE app_sql
@@ -898,10 +905,10 @@ ALTER TABLE app_log
 -------------------------------------------------------------------------------
 /*
 There are at least five different methods to recording historical changes
-This table represents only one of them and by no means fits the requirements of 
+This table represents only one of them and by no means fits the requirements of
 every system out there. Feel free to extend, scrap or redesign as you see fit.
 Each shop should write a job to periodically archive off, or truncate off,
-the back end of this table. How many months are kept online would be up to each 
+the back end of this table. How many months are kept online would be up to each
 shop. The table could also be partitioned, by adding mod_dtm to the front of the
 PK, and partitioning by range on mod_dtm. Partitioning would make the archival/
 truncation process much easier and quicker.
@@ -968,11 +975,11 @@ ALTER TABLE app_chg_log
   ADD CONSTRAINT aclg_app_id_fk
   FOREIGN KEY (app_id)
   REFERENCES app (app_id)
-/  
+/
 CREATE INDEX aclg_app_id_idx ON app_chg_log (app_id)
   TABLESPACE &&index_tablespace
 /
-  
+
 ALTER TABLE app_chg_log
   ADD CONSTRAINT aclg_chg_type_cd_chk
   CHECK (chg_type_cd IN ('I','U','D'))
@@ -1040,9 +1047,9 @@ ALTER TABLE app_chg_log_dtl
 -- Permissions are assigned to roles. Roles can have 0-N permissions.
 -- Roles are assigned to users. A user can have 0-N roles.
 --
--- In this model, I still kept the slightly more complex concept that roles can 
+-- In this model, I still kept the slightly more complex concept that roles can
 -- be included in a hierarchy, so that permissions can be inherited by higher
--- roles, rather than having to duplicate permissions for every role. If your 
+-- roles, rather than having to duplicate permissions for every role. If your
 -- shop doesn't need this complexity, remove the parent column in SEC_ROLE.
 -------------------------------------------------------------------------------
 /*
@@ -1050,7 +1057,7 @@ Add the user_pwd (password) column back in if authentication will take
 place inside the database instead of in a typical authentication server like
 Active Directory, OID, Kerberos, etc.
 
-Comment in the other columns if you need a little more metadata on each user, or 
+Comment in the other columns if you need a little more metadata on each user, or
 break the columns out into a new SEC_USER_CONTACT table, an attributive entity
 that could support multiple contacts per user, plus things like addresses, pagers,
 etc.
@@ -1141,7 +1148,7 @@ ALTER TABLE sec_user_app
   UNIQUE (user_id, app_id)
   USING INDEX
   TABLESPACE &&index_tablespace
-/ 
+/
 ALTER TABLE sec_user_app
   ADD CONSTRAINT sua_user_id_fk
   FOREIGN KEY (user_id)
@@ -1299,7 +1306,7 @@ ALTER TABLE sec_role_pmsn
   UNIQUE (role_id, pmsn_id)
   USING INDEX
   TABLESPACE &&index_tablespace
-/ 
+/
 ALTER TABLE sec_role_pmsn
   ADD CONSTRAINT srp_role_id_fk
   FOREIGN KEY (role_id)
