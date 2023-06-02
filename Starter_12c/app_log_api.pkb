@@ -25,7 +25,7 @@ bcoulam      1997Dec30 Creation
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-    
+
 *******************************************************************************/
 AS
 
@@ -66,8 +66,9 @@ PROCEDURE ins
    lr_app_log app_log%ROWTYPE;
 BEGIN
    lr_app_log.log_id := app_log_seq.NEXTVAL;
-     
+
    lr_app_log.app_id      := env.get_app_id;
+   lr_app_log.env_id      := env.get_env_id;
    lr_app_log.log_ts      := dt.get_systs;
    lr_app_log.sev_cd      := NVL(i_sev_cd, cnst.INFO);
    lr_app_log.msg_cd      := NVL(i_msg_cd, msgs.DEFAULT_MSG_CD);
@@ -80,16 +81,16 @@ BEGIN
    lr_app_log.client_ip   := env.get_client_ip;
    lr_app_log.client_host := env.get_client_host;
    lr_app_log.client_os_user := env.get_client_os_user;
-   
+
    -- For now the 12c error and backtrace stacks are actually a little less informative and
    -- harder to get into a string for logging, so we'll stick with the 9i and 10g versions
    IF (utl_call_stack.error_depth > 0) THEN
-      
+
       -- although the call stack is always available, I don't really care and don't want
       -- to spend the overhead of gathering and storing it, except for when logging
       -- errors. Hence, the reason this is buried inside the error stack depth check.
       -- 12c call stack is a little better in that the calling objects are fully qualified
-      -- Unfortunately the 12c call stack is missing object type. No tears for losing the 
+      -- Unfortunately the 12c call stack is missing object type. No tears for losing the
       -- object handle though.
       lr_app_log.call_stack := str.ewc('Lvl',4)||str.ewc('Line#',6)||'Unit Name'||CHR(10);
       FOR i IN 2..utl_call_stack.dynamic_depth() LOOP
@@ -104,7 +105,7 @@ BEGIN
                                 ||'Backtrace:'||CHR(10)||
                                 dbms_utility.format_error_backtrace;
    END IF;
-   
+
    ins(lr_app_log);
 
 END ins;
@@ -123,7 +124,7 @@ IS
    l_keep_amt NUMBER := ABS(i_keep_amt);
    l_keep_amt_uom VARCHAR2(10) := LOWER(i_keep_amt_uom);
    l_file_nm VARCHAR2(100);
-   
+
    FUNCTION format_log_txt(ir_app_log IN app_log%ROWTYPE) RETURN VARCHAR2
    IS
    BEGIN
@@ -132,10 +133,11 @@ IS
                     env.get_db_instance_name||cnst.PIPECHAR||
                     env.get_sid||cnst.PIPECHAR||
                     env.get_app_cd(ir_app_log.app_id) || cnst.PIPECHAR ||
+                    env.get_env_nm(ir_app_log.app_id) || cnst.PIPECHAR ||
                     ir_app_log.client_id || cnst.PIPECHAR ||
                     -- skipped client_ip, client_host and client_os_user
-                    NVL(ir_app_log.routine_nm, cnst.UNKNOWN_STR) || cnst.PIPECHAR || 
-                    NVL(TO_CHAR(ir_app_log.line_num), '-') || cnst.PIPECHAR || 
+                    NVL(ir_app_log.routine_nm, cnst.UNKNOWN_STR) || cnst.PIPECHAR ||
+                    NVL(TO_CHAR(ir_app_log.line_num), '-') || cnst.PIPECHAR ||
                     ir_app_log.sev_cd || cnst.PIPECHAR ||
                     ir_app_log.msg_cd || cnst.PIPECHAR ||
                     NVL(ir_app_log.log_txt, 'Message missing. Figure out why!')||
@@ -162,14 +164,14 @@ BEGIN
       raise_application_error(-20000,'A Keep Unit of Measure of ['||i_keep_amt_uom||
          '] is not supported. Use hour, day, week, month or year. Not case sensitive.');
    END IF;
-   
-   --dbms_output.put_line(TO_CHAR(l_lower_bound,'YYYYMonDD HH24:MI:SS')); 
-   
+
+   --dbms_output.put_line(TO_CHAR(l_lower_bound,'YYYYMonDD HH24:MI:SS'));
+
    -- Handle copying to file if requested
    IF (i_archive_to_file_flg = 'Y') THEN
-   
+
       l_file_nm := NVL(i_archive_file_nm,TO_CHAR(SYSDATE,'YYYYMMDD')||'_app_log_archive.log');
-      
+
       FOR lr_app_log IN (SELECT * FROM app_log WHERE log_ts < l_lower_bound) LOOP
          io.write_line(
             format_log_txt(lr_app_log),
@@ -178,17 +180,17 @@ BEGIN
             );
       END LOOP;
    END IF;
-   
+
    DELETE FROM app_log WHERE log_ts < l_lower_bound;
    o_rows_deleted := SQL%ROWCOUNT;
-    
+
    COMMIT;
-      
+
 END trim_table;
 
 --------------------------------------------------------------------------------
 --                  PACKAGE INITIALIZATIONS (RARELY USED)
 --------------------------------------------------------------------------------
-   
+
 END app_log_api;
 /

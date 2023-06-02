@@ -10,7 +10,7 @@ BEGIN
    dbms_output.put_line('USER_IP: '||env.get_client_ip);
    dbms_output.put_line('CLIENT_HOST: '||env.get_client_host);
    dbms_output.put_line('OS_USER: '||env.get_client_os_user);
-   dbms_output.put_line('CLIENT_PROGRAM: '||env.get_client_program);
+--   dbms_output.put_line('CLIENT_PROGRAM: '||env.get_client_program);
    dbms_output.put_line('CLIENT_MODULE: '||env.get_client_module);
    dbms_output.put_line('CLIENT_ACTION: '||env.get_client_action);
    dbms_output.put_line('SESSION_USER: '||env.get_session_user);
@@ -22,24 +22,28 @@ BEGIN
    dbms_output.put_line('SERVER_HOST: '||env.get_server_host);
    dbms_output.put_line('SID: '||env.get_sid);
    dbms_output.put_line('SESSION_ID: '||env.get_session_id);
-   dbms_output.put_line('OS_PID: '||env.get_os_pid);
-   
+--   dbms_output.put_line('OS_PID: '||env.get_os_pid);
+
    dbms_output.put_line('SCHEMA_EMAIL_ADDRESS: '||env.get_schema_email_address);
    dbms_output.put_line('DBID (per app_db): '||env.get_db_id);
    dbms_output.put_line('APP_ID: '||env.get_app_id);
-   dbms_output.put_line('APP_ID: '||env.get_app_id('PSOL'));
-   dbms_output.put_line('APP_CD: '||env.get_app_cd); 
-   dbms_output.put_line('APP_CD: '||env.get_app_cd(i_app_id => env.get_app_id('PSOL'))); 
+   dbms_output.put_line('APP_ID: '||env.get_app_id('CORE'));
+   dbms_output.put_line('APP_CD: '||env.get_app_cd);
+   dbms_output.put_line('APP_CD: '||env.get_app_cd(i_app_id => env.get_app_id('CORE')));
    dbms_output.put_line('ENV_NM: '||env.get_env_nm);
-   dbms_output.put_line('ENV_NM: '||env.get_env_nm('PSOL'));
+   dbms_output.put_line('ENV_NM: '||env.get_env_nm('CORE'));
+   dbms_output.put_line('ENV_NM: '||env.get_env_nm(1));
+   dbms_output.put_line('ENV_ID: '||env.get_env_id);
+   dbms_output.put_line('ENV_ID: '||env.get_env_id('CORE'));
+   dbms_output.put_line('ENV_ID: '||env.get_env_id(1));
    dbms_output.put_line('DIR_PATH: '||env.get_dir_path(i_dir_nm => 'CORE_LOGS'));
-   dbms_output.put_line('WHO_CALLED_ME: '||env.who_called_me);
-   dbms_output.put_line('WHO_AM_I: '||env.who_am_i);
-   -- env.who_called_me and who_am_i are best called from deep within 
+--   dbms_output.put_line('WHO_CALLED_ME: '||env.who_called_me);
+--   dbms_output.put_line('WHO_AM_I: '||env.who_am_i);
+   -- env.who_called_me and who_am_i are best called from deep within
    -- packages, not here from a shallow anonymous block.
    dbms_output.put_line('Custom CTX Value [5]: '||SYS_CONTEXT('APP_CORE_CTX','authentication attempts'));
    dbms_output.put_line('Custom CTX Value [5]: '||SYS_CONTEXT('app_core_ctx','authentication attempts'));
-   env.clear_ctx_val('authentication attempts');   
+   env.clear_ctx_val('authentication attempts');
    dbms_output.put_line('Custom CTX Value []: '||SYS_CONTEXT('APP_CORE_CTX','authentication attempts'));
    env.set_ctx_val('authentication attempts', 5);
    dbms_output.put_line('Custom CTX Value [5]: '||SYS_CONTEXT('APP_CORE_CTX','authentication attempts'));

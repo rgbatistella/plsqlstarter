@@ -25,7 +25,7 @@ bcoulam      1997Dec30 Creation
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-    
+
 *******************************************************************************/
 AS
 --------------------------------------------------------------------------------
@@ -49,7 +49,7 @@ TYPE tr_client_ctx IS RECORD(
 TYPE tr_server_ctx IS RECORD (
    db_version INTEGER,
    db_name VARCHAR2(30),
-   db_instance_name VARCHAR2(30),   
+   db_instance_name VARCHAR2(30),
    server_host VARCHAR2(40),
    sid INTEGER,
    os_pid INTEGER
@@ -74,13 +74,13 @@ gr_empty_client_ctx tr_client_ctx; -- used for re-initializations of session con
 /**-----------------------------------------------------------------------------
 ins
  This private INSERT to app_log routine is handy for debugging the ENV package.
- ENV is supposed to be the lowest level in the package hierarchy (along with CNST, 
- TYP, DT, STR and NUM), so it cannot call routines in the LOGS or APP_LOG_API 
+ ENV is supposed to be the lowest level in the package hierarchy (along with CNST,
+ TYP, DT, STR and NUM), so it cannot call routines in the LOGS or APP_LOG_API
  packages.
- 
+
  Uncomment this routine and recompile if you need to debug something within ENV.
 
-%design 
+%design
  Must use autonomous transaction in order to see the results immediately in the
  table.
 ------------------------------------------------------------------------------*/
@@ -110,7 +110,7 @@ END ins;
 bundle_stack_lines:
  Gets the current call_stack and parses useful information out of it into
  an array for further processing as the caller sees fit.
- 
+
  In 9i a call stack looks like this:
 ----- PL/SQL Call Stack -----
   object      line  object
@@ -132,13 +132,13 @@ bundle_stack_lines:
 2E909084        13  package body APP_CORE.MIDDLE
 2E9095FC         5  package body APP_CORE.TOP
 2E8AF158         2  anonymous block
- 
+
  lines 1-3 are header info we don't need
  line 4 is ME, the immediate block where format_call_stack was just called
  line 5 is MY Caller
  line 6 is Their Caller
  and so on...
- 
+
  Much of this is from Tom Kyte's "who_called_me" procedure.
 ------------------------------------------------------------------------------*/
 --PROCEDURE bundle_stack_lines
@@ -168,7 +168,7 @@ bundle_stack_lines:
 --
 --      -- Trip address off left side of line
 --      l_line := LTRIM(SUBSTR(l_line, INSTR(l_line,CHR(32))));
---      
+--
 --      -- First thing we care about is the line number
 --      lar_stack_data(l_cnt).line_num := TO_NUMBER(SUBSTR(l_line, 1, INSTR(l_line,CHR(32))-1));
 --
@@ -263,13 +263,13 @@ END pop_trace_stack;
 FUNCTION get_client_id RETURN VARCHAR2 IS
 BEGIN
    -- This should have been set by init_client_ctx, when called by the front-end
-   -- at the start of the session or transaction. If it is not yet set, this 
+   -- at the start of the session or transaction. If it is not yet set, this
    -- means the application is either not using this package, or someone logged
-   -- into an account with privs on the application schema, and is triggering 
+   -- into an account with privs on the application schema, and is triggering
    -- auditing code that requires this function.
-   
+
    --ins('get_client_id[gr_client_ctx.client_id = '||gr_client_ctx.client_id||']');
-   
+
    IF (gr_client_ctx.client_id IS NULL) THEN
       gr_client_ctx.client_id := SYS_CONTEXT('userenv', 'client_identifier');
       -- If no client_identifier is available, we'll have to give it something, so grab
@@ -280,7 +280,7 @@ BEGIN
          get_client_os_user,1,255);
       END IF;
    END IF;
-   
+
    RETURN gr_client_ctx.client_id;
 END get_client_id;
 
@@ -399,7 +399,7 @@ BEGIN
    END IF;
 
    RETURN gr_server_ctx.db_version;
-   
+
 END get_db_version;
 
 --------------------------------------------------------------------------------
@@ -415,7 +415,7 @@ END get_db_name;
 FUNCTION get_db_instance_name RETURN VARCHAR2 IS
    l_instance_name typ.t_instance_nm;
    lx_catalog_invisible EXCEPTION;
-   PRAGMA EXCEPTION_INIT(lx_catalog_invisible,-942);   
+   PRAGMA EXCEPTION_INIT(lx_catalog_invisible,-942);
 BEGIN
    IF (get_db_version < 10) THEN
       SELECT instance_name
@@ -425,7 +425,7 @@ BEGIN
    ELSE
       l_instance_name := SYS_CONTEXT('userenv', 'instance_name');
    END IF;
-   
+
    RETURN l_instance_name;
 EXCEPTION
    WHEN lx_catalog_invisible OR NO_DATA_FOUND THEN
@@ -440,7 +440,7 @@ BEGIN
    -- if and when they would ever differ within a given RAC cluster.
    -- dbms_utility.current_instance seems to provide similar functionality
    l_instance_id := SYS_CONTEXT('userenv', 'instance');
-   
+
    RETURN l_instance_id;
 
 END get_db_instance_id;
@@ -449,7 +449,7 @@ END get_db_instance_id;
 FUNCTION get_server_host RETURN VARCHAR2 IS
    l_host_name typ.t_host_nm;
    lx_catalog_invisible EXCEPTION;
-   PRAGMA EXCEPTION_INIT(lx_catalog_invisible,-942);   
+   PRAGMA EXCEPTION_INIT(lx_catalog_invisible,-942);
 BEGIN
    IF (get_db_version < 10) THEN
       SELECT host_name
@@ -488,9 +488,9 @@ BEGIN
    ELSE
       l_sid := SYS_CONTEXT('userenv', 'sid');
    END IF;
-   
+
    RETURN l_sid;
-   
+
 END get_session_id;
 
 --------------------------------------------------------------------------------
@@ -554,9 +554,9 @@ BEGIN
        WHERE db_nm = NVL(UPPER(i_db),UPPER(env.get_db_name))
           OR db_alias = UPPER(i_db);
    END IF;
-   
+
    RETURN l_db_alias;
-   
+
 EXCEPTION
    WHEN NO_DATA_FOUND THEN
       RAISE_APPLICATION_ERROR(-20000, i_db || ' is not a valid database SID, service name or alias.');
@@ -573,13 +573,13 @@ BEGIN
       -- data dictionary (data as set up in APP, APP_DB, and APP_ENV).
 
       IF (gr_client_ctx.app_id IS NULL) THEN
-         
+
          --ins('get_app_id:  gr_client_ctx.app_id is NULL');
-         
+
          -- Attempt to get app code from the default context. Could be set by
          -- an after logon trigger.
          l_app_cd := SYS_CONTEXT(app_core_ctx, 'app_cd');
-         
+
          --ins('get_app_id:  app_cd in app_core_ctx is ['||l_app_cd||']');
 
          IF (l_app_cd IS NOT NULL)  THEN
@@ -600,12 +600,12 @@ BEGIN
                     OR
                     aev.owner_account = SYS_CONTEXT('userenv', 'current_schema')
                    );
-                   
+
          EXCEPTION
             WHEN TOO_MANY_ROWS THEN
-               -- Multiple matches will happen in access and object-owning 
+               -- Multiple matches will happen in access and object-owning
                -- accounts when multiple applications run out of the same schema.
-               -- We will try to get the app_id one more time from APP_DB and 
+               -- We will try to get the app_id one more time from APP_DB and
                -- APP_ENV using just the access_account. After that, if we still have
                -- too many rows, then the caller is the owning schema that has
                -- the multiple apps, which will require the app_cd set in context
@@ -627,28 +627,28 @@ BEGIN
                            NVL(SYS_CONTEXT(app_core_ctx, 'app_cd'),'Not Set')||'].');
                END; -- second attempt using just access account
          END; -- first attempt using owner or access account
-         END IF;   
-         
+         END IF;
+
          -- One of the three SELECT statements above should have found it by now.
          -- Store in package structure that is kept in memory. Future calls to
          -- env.get_app_id will be very quick as only this struct will be read.
          gr_client_ctx.app_id := l_app_id;
 
       ELSE
-         l_app_id := gr_client_ctx.app_id;   
+         l_app_id := gr_client_ctx.app_id;
       END IF;
    ELSE
       -- Here we are given the app_cd, so we'll just do a simple lookup and not
-      -- assume the caller wants it stored in the session's UGA.   
+      -- assume the caller wants it stored in the session's UGA.
       SELECT app_id
         INTO l_app_id
         FROM app
        WHERE LOWER(app_cd) = LOWER(i_app_cd);
    END IF;
-   
+
    RETURN l_app_id;
 
-   -- We do not handle NO_DATA_FOUND on purpose so that the error bubbles up, 
+   -- We do not handle NO_DATA_FOUND on purpose so that the error bubbles up,
    -- clearly indicating that data and/or schemas aren't set up properly.
 END get_app_id;
 
@@ -670,7 +670,7 @@ BEGIN
 
    RETURN l_app_cd;
 
-   -- We do not handle NO_DATA_FOUND on purpose so that the error bubbles up, 
+   -- We do not handle NO_DATA_FOUND on purpose so that the error bubbles up,
    -- clearly indicating that data and/or schemas aren't set up properly.
 END get_app_cd;
 
@@ -700,6 +700,81 @@ BEGIN
 END get_env_nm;
 
 --------------------------------------------------------------------------------
+FUNCTION get_env_nm(i_app_id IN app.app_id%TYPE) RETURN VARCHAR2 IS
+   l_env_nm app_env.env_nm%TYPE;
+   l_app_id app_env.app_id%TYPE;
+BEGIN
+   -- i_app_cd may be empty, which will cause get_app_id to get app_cd dynamically
+   l_app_id := i_app_id;
+
+   -- Get environment name by app_id
+   BEGIN
+      SELECT env_nm
+        INTO l_env_nm
+        FROM app_env
+       WHERE app_id = l_app_id
+         AND db_id = get_db_id
+         AND owner_account = get_current_schema;
+   EXCEPTION
+      WHEN NO_DATA_FOUND THEN
+         l_env_nm := cnst.UNKNOWN_STR;
+   END;
+
+   RETURN l_env_nm;
+
+END get_env_nm;
+
+--------------------------------------------------------------------------------
+FUNCTION get_env_id(i_app_cd IN app.app_cd%TYPE DEFAULT NULL) RETURN INTEGER IS
+   l_env_id app_env.env_id%TYPE;
+   l_app_id app_env.app_id%TYPE;
+BEGIN
+   -- i_app_cd may be empty, which will cause get_app_id to get app_cd dynamically
+   l_app_id := get_app_id(i_app_cd);
+
+   -- Get environment name by app_id
+   BEGIN
+      SELECT env_id
+        INTO l_env_id
+        FROM app_env
+       WHERE app_id = l_app_id
+         AND db_id = get_db_id
+         AND owner_account = get_current_schema;
+   EXCEPTION
+      WHEN NO_DATA_FOUND THEN
+         l_env_id := null;
+   END;
+
+   RETURN l_env_id;
+
+END get_env_id;
+
+--------------------------------------------------------------------------------
+FUNCTION get_env_id(i_app_id IN app.app_id%TYPE) RETURN INTEGER IS
+   l_env_id app_env.env_id%TYPE;
+   l_app_id app_env.app_id%TYPE;
+BEGIN
+   -- i_app_cd may be empty, which will cause get_app_id to get app_cd dynamically
+   l_app_id := i_app_id;
+
+   -- Get environment name by app_id
+   BEGIN
+      SELECT env_id
+        INTO l_env_id
+        FROM app_env
+       WHERE app_id = l_app_id
+         AND db_id = get_db_id
+         AND owner_account = get_current_schema;
+   EXCEPTION
+      WHEN NO_DATA_FOUND THEN
+         l_env_id := null;
+   END;
+
+   RETURN l_env_id;
+
+END get_env_id;
+
+--------------------------------------------------------------------------------
 FUNCTION get_dir_path(i_dir_nm IN VARCHAR2) RETURN VARCHAR2
 IS
    l_dir_path all_directories.directory_path%TYPE;
@@ -708,7 +783,7 @@ BEGIN
    INTO l_dir_path
    FROM all_directories
    WHERE directory_name = UPPER(TRIM(i_dir_nm));
-   
+
    RETURN l_dir_path;
 EXCEPTION
    WHEN NO_DATA_FOUND THEN
@@ -833,10 +908,10 @@ PROCEDURE tag_session
 )
 IS
 BEGIN
-   
+
    -- We do not use excp.throw here so ENV can maintain low-level independence
    IF (LENGTH(i_module) > 48) THEN
-      RAISE_APPLICATION_ERROR(-20000, 'ERROR: (Assertion Failure) ['||get_my_nm||']'|| 
+      RAISE_APPLICATION_ERROR(-20000, 'ERROR: (Assertion Failure) ['||get_my_nm||']'||
          ' i_module must be 48 characters or less');
    ELSIF (LENGTH(i_action) > 32) THEN
       RAISE_APPLICATION_ERROR(-20000, 'ERROR: (Assertion Failure) ['||get_my_nm||']'||
@@ -845,9 +920,9 @@ BEGIN
       RAISE_APPLICATION_ERROR(-20000, 'ERROR: (Assertion Failure) ['||get_my_nm||']'||
          ': i_info must be 64 characters or less');
    END IF;
-   
+
    push_trace_stack(i_module, i_action, i_info);
-      
+
    dbms_application_info.set_module(i_module, i_action);
    dbms_application_info.set_client_info(i_info);
 
@@ -865,7 +940,7 @@ IS
    l_action   typ.t_action := i_action;
    l_info     typ.t_client_id := i_info;
 BEGIN
-   
+
    IF (l_module IS NULL OR l_action is NULL OR l_info IS NULL) THEN
       DECLARE
          l_unit_nm     typ.t_maxobjnm;
@@ -879,7 +954,7 @@ BEGIN
             -- transfer name of standalone unit to l_unit_nm
             l_unit_nm := UPPER(l_routine_nm);
          END IF;
-      
+
          IF (i_module IS NULL) THEN
             l_module := l_unit_nm;
          END IF;
@@ -892,9 +967,9 @@ BEGIN
          END IF;
       END;
    END IF;
-   
+
    tag_session(l_module, l_action, l_info);
-   
+
 END tag;
 
 --------------------------------------------------------------------------------
@@ -904,7 +979,7 @@ PROCEDURE untag_session(i_restore_prior_tag IN BOOLEAN DEFAULT TRUE) IS
    l_info     typ.t_client_id := NULL;
 BEGIN
    pop_trace_stack;
-   
+
    IF (i_restore_prior_tag) THEN
       IF (g_trace_stack.COUNT > 0) THEN
          l_module := g_trace_stack(g_trace_stack.COUNT).module;
@@ -912,7 +987,7 @@ BEGIN
          l_info   := g_trace_stack(g_trace_stack.COUNT).client_info;
       END IF;
    END IF;
-   
+
    $IF (dbms_db_version.version = 11 AND dbms_db_version.release = 1) $THEN
       IF (l_info IS NULL) THEN
          l_info := ' ';
@@ -922,7 +997,7 @@ BEGIN
    $ELSE
       dbms_application_info.set_client_info(l_info);
    $END
-   
+
    dbms_application_info.set_module(l_module, l_action);
 END untag_session;
 
@@ -953,7 +1028,7 @@ IS
 BEGIN
    IF (i_app_cd IS NOT NULL) THEN
 
-      --ins('set_app_cd: setting app_id for app_cd '||i_app_cd); 
+      --ins('set_app_cd: setting app_id for app_cd '||i_app_cd);
 
       gr_client_ctx.app_id := get_app_id(i_app_cd);
       set_ctx_val('app_cd',i_app_cd);
@@ -992,10 +1067,10 @@ PROCEDURE init_client_ctx
    i_app_cd      IN VARCHAR2 DEFAULT NULL
 ) IS
 BEGIN
-   
+
    -- Populate in-memory structure with new identifier. If not passed in
    gr_client_ctx.client_id := i_client_id;
-   
+
    IF (i_client_ip IS NOT NULL) THEN
       gr_client_ctx.client_ip := i_client_ip;
    END IF;
