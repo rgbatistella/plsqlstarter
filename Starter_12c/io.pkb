@@ -26,7 +26,7 @@ bcoulam      2008Feb05 Added a few functions and simplified others.
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-    
+
 *******************************************************************************/
 AS
 
@@ -101,9 +101,9 @@ END bool_to_str;
 
 --------------------------------------------------------------------------------
 FUNCTION get_default_dir RETURN VARCHAR2
-IS 
+IS
 BEGIN
-   RETURN g_default_dir; 
+   RETURN g_default_dir;
 END get_default_dir;
 
 --------------------------------------------------------------------------------
@@ -127,7 +127,7 @@ BEGIN
                                   NVL(l_app_cd,cnst.UNKNOWN_STR)||'.log';
       END;
    END IF;
-   
+
    RETURN g_default_filename;
 END get_default_filename;
 
@@ -170,7 +170,7 @@ BEGIN
    -- check to ensure file is open and handle is valid
    l_marker := 'is_open';
    IF (utl_file.is_open(lr_file_handle)) THEN
-   
+
       -- Read through the file until we reach the last line.
       l_marker := 'get_line in loop';
       BEGIN
@@ -184,15 +184,15 @@ BEGIN
             -- UTL_FILE throws this when EOF reached
             NULL;
       END;
-   
+
       l_marker := 'fclose';
       utl_file.fclose(lr_file_handle);
    ELSE
       RAISE utl_file.invalid_filehandle;
    END IF;
-   
+
    RETURN l_total;
-   
+
 EXCEPTION
    -- fopen exceptions
    WHEN utl_file.invalid_path THEN
@@ -254,7 +254,7 @@ FUNCTION read_line
 BEGIN
    -- open file for IO operations
 
-   -- 8i: The first parameter to fopen is a directory specified in init.ora file. 
+   -- 8i: The first parameter to fopen is a directory specified in init.ora file.
    -- It must include the directory delimiter '/' (Unix) or '\' (NT) at the end of
    -- the directory name (unlike the way it looks in the init.ora file)
    -- 9i: Don't use init.ora to establish directories anymore. Instead, as sys or
@@ -266,7 +266,7 @@ BEGIN
    -- check to ensure file is open and handle is valid
    l_marker := 'is_open';
    IF (utl_file.is_open(lr_file_handle)) THEN
-   
+
       -- Read through the file until we reach the last line.
       l_marker := 'get_line in loop';
       BEGIN
@@ -281,13 +281,13 @@ BEGIN
             -- UTL_FILE throws this when EOF reached
             RAISE lx_eof;
       END;
-   
+
       l_marker := 'fclose';
       utl_file.fclose(lr_file_handle);
    ELSE
       RAISE utl_file.invalid_filehandle;
    END IF;
-   
+
    RETURN l_line;
 
 EXCEPTION
@@ -388,7 +388,7 @@ PROCEDURE write_line
 BEGIN
    -- open file for IO operations
 
-   -- 8i: The first parameter to fopen is a directory specified in init.ora file. 
+   -- 8i: The first parameter to fopen is a directory specified in init.ora file.
    -- It must include the directory delimiter '/' (Unix) or '\' (NT) at the end of
    -- the directory name (unlike the way it looks in the init.ora file)
    -- 9i: Don't use init.ora to establish directories anymore. Instead, as sys or
@@ -404,15 +404,15 @@ BEGIN
    -- check to ensure file is open and handle is valid
    l_marker := 'is_open';
    IF (utl_file.is_open(lr_file_handle)) THEN
-   
+
       -- write to file
       l_marker := 'put_line';
       utl_file.put_line(lr_file_handle, i_msg);
-   
+
       -- flush buffer (so line can be read immediately) and close file
       l_marker := 'fflush';
       utl_file.fflush(lr_file_handle);
-   
+
       l_marker := 'fclose';
       utl_file.fclose(lr_file_handle);
    ELSE
@@ -444,7 +444,7 @@ EXCEPTION
                       'Specified maxlinesize in call to fopen must be between ' ||
                       '1 and g_max_linesize');
       RAISE;
-   
+
    -- put_line, fflush and fclose exceptions
    WHEN utl_file.write_error THEN
       log_and_cleanup(lr_file_handle,
@@ -461,8 +461,8 @@ EXCEPTION
                       get_my_nm || ' [' || l_marker || ']',
                       'Invalid Filename. Check spelling and special characters.');
       RAISE;
-   
-   -- other UTL_FILE exceptions 
+
+   -- other UTL_FILE exceptions
    WHEN utl_file.internal_error THEN
       log_and_cleanup(lr_file_handle,
                       get_my_nm || ' [' || l_marker || ']',
@@ -494,7 +494,7 @@ IS
 BEGIN
    -- open file for IO operations
 
-   -- 8i: The first parameter to fopen is a directory specified in init.ora file. 
+   -- 8i: The first parameter to fopen is a directory specified in init.ora file.
    -- It must include the directory delimiter '/' (Unix) or '\' (NT) at the end of
    -- the directory name (unlike the way it looks in the init.ora file)
    -- 9i: Don't use init.ora to establish directories anymore. Instead, as sys or
@@ -510,7 +510,7 @@ BEGIN
    -- check to ensure file is open and handle is valid
    l_marker := 'is_open';
    IF (utl_file.is_open(lr_file_handle)) THEN
-   
+
       -- write to file
       IF (i_msgs IS NOT NULL AND i_msgs.count > 0) THEN
          FOR i IN i_msgs.FIRST..i_msgs.LAST LOOP
@@ -518,11 +518,11 @@ BEGIN
             utl_file.put_line(lr_file_handle, i_msgs(i));
          END LOOP;
       END IF;
-      
+
       -- flush buffer (so line can be read immediately) and close file
       l_marker := 'fflush';
       utl_file.fflush(lr_file_handle);
-   
+
       l_marker := 'fclose';
       utl_file.fclose(lr_file_handle);
    ELSE
@@ -554,7 +554,7 @@ EXCEPTION
                       'Specified maxlinesize in call to fopen must be between ' ||
                       '1 and g_max_linesize');
       RAISE;
-   
+
    -- put_line, fflush and fclose exceptions
    WHEN utl_file.write_error THEN
       log_and_cleanup(lr_file_handle,
@@ -571,8 +571,8 @@ EXCEPTION
                       get_my_nm || ' [' || l_marker || ']',
                       'Invalid Filename. Check spelling and special characters.');
       RAISE;
-   
-   -- other UTL_FILE exceptions 
+
+   -- other UTL_FILE exceptions
    WHEN utl_file.internal_error THEN
       log_and_cleanup(lr_file_handle,
                       get_my_nm || ' [' || l_marker || ']',
@@ -607,11 +607,11 @@ BEGIN
    ELSE
       l_overwrite := FALSE;
    END IF;
-   
+
    IF (file_exists(i_old_file_nm, i_old_file_dir)) THEN
       -- Throws ORA-29292 when overwrite is false, so we will have to prevent
       -- overwrite ourselves.
-   
+
       -- Test for new file first
       IF (file_exists(i_new_file_nm, i_old_file_dir)) THEN
          IF (l_overwrite = FALSE) THEN
@@ -639,12 +639,12 @@ BEGIN
                           i_new_file_nm,
                           l_overwrite);
       END IF;
-   
+
    ELSE
       -- Consider a raw call to send this line to the logs. For most applications
       -- I'm sure they won't care if the file is not there, kind of like the
       -- Oracle "error" that isn't an error when you try to pre-emptively drop
-      -- a table that doesn't exist. 
+      -- a table that doesn't exist.
       raise_application_error(-20000,
                               'ERROR: Cannot rename file [' || i_old_file_nm ||
                               '], as it does not exist in directory [' ||
@@ -669,9 +669,9 @@ BEGIN
       -- Consider a raw call to send this line to the logs. For most applications
       -- I'm sure they won't care if the file is not there, kind of like the
       -- Oracle "error" that isn't an error when you try to pre-emptively drop
-      -- a table that doesn't exist. 
+      -- a table that doesn't exist.
       raise_application_error(-20000,'ERROR: Cannot delete file ['||i_file_nm||
-      '] does not exist in directory ['||i_file_dir||'].');   
+      '] does not exist in directory ['||i_file_dir||'].');
    END IF;
 
 END delete_file;
@@ -697,9 +697,9 @@ BEGIN
       -- Consider a raw call to send this line to the logs. For most applications
       -- I'm sure they won't care if the file is not there, kind of like the
       -- Oracle "error" that isn't an error when you try to pre-emptively drop
-      -- a table that doesn't exist. 
+      -- a table that doesn't exist.
       raise_application_error(-20000,'ERROR: Cannot copy file ['||i_src_file||
-      '] as it does not exist in directory ['||i_src_dir||'].');   
+      '] as it does not exist in directory ['||i_src_dir||'].');
    END IF;
 END copy_file;
 
@@ -720,12 +720,12 @@ BEGIN
    ELSE
       l_overwrite := FALSE;
    END IF;
-   
+
    IF (file_exists(i_src_file, i_src_dir)) THEN
-   
+
       -- Throws ORA-29292 when overwrite is false, so we will have to prevent
       -- overwrite ourselves.
-   
+
       -- Test for new file first
       IF (file_exists(i_src_file, i_src_dir)) THEN
          IF (l_overwrite = FALSE) THEN
@@ -753,7 +753,7 @@ BEGIN
                           i_dest_file,
                           l_overwrite);
       END IF;
-   
+
    ELSE
       raise_application_error(-20000,
                               'ERROR: Cannot move file [' || i_src_file ||
@@ -775,7 +775,7 @@ PROCEDURE get_file_props
    lb_exists BOOLEAN;
 BEGIN
    utl_file.fgetattr(i_file_dir, i_file_nm, lb_exists, on_length, ln_blocksize);
-   -- This check is necessary because fgetattrs acts differently on 9i and 10g, 
+   -- This check is necessary because fgetattrs acts differently on 9i and 10g,
    -- and returns incorrect results if the caller doesn't have read permissions
    -- on the given directory.
    IF (lb_exists IS NULL) THEN
@@ -803,7 +803,7 @@ IS
    CR    CONSTANT VARCHAR2(1) := CHR(13); -- A single carriage return character (^M)
    LF    CONSTANT VARCHAR2(1) := CHR(10); -- A single linefeed character
    SP    CONSTANT VARCHAR2(1) := CHR(32); -- A space
-   
+
 BEGIN
    IF (i_str2 IS NOT NULL) THEN
       p(i_str||cnst.SEPCHAR||i_str2);
@@ -813,7 +813,7 @@ BEGIN
       LOOP
          end_text := start_text + cnst.PAGEWIDTH - 1;
          lentxt := NVL(LENGTH(SUBSTR(i_str, start_text, cnst.PAGEWIDTH)),0);
-   
+
          IF (lentxt < cnst.PAGEWIDTH) THEN  -- last chunk of text in string
             DBMS_OUTPUT.put_line(SUBSTR(i_str, start_text, lentxt));
             EXIT;  -- and we're done!
@@ -825,21 +825,21 @@ BEGIN
                   EXIT;
                END IF;
             END LOOP;  -- find break pt
-   
+
             IF (break_pt = 0) THEN  -- no suitable break pt found!
                DBMS_OUTPUT.put_line(SUBSTR(i_str, start_text, cnst.PAGEWIDTH));
                start_text := end_text + 1;  -- next start pt
             ELSE  -- print to just before break pt
                DBMS_OUTPUT.put_line(SUBSTR(i_str, start_text, break_pt-start_text));
                start_next := 0;  -- reset
-   
-               FOR i IN break_pt .. end_text LOOP  -- find next non-newline char
+
+               FOR i IN break_pt+1 .. end_text LOOP  -- find next non-newline char
                   IF (SUBSTR(i_str, i, 1) NOT IN (CR, LF)) THEN
                     start_next := i;
                     EXIT;
                   END IF;
                END LOOP;  -- find next non-newline char
-   
+
                IF (start_next = 0) THEN  -- no non-newline char found
                   start_text := end_text + 1;
                ELSE
@@ -864,7 +864,7 @@ PROCEDURE p
 (
    i_date IN DATE, --  will be printed to stdout, using format
    i_fmt  IN VARCHAR2 DEFAULT dt.DTM_MASK
-   
+
 )
 IS
 BEGIN
@@ -908,7 +908,7 @@ END p;
 PROCEDURE p
 (
    i_str  IN VARCHAR2, --  used as label, preceding numeric value
-   i_num  IN NUMBER,  
+   i_num  IN NUMBER,
    i_fmt  IN VARCHAR2 DEFAULT num.FLOAT_MASK
 )
 IS
@@ -933,6 +933,6 @@ END p;
 BEGIN
    g_default_dir := parm.get_val('Default IO Directory');
    g_default_filename := parm.get_val('Default IO File Name');
-   
+
 END io;
 /
