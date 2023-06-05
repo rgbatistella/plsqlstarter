@@ -271,3 +271,26 @@ EXEC top.proc('logs');
 SET SERVEROUTPUT ON
 EXEC top.proc('dbg');
 
+BEGIN
+  app_log_api.g_event_id := 11;
+  logs.update_event('updated event name');
+END;
+/
+
+BEGIN
+  app_log_api.g_event_id := null;
+  logs.update_event('updated/created non existant event name');
+END;
+/
+
+SELECT msgs.get_msg_cd(103), msgs.get_msg(msgs.get_msg_cd(103)) FROM dual;
+SELECT env.get_caller_nm, env.get_caller_line FROM dual;
+SELECT logs.format_log_txt ('teste')  FROM dual ;
+BEGIN
+  app_log_api.g_event_id := null;
+  logs.update_event('updated/created non existant event name',null,null,false);
+END;
+/
+ORA-20000: teste
+
+2023/06/05|11:00:45|INOVACAODEV|414|CORE|Core Dev|WORKGROUP\RODRIGO-BATIS:RodrigoBatistella|LOGS.UPDATE_EVENT|398|ERROR|There is no event to update|The application tryed to update an event, but there is no current event to update

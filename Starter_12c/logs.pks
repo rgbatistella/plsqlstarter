@@ -343,6 +343,13 @@ set_dbg:
 PROCEDURE set_dbg (i_dbg_val IN VARCHAR2);
 PROCEDURE set_dbg (i_state IN BOOLEAN);
 
+
+/**-----------------------------------------------------------------------------
+set_event_id:
+ sets the current event_id for this session. logs are grouped into this event
+------------------------------------------------------------------------------*/
+PROCEDURE set_event_id (i_event_id INTEGER);
+
 /**-----------------------------------------------------------------------------
 msg:
  Call this version of msg() when you have a named, pre-built message in APP_MSG

@@ -393,7 +393,9 @@ PROCEDURE update_event
 IS
 BEGIN
   IF b_create AND app_log_api.g_event_id IS NULL THEN
-    logs.err('There is no event to update');
+    create_event(i_name,i_routine_nm, i_line_num);
+  ELSIF app_log_api.g_event_id IS NULL THEN
+    logs.msg(103, cnst.ERROR, null, true); --'There is no event to update'
   END IF;
    app_log_api.event_upd(
       format_tbl_txt(i_name),
@@ -442,6 +444,12 @@ END get_log_path;
 FUNCTION get_event_id RETURN INTEGER IS
 BEGIN
   RETURN app_log_api.g_event_id;
+END;
+
+--------------------------------------------------------------------------------
+PROCEDURE set_event_id (i_event_id INTEGER) IS
+BEGIN
+  app_log_api.g_event_id := i_event_id;
 END;
 
 --------------------------------------------------------------------------------
