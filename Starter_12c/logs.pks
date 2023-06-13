@@ -152,6 +152,7 @@ TARGET_FILE CONSTANT VARCHAR2(10) := 'File';
 TARGET_TABLE CONSTANT VARCHAR2(10) := 'Table';
 --TARGET_PIPE CONSTANT VARCHAR2(10) := 'Pipe';
 DEBUG_PARM_NM CONSTANT app_parm.parm_nm%TYPE := 'Debug';
+g_step VARCHAR2(4000 CHAR);
 
 --------------------------------------------------------------------------------
 --                              PUBLIC FUNCTIONS
