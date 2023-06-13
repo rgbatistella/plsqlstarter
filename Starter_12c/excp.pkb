@@ -25,7 +25,7 @@ bcoulam      1997Dec30 Creation
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-    
+
 *******************************************************************************/
 AS
 
@@ -67,7 +67,7 @@ BEGIN
          l_line_num := utl_call_stack.unit_line(2);
       END IF;
    END IF;
-   
+
    -- If expression asserted is false, then log and/or re-raise the error
    IF (NVL(i_expr, FALSE) = FALSE) THEN
       IF (i_raise_excp) THEN
@@ -85,7 +85,7 @@ BEGIN
                               '['||l_routine_nm||' line '||NVL(TO_CHAR(l_line_num),'?')||'] '|| i_msg);
          app_log_api.ins(i_msg, cnst.error, 'Assertion Failure', l_routine_nm, l_line_num);
       END IF; -- if exception is provided
-   
+
    END IF; -- if expression is false
 
 END assert;
@@ -99,7 +99,7 @@ PROCEDURE throw
 IS
    l_msg typ.t_maxvc2;
 BEGIN
-   -- If throw() is called without a message when a real exception has not 
+   -- If throw() is called without a message when a real exception has not
    -- occurred, the default SQLERRM will be "ORA-0000: normal, successful completion"
    -- which is useless, so we'll try to look up a canned message using the
    -- msg_id.
@@ -108,10 +108,15 @@ BEGIN
    ELSE
       l_msg := i_msg;
    END IF;
-   
+
+   -- adds the program step caught from logs.dbg() calls
+   IF logs.g_step IS NOT NULL THEN
+     l_msg := l_msg || ' step['||logs.g_step||']';
+   END IF;
+
    -- if user-defined in Oracle-provided range
    IF (i_msg_id BETWEEN -20999 AND -20000) THEN
-   
+
       RAISE_APPLICATION_ERROR(i_msg_id, SUBSTR(l_msg,1,2048));
 
    -- if user-defined positive error from APP_MSG table
@@ -120,23 +125,53 @@ BEGIN
    ELSIF ((i_msg_id >= 0 AND i_msg_id <> 100) OR (i_msg_id BETWEEN -21299 AND -21000)) THEN
       -- UDE = User Defined Error ID
       RAISE_APPLICATION_ERROR(-20000, SUBSTR('UDE['||i_msg_id||'] '||l_msg,1,2048));
-   
+
    -- if no data found (can't be bound to local)
    ELSIF (i_msg_id IN (100,-1403) )THEN
-   
-      RAISE NO_DATA_FOUND;
-   
+
+      -- IF there is a "program step" raise an error with it first, so it's in the error stack
+      IF logs.g_step IS NOT null THEN
+        BEGIN
+          raise_application_error (-20000,SUBSTR(l_msg,1,2048));
+        EXCEPTION
+          WHEN others THEN
+            -- then raise the no_data_found
+            RAISE no_data_found;
+        END;
+      ELSE
+        RAISE no_data_found;
+      END IF;
+
    -- if not positive, user-defined or one of the special no_data_found
    -- exceptions, it must be an Oracle built-in error, re-raise as is.
    ELSE
-      EXECUTE IMMEDIATE
-      'DECLARE'||
-      '   lx EXCEPTION;'||
-      '   PRAGMA EXCEPTION_INIT(lx,'||TO_CHAR(i_msg_id)||');'||
-      'BEGIN'||
-      '   RAISE lx;'||
-      'END;'
-      ;
+      -- IF there is a "program step" raise an error with it first, so it's in the error stack
+      IF logs.g_step IS NOT null THEN
+        BEGIN
+          raise_application_error (-20000,SUBSTR(l_msg,1,2048));
+        EXCEPTION
+          WHEN others THEN
+            -- then raise the exception
+            EXECUTE IMMEDIATE
+            'DECLARE'||
+            '   lx EXCEPTION;'||
+            '   PRAGMA EXCEPTION_INIT(lx,'||TO_CHAR(i_msg_id)||');'||
+            'BEGIN'||
+            '   RAISE lx;'||
+            'END;'
+            ;
+            END;
+      ELSE
+        EXECUTE IMMEDIATE
+        'DECLARE'||
+        '   lx EXCEPTION;'||
+        '   PRAGMA EXCEPTION_INIT(lx,'||TO_CHAR(i_msg_id)||');'||
+        'BEGIN'||
+        '   RAISE lx;'||
+        'END;'
+        ;
+      END IF;
+
    END IF;
 END throw;
 

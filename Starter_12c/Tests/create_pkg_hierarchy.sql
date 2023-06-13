@@ -1,3 +1,10 @@
+DROP SYNONYM top
+/
+DROP SYNONYM middle
+/
+DROP SYNONYM bottom
+/
+
 CREATE OR REPLACE PACKAGE top
 AS
 PROCEDURE proc(i_str IN VARCHAR2);
@@ -25,6 +32,7 @@ AS
 PROCEDURE proc(i_str IN VARCHAR2) IS
 BEGIN
    logs.create_event('Testing logs Event');
+   logs.dbg('before middle.proc call');
    middle.proc(i_str);
 EXCEPTION
    WHEN NO_DATA_FOUND THEN
@@ -32,18 +40,21 @@ EXCEPTION
 END proc;
 END top;
 /
+
 CREATE OR REPLACE PACKAGE BODY middle
 AS
 PROCEDURE proc(i_str IN VARCHAR2) IS
    -- this is only meant to test inner routines, not accuracy of $$PLSQL_LINE
-   FUNCTION get_line RETURN NUMBER IS BEGIN RETURN $$PLSQL_LINE; END get_line;
+   FUNCTION get_line RETURN NUMBER IS BEGIN    logs.dbg('inside get line'); RETURN $$PLSQL_LINE; END get_line;
    -- this is only meant to test inner routines
    FUNCTION get_str RETURN VARCHAR2
    IS
    BEGIN
+      logs.dbg('inside get str');
       RETURN i_str;
    END get_str;
 BEGIN
+   logs.dbg('before bottom.proc call');
    bottom.proc(get_str, get_line);
 END proc;
 END middle;
@@ -53,6 +64,7 @@ CREATE OR REPLACE PACKAGE BODY bottom
 AS
 PROCEDURE bogus_priv_proc (i_str IN VARCHAR2) IS
 BEGIN
+   logs.dbg('inside bottom.bogus_priv_proc');
    dbms_output.put_line(i_str);
 END bogus_priv_proc;
 
@@ -62,6 +74,7 @@ PROCEDURE proc    (i_str IN VARCHAR2, i_line IN NUMBER) IS
 
    PROCEDURE force_error IS
    BEGIN
+      logs.dbg('raising too many rows');
       RAISE TOO_MANY_ROWS;
    EXCEPTION
       WHEN TOO_MANY_ROWS THEN
@@ -114,15 +127,20 @@ PROCEDURE proc    (i_str IN VARCHAR2, i_line IN NUMBER) IS
 
 BEGIN
 
+   logs.dbg('before bogus_priv_proc');
    bogus_priv_proc(i_str);
 
    IF (i_str = 'excp.throw') THEN
+      logs.dbg('before excp 5000');
       excp.throw(5000,'Super important error from bottom.proc');
    ELSIF(i_str = 'excp.throw(ORA)') THEN
+      logs.dbg('before excp -12574');
       excp.throw(-12574);
    ELSIF (i_str = 'SQLCODE') THEN
+      logs.dbg('before excp too_many_rows');
       RAISE TOO_MANY_ROWS;
    ELSIF (i_str = 'raise') THEN
+      logs.dbg('before raise -2000');
       raise_application_error(-20000,'Error raised by RAISE_APPLICATION_ERROR');
    ELSIF (i_str = 'ucs - call stack') THEN
       dbms_output.new_line;
@@ -135,6 +153,7 @@ BEGIN
       dbms_output.put_line('Call Stack Depth ['||utl_call_stack.dynamic_depth||'] Backtrace Depth ['||utl_call_stack.backtrace_depth||'] Error Stack Depth ['||utl_call_stack.error_depth||']');
       dbms_output.put_line('--------------------------------------------------------------------------------');
       dbms_output.put_line( str.ewc('LexDepth',9)||str.ewc('Depth',6)||str.ewc('Line#',6)||str.ewc('Name',60) );
+      logs.dbg('before call stack loop');
       FOR i IN 1..utl_call_stack.dynamic_depth() LOOP
          dbms_output.put_line( str.ewc(TO_CHAR(utl_call_stack.lexical_depth(i)),9)||
                                str.ewc(TO_CHAR(i),6)||
@@ -142,9 +161,11 @@ BEGIN
                                str.ewc(utl_call_stack.concatenate_subprogram(utl_call_stack.subprogram(i)),60) );
       END LOOP;
    ELSIF (i_str = 'ucs - error stack') THEN
+      logs.dbg('before force error');
       force_error;
    ELSIF (i_str = 'backtrace') THEN
       BEGIN
+         logs.dbg('before excp too_many_rows');
          RAISE TOO_MANY_ROWS;
       EXCEPTION
          WHEN TOO_MANY_ROWS THEN
@@ -156,6 +177,7 @@ BEGIN
             logs.err('Failed during proc(backtrace)',TRUE);
       END;
    ELSIF (i_str = 'env') THEN
+      logs.dbg('inside env');
       dbms_output.new_line;
       dbms_output.put_line('Call Stack');
       dbms_output.put_line('--------------------------------------------------------------------------------');
@@ -189,6 +211,7 @@ BEGIN
          WHEN lx THEN
             logs.err(FALSE);
             --dbms_output.put_line(dbms_utility.format_error_backtrace);
+            logs.dbg('before raise error message');
             logs.err('My error message',TRUE);
       END;
    ELSIF (i_str = 'dbg') THEN
@@ -198,10 +221,12 @@ BEGIN
          --dbms_lock.sleep(5);
       END LOOP;
    ELSIF (i_str = 'err_in_excp') THEN
+      logs.dbg('before err_in_excp');
       err_in_excp;
    END IF;
 EXCEPTION
    WHEN TOO_MANY_ROWS THEN
+      logs.dbg('before final too many rows');
       excp.throw;
 END proc;
 
@@ -220,6 +245,7 @@ END bogus_pub_proc;
 
 PROCEDURE err_in_excp IS
 BEGIN
+   logs.dbg('before no data found in err_in_excp');
    RAISE NO_DATA_FOUND;
 EXCEPTION
    WHEN NO_DATA_FOUND THEN
@@ -252,8 +278,7 @@ END proc;
 
 END bottom;
 /
-SELECT * FROM app_log ORDER BY 1 DESC;
-SELECT * FROM app_event ORDER BY 1 DESC;
+
 SET SERVEROUTPUT ON
 EXEC top.proc('excp.throw');
 SET SERVEROUTPUT ON
@@ -283,14 +308,62 @@ BEGIN
 END;
 /
 
-SELECT msgs.get_msg_cd(103), msgs.get_msg(msgs.get_msg_cd(103)) FROM dual;
-SELECT env.get_caller_nm, env.get_caller_line FROM dual;
-SELECT logs.format_log_txt ('teste')  FROM dual ;
 BEGIN
   app_log_api.g_event_id := null;
   logs.update_event('updated/created non existant event name',null,null,false);
 END;
 /
-ORA-20000: teste
+SELECT v('APP_ID') FROM dual
+APP_PAGE_ID
+APP_SESSION
+APP_USER
+REQUEST
+SELECT * FROM useR_scheduler_jobs WHERE Lower(job_action) LIKE '%_da%';
+                      begin DA_ADM_PRC_CUSTO_MENSAL( TO_CHAR(SYSDATE,'YYYY-MM') ); end;
+                      DA_DCP_PKG_DOCUMENT_CAPTURE.processar_arquivos
+/
 
-2023/06/05|11:00:45|INOVACAODEV|414|CORE|Core Dev|WORKGROUP\RODRIGO-BATIS:RodrigoBatistella|LOGS.UPDATE_EVENT|398|ERROR|There is no event to update|The application tryed to update an event, but there is no current event to update
+SELECT * FROM apex_appl_automations WHERE application_id=2500;
+SELECT * FROM apex_appl_automation_actions WHERE application_id=2500 ORDER BY 1 desc;
+SELECT * FROM apex_debug_messages WHERE session_id=16047692502195;
+
+Select *
+From APEX_Automation_Log WHERE application_id=2500
+AND automation_name <>'Iniciar jobs de análise de documento'
+ORDER BY end_timestamp desc;
+SELECT * FROM app_log WHERE log_id=1555 ORDER BY 1 DESC;
+
+SELECT * FROM app_log WHERE log_id>473 ORDER BY 1 DESC;
+SELECT * FROM app_event ORDER BY 1 DESC;
+exec env.init_client_ctx(   i_client_id  => 1)
+exec env.set_current_schema ('ECOMEX');
+SELECT env.get_current_schema FROM dual;
+SELECT msgs.get_msg_cd(103), msgs.get_msg(msgs.get_msg_cd(103)) FROM dual;
+SELECT env.get_caller_nm, env.get_caller_line FROM dual;
+SELECT logs.format_log_txt ('teste')  FROM dual ;
+
+
+ORA-01403: no data found
+ORA-06512: at line 5
+ORA-20000: teste
+ORA-06512: at line 2
+
+ORA-01403: no data found
+ORA-06512: at line 5
+ORA-20000: teste
+ORA-06512: at line 2
+/
+
+DECLARE
+  x NUMBER;
+BEGIN
+  logs.dbg('antes de da divisão');
+  x := 1 / 0;
+EXCEPTION
+  WHEN others THEN
+  logs.err;
+END;
+/
+
+SELECT * FROM app_log ORDER BY 1 DESC;
+begin

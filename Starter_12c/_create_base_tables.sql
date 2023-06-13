@@ -837,6 +837,19 @@ TABLESPACE &&default_tablespace
 PCTFREE 10 PCTUSED 90
 /
 
+ALTER TABLE app_log MODIFY (
+client_id                      VARCHAR2(200 CHAR)
+,client_ip                      VARCHAR2(80 CHAR)
+,client_host                    VARCHAR2(150 CHAR)
+,client_os_user                 VARCHAR2(150 CHAR)
+)
+/
+
+ALTER TABLE app_log ADD apex_app_id      INTEGER;
+ALTER TABLE app_log ADD apex_app_page_id INTEGER;
+ALTER TABLE app_log ADD apex_app_session INTEGER;
+ALTER TABLE app_log ADD apex_items       CLOB;
+
 COMMENT ON TABLE  app_log IS 'Logs (ALG): Application logging table. This table dovetails with the LOGS package. This table is one of the output targets for logging and debugging. All debugging goes to this table by default. But application and error logging only gets written here if the targets are turned on using logs.set_targets.';
 COMMENT ON COLUMN app_log.log_id IS 'Log ID: Surrogate key for this table.';
 COMMENT ON COLUMN app_log.event_id IS 'Event ID: Foreign Key to the Event table.';
@@ -854,6 +867,10 @@ COMMENT ON COLUMN app_log.client_id IS 'Client Identifier: Optional unique ident
 COMMENT ON COLUMN app_log.client_ip IS 'Client IP: Optional IPv4 or IPv6 address of the client machine.';
 COMMENT ON COLUMN app_log.client_host IS 'Client Host: Optional name of the machine the client is connecting from. For direct connections (application servers, end users with SQL*Plus, OEM, Forms, DBA tools, etc.), this is available from the USERENV context using the ''host'' parameter. For 3 and n-tier applications, if you desire to store the name of the machine the end user is operating from, the application server would have to obtain it from the user''s environment and set it using env.init_client_ctx() upon connection.';
 COMMENT ON COLUMN app_log.client_os_user IS 'Client OS User: The name of the logged in account on the operating system from which the client or user is connecting. This can be set by the application using env.init_client_ctx() upon connection.';
+COMMENT ON COLUMN app_log.apex_app_id      IS 'APEX v(''APP_ID'')';
+COMMENT ON COLUMN app_log.apex_app_page_id IS 'APEX v(''APP_PAGE_ID'')';
+COMMENT ON COLUMN app_log.apex_app_session IS 'APEX v(''APP_SESSION'')';
+COMMENT ON COLUMN app_log.apex_items       IS 'JSON containing all APEX ITEMS for the page';
 
 ALTER TABLE app_log
   ADD CONSTRAINT app_log_pk

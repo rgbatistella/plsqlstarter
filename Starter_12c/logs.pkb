@@ -733,6 +733,7 @@ IS
    l_routine_nm  app_log.routine_nm%TYPE := i_routine_nm;
    l_line_num    app_log.line_num%TYPE := i_line_num;
 BEGIN
+  g_step := i_msg; -- sets the debug message as the current step of the program to be shown in an axception
    IF (NOT gr_debug.session_override -- don't check if overriden
        AND
        (

@@ -105,6 +105,38 @@ BEGIN
    lr_app_log.client_host := env.get_client_host;
    lr_app_log.client_os_user := env.get_client_os_user;
 
+   lr_app_log.apex_app_id      := v('APP_ID');
+   lr_app_log.apex_app_page_id := v('APP_PAGE_ID');
+   lr_app_log.apex_app_session := v('APP_SESSION');
+
+   -- If it is an APEX session create a JSON with all the items and their values to store into the APEX_ITEMS column
+   IF lr_app_log.apex_app_page_id IS NOT null THEN
+     BEGIN
+       SELECT json_arrayagg(json_object(
+                 'page_id' VALUE page_id
+               , 'items' Value json_objectagg (item_name value item_value)))
+         INTO lr_app_log.apex_items
+	       FROM (-- Application items
+	             SELECT application_id, 1 app_page_seq, 0 page_id, item_name, v(item_name) item_value
+	               FROM apex_application_items
+	             UNION ALL
+	             -- Application page items
+	             SELECT application_id
+                    , 2 app_page_seq
+                    , page_id
+                    , item_name
+                    , v(item_name) item_value
+	               FROM apex_application_page_items
+	            )
+          WHERE application_id=lr_app_log.apex_app_id
+            AND page_id IN( 0,lr_app_log.apex_app_page_id)
+            AND item_value IS NOT null
+            GROUP BY page_id;
+     EXCEPTION
+       WHEN others THEN
+         lr_app_log.apex_items := SQLERRM;
+     END;
+   END IF;
    -- For now the 12c error and backtrace stacks are actually a little less informative and
    -- harder to get into a string for logging, so we'll stick with the 9i and 10g versions
    IF (utl_call_stack.error_depth > 0) THEN
